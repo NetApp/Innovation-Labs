@@ -17,7 +17,8 @@ The NetApp Connector for M365 Copilot is a containerized solution that enables y
 
 ### Register the connector in Azure ENTRA
 
-In order for the connector to be able to communicate with Microsoft 365 Copilot, it needs to be registered in Azure ENTRA.
+In order for the connector to be able to securely communicate with M365 Copilot, a new "App Registration" needs to be created in Azure Entra.
+
 ![Select App Registration in the Add menu in Microsoft Azure Entra](./media/2025-03-10_20-17-27.png)
 
 ### Prerequisites
