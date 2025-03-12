@@ -105,6 +105,10 @@ Yes, the NetApp Connector for M365 Copilot supports multiple file shares. You ca
 
 Simply pull the latest image from the repository and redeploy the connector. The connector will automatically upgrade to the latest version. Please ensure that you have a valid license key for the connector.
 
+### How does Microsoft 365 Copilot work for organizations with multiple regions?
+
+All graph data is stored in the **Primary Provisioned Geography** location. This applies even if an organization has satellite regions, as explained here [Plan for Microsoft 365 Multi-Geo - Microsoft 365 Enterprise | Microsoft Learn](https://learn.microsoft.com/en-us/microsoft-365/enterprise/plan-for-multi-geo?view=o365-worldwide) but the graph index is only in the primary region (in order to provide a unified search experience across all the tenants).
+
 ## Troubleshooting
 
 ### The connector is not accessible on port 8080
