@@ -67,6 +67,9 @@ Trouble deploying the connector? Check the [Troubleshooting](#troubleshooting) s
 
 - SMB File Share(s) accessible from the machine where the connector will be deployed
 - Microsoft 365 Copilot License
+- Port 443 open for outbound traffic to the MS Graph API
+- Port 8080 open for internal management of the connector
+- Port 445 open for SMB file share access
 - Docker / Podman installed on the machine where the connector will be deployed
 - Access to the offline tar image of the connector
 - (Optional) Docker Compose installed on the machine where the connector will be deployed
