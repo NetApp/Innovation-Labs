@@ -31,7 +31,7 @@ In order for the connector to be able to securely communicate with M365 Copilot.
 8. Search for "Directory.Read.All" and select the checkbox.
 9. Search for "User.Read" and select the checkbox.
 10. Click "Add permissions".
-11. Click "Grah admin consent for (tenant)" and click "Yes".
+11. Click "Graph admin consent for (tenant)" and click "Yes".
 12. Navigate to the "Certificates & secrets" page and click "New client secret".
 13. Fill in the required fields and click "Add".
 14. Copy the value of the client secret.
@@ -65,11 +65,16 @@ Trouble deploying the connector? Check the [Troubleshooting](#troubleshooting) s
 
 ### Prerequisites
 
-- SMB File Share(s) accessible from the machine where the connector will be deployed
+#### Network Requirements
+
+- **Port 443** open for outbound traffic to the MS Graph API
+- **Port 8080** open for internal management of the connector
+- **Port 445** open for SMB file share access
+- SMB File Share(s) must be routable to the connector
+
+#### Software Requirements
+
 - Microsoft 365 Copilot License
-- Port 443 open for outbound traffic to the MS Graph API
-- Port 8080 open for internal management of the connector
-- Port 445 open for SMB file share access
 - Docker / Podman installed on the machine where the connector will be deployed
 - Access to the offline tar image of the connector
 - (Optional) Docker Compose installed on the machine where the connector will be deployed
@@ -89,12 +94,16 @@ The NetApp Connector for M365 Copilot is a containerized solution that enables y
 
 The NetApp Connector for M365 Copilot supports the following sources:
 
-- SMB File Shares (v3.1.1 through v2.0). SMB 3.1.1 is recommended for optimal performance due to multi-channel support and performance improvements.
-- Azure NetApp Files (ANF)
-- AWS FSxN
-- Google Cloud Volumes NetApp (GCVN)
-- Cloud Volumes ONTAP (CVO)
-- Any ONTAP-based system (FAS, AFF, Select, etc.)
+- SMB File Shares (v3.1.1 through v2.0). SMB 3.1.1 is recommended for optimal performance due to multi-channel support and performance improvements over prior SMB versions. This includes:
+  - Azure NetApp Files (ANF)
+  - AWS FSxN
+  - Google Cloud Volumes NetApp (GCVN)
+  - Cloud Volumes ONTAP (CVO)
+  - Any ONTAP-based system (FAS, AFF, Select, etc.)
+
+### What about non-NetApp sources?
+
+The NetApp Connector for M365 Copilot is designed to work at protocol level and is not specifically locked to NetApp platforms. Please reach out to your NetApp representative for more information.
 
 ### How is the NetApp Connector for M365 Copilot licensed?
 
@@ -102,7 +111,7 @@ The NetApp Connector for M365 Copilot is licensed per licensed user of M365 Copi
 
 ### Does the NetApp Connector for M365 Copilot support multiple file shares?
 
-Yes, the NetApp Connector for M365 Copilot supports multiple file shares. You can configure multiple file shares in the connector and manage them through the API interface. A shares API endpoint is available for managing and monitoring the file shares.
+Yes, the NetApp Connector for M365 Copilot supports multiple file shares. You can configure multiple file shares in the connector and manage them through the API interface. A shares API endpoint is available for managing and monitoring the file shares. Theoretically, there is no limit to the number of file shares that can be connected to the connector. In a real-world deployment, the number of file shares that can be connected to the connector is limited by the performance of the connector and the underlying storage system and as such should be tested in early testing before deploying to production.
 
 ### How do I upgrade the NetApp Connector for M365 Copilot?
 
