@@ -15,6 +15,23 @@ The NetApp Connector for M365 Copilot is a containerized solution that enables y
 
 ## Getting Started
 
+### Prerequisites
+
+#### Network Requirements
+
+- **Port 443** open for outbound traffic to the MS Graph API
+- **Port 8080** open for internal management of the connector
+- **Port 445** open for SMB file share access
+- SMB File Share(s) must be routable to the connector
+
+#### Software Requirements
+
+- Microsoft 365 Copilot License
+- Docker / Podman installed on the machine where the connector will be deployed
+- Access to the offline tar image of the connector
+- (Optional) Docker Compose installed on the machine where the connector will be deployed
+- (Optional) Access to a Kubernetes cluster for deployment
+
 ### Register the connector in Azure Entra
 
 In order for the connector to be able to securely communicate with M365 Copilot.
@@ -63,22 +80,9 @@ docker-compose up -d
 
 Trouble deploying the connector? Check the [Troubleshooting](#troubleshooting) section for common issues.
 
-### Prerequisites
+### Manage the connector
 
-#### Network Requirements
-
-- **Port 443** open for outbound traffic to the MS Graph API
-- **Port 8080** open for internal management of the connector
-- **Port 445** open for SMB file share access
-- SMB File Share(s) must be routable to the connector
-
-#### Software Requirements
-
-- Microsoft 365 Copilot License
-- Docker / Podman installed on the machine where the connector will be deployed
-- Access to the offline tar image of the connector
-- (Optional) Docker Compose installed on the machine where the connector will be deployed
-- (Optional) Access to a Kubernetes cluster for deployment
+The connector is managed via API. The latest API documentation for your deployed connector can be found at `http://localhost:8080/docs` or `http://localhost:8080/redoc`
 
 ## Roadmap
 
