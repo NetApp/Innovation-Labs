@@ -1,0 +1,688 @@
+{
+  "info": {
+    "_postman_id": "5a15e1b0-b98c-49e1-a7b2-27f1f7a201b0",
+    "name": "NetApp Connector for M365 Copilot",
+    "description": "A collection of API operations for the NetApp Connector for M365 Copilot",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "39738573"
+  },
+  "item": [
+    {
+      "name": "shares",
+      "item": [
+        {
+          "name": "Add a new share",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"share_path\": \"\\\\\\\\{{SMB_BASE_URL}}\\\\{{SMB_SHARE}}\",\r\n    \"username\": \"{{SMB_USER}}\",\r\n    \"password\": \"{{SMB_PASSWORD}}\",\r\n    \"crawl_schedule\": \"0 * * * *\",\r\n    \"recursive_crawl\": true,\r\n    \"rules\": {\r\n        \"exclude_patterns\": [\r\n            \"*.tmp\",\r\n            \"*.bak\",\r\n            \"*.git/\",\r\n            \"node_modules/\",\r\n            \"temp/\",\r\n            \".snapshot/\",\r\n            \"*.csv\",\r\n            \"*.DS_Store\"\r\n        ],\r\n        \"max_file_size_bytes\": 1000000000,  // 1GB = 1,000,000,000 bytes\r\n        \"min_file_size_bytes\": 2048  // 1KB = 1,024 bytes\r\n    }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/shares",
+              "host": ["{{BASE_URL}}"],
+              "path": ["shares"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List all shares",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/shares",
+              "host": ["{{BASE_URL}}"],
+              "path": ["shares"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get share details",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/shares/:id",
+              "host": ["{{BASE_URL}}"],
+              "path": ["shares", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "be74f5f7-a1f0-4216-a514-91485b9a5158"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete a share",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"path\": \"\\\\\\\\{{SMB_BASE_URL}}\\\\{{SMB_SHARE}}\",\r\n    \"username\": \"{{SMB_USER}}\",\r\n    \"password\": \"{{SMB_PASSWORD}}\",\r\n    \"crawlSchedule\": \"0 0 * * *\",\r\n    \"rules\": [\r\n        {\r\n            \"type\": \"exclude\",\r\n            \"pattern\": \"*.tmp\",\r\n            \"isEnabled\": true\r\n        }\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/shares/:id",
+              "host": ["{{BASE_URL}}"],
+              "path": ["shares", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "2461b23a-702b-be2406e3-5f9a-4da4-9b79-49ed34c5e35c-adeb-5029a984cd1c"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update an existing share",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"crawl_schedule\": \"0 */2 * * *\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/shares/:id",
+              "host": ["{{BASE_URL}}"],
+              "path": ["shares", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "0f3300a7-932b-4db7-9efa-76484871038a"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Trigger manual crawl",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"path\": \"\\\\\\\\{{SMB_BASE_URL}}\\\\{{SMB_SHARE}}\",\r\n    \"username\": \"{{SMB_USER}}\",\r\n    \"password\": \"{{SMB_PASSWORD}}\",\r\n    \"crawlSchedule\": \"0 0 * * *\",\r\n    \"rules\": [\r\n        {\r\n            \"type\": \"exclude\",\r\n            \"pattern\": \"*.tmp\",\r\n            \"isEnabled\": true\r\n        }\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/shares/:id/crawl",
+              "host": ["{{BASE_URL}}"],
+              "path": ["shares", ":id", "crawl"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "faec34aa-377d-4f51-8d29-fa28a3411de3"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "files",
+      "item": [
+        {
+          "name": "Lists files in a share",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var template = `\r",
+                  "<style type=\"text/css\">\r",
+                  "    .tftable {font-size:14px;color:#333333;width:100%;border-width: 1px;border-color: #87ceeb;border-collapse: collapse;}\r",
+                  "    .tftable th {font-size:18px;background-color:#87ceeb;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;text-align:left;}\r",
+                  "    .tftable tr {background-color:#ffffff;}\r",
+                  "    .tftable td {font-size:14px;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;}\r",
+                  "    .tftable tr:hover {background-color:#e0ffff;}\r",
+                  "</style>\r",
+                  "\r",
+                  "<table class=\"tftable\" border=\"1\">\r",
+                  "    <tr>\r",
+                  "        <th>ID</th>\r",
+                  "        <th>Share ID</th>\r",
+                  "        <th>Path</th>\r",
+                  "        <th>Name</th>\r",
+                  "        <th>Size</th>\r",
+                  "        <th>Is Directory</th>\r",
+                  "        <th>Modified Time</th>\r",
+                  "        <th>Created Time</th>\r",
+                  "        <th>Access Time</th>\r",
+                  "        <th>Last Crawled</th>\r",
+                  "    </tr>\r",
+                  "    \r",
+                  "    {{#each response}}\r",
+                  "        <tr>\r",
+                  "            <td>{{id}}</td>\r",
+                  "            <td>{{shareId}}</td>\r",
+                  "            <td>{{path}}</td>\r",
+                  "            <td>{{name}}</td>\r",
+                  "            <td>{{size}}</td>\r",
+                  "            <td>{{isDir}}</td>\r",
+                  "            <td>{{modTime}}</td>\r",
+                  "            <td>{{createTime}}</td>\r",
+                  "            <td>{{accessTime}}</td>\r",
+                  "            <td>{{lastCrawled}}</td>\r",
+                  "        </tr>\r",
+                  "    {{/each}}\r",
+                  "</table>\r",
+                  "`;\r",
+                  "\r",
+                  "function constructVisualizerPayload() {\r",
+                  "    return {response: pm.response.json()}\r",
+                  "}\r",
+                  "\r",
+                  "pm.visualizer.set(template, constructVisualizerPayload());"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/shares/:id/files?page=1&pageSize=10",
+              "host": ["{{BASE_URL}}"],
+              "path": ["shares", ":id", "files"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "cb99ac19-e1a5-4ad7-8634-6de77df1bb08"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get individual file metadata",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var template = `\r",
+                  "<style type=\"text/css\">\r",
+                  "    .tftable {font-size:14px;color:#333333;width:100%;border-width: 1px;border-color: #87ceeb;border-collapse: collapse;}\r",
+                  "    .tftable th {font-size:18px;background-color:#87ceeb;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;text-align:left;}\r",
+                  "    .tftable tr {background-color:#ffffff;}\r",
+                  "    .tftable td {font-size:14px;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;}\r",
+                  "    .tftable tr:hover {background-color:#e0ffff;}\r",
+                  "</style>\r",
+                  "\r",
+                  "<table class=\"tftable\" border=\"1\">\r",
+                  "    <tr>\r",
+                  "        <th>ID</th>\r",
+                  "        <th>Share ID</th>\r",
+                  "        <th>Path</th>\r",
+                  "        <th>Name</th>\r",
+                  "        <th>Size</th>\r",
+                  "        <th>Is Directory</th>\r",
+                  "        <th>Modified Time</th>\r",
+                  "        <th>Created Time</th>\r",
+                  "        <th>Access Time</th>\r",
+                  "        <th>Last Crawled</th>\r",
+                  "    </tr>\r",
+                  "    \r",
+                  "    {{#each response}}\r",
+                  "        <tr>\r",
+                  "            <td>{{id}}</td>\r",
+                  "            <td>{{shareId}}</td>\r",
+                  "            <td>{{path}}</td>\r",
+                  "            <td>{{name}}</td>\r",
+                  "            <td>{{size}}</td>\r",
+                  "            <td>{{isDir}}</td>\r",
+                  "            <td>{{modTime}}</td>\r",
+                  "            <td>{{createTime}}</td>\r",
+                  "            <td>{{accessTime}}</td>\r",
+                  "            <td>{{lastCrawled}}</td>\r",
+                  "        </tr>\r",
+                  "    {{/each}}\r",
+                  "</table>\r",
+                  "`;\r",
+                  "\r",
+                  "function constructVisualizerPayload() {\r",
+                  "    return {response: pm.response.json()}\r",
+                  "}\r",
+                  "\r",
+                  "pm.visualizer.set(template, constructVisualizerPayload());"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/shares/:id/files/metadata?file_id=616d912d-bc49-4b24-91e4-83991178ea23",
+              "host": ["{{BASE_URL}}"],
+              "path": ["shares", ":id", "files", "metadata"],
+              "query": [
+                {
+                  "key": "file_id",
+                  "value": "616d912d-bc49-4b24-91e4-83991178ea23"
+                },
+                {
+                  "key": "path",
+                  "value": null,
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "162674a7-186b-4678-bded-796d031e58ba"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get all duplicate files",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var template = `\r",
+                  "<style type=\"text/css\">\r",
+                  "    .tftable {font-size:14px;color:#333333;width:100%;border-width: 1px;border-color: #87ceeb;border-collapse: collapse;}\r",
+                  "    .tftable th {font-size:18px;background-color:#87ceeb;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;text-align:left;}\r",
+                  "    .tftable tr {background-color:#ffffff;}\r",
+                  "    .tftable td {font-size:14px;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;}\r",
+                  "    .tftable tr:hover {background-color:#e0ffff;}\r",
+                  "</style>\r",
+                  "\r",
+                  "<table class=\"tftable\" border=\"1\">\r",
+                  "    <tr>\r",
+                  "        <th>ID</th>\r",
+                  "        <th>Share ID</th>\r",
+                  "        <th>Path</th>\r",
+                  "        <th>Name</th>\r",
+                  "        <th>Size</th>\r",
+                  "        <th>Is Directory</th>\r",
+                  "        <th>Modified Time</th>\r",
+                  "        <th>Created Time</th>\r",
+                  "        <th>Access Time</th>\r",
+                  "        <th>Last Crawled</th>\r",
+                  "    </tr>\r",
+                  "    \r",
+                  "    {{#each response}}\r",
+                  "        <tr>\r",
+                  "            <td>{{id}}</td>\r",
+                  "            <td>{{shareId}}</td>\r",
+                  "            <td>{{path}}</td>\r",
+                  "            <td>{{name}}</td>\r",
+                  "            <td>{{size}}</td>\r",
+                  "            <td>{{isDir}}</td>\r",
+                  "            <td>{{modTime}}</td>\r",
+                  "            <td>{{createTime}}</td>\r",
+                  "            <td>{{accessTime}}</td>\r",
+                  "            <td>{{lastCrawled}}</td>\r",
+                  "        </tr>\r",
+                  "    {{/each}}\r",
+                  "</table>\r",
+                  "`;\r",
+                  "\r",
+                  "function constructVisualizerPayload() {\r",
+                  "    return {response: pm.response.json()}\r",
+                  "}\r",
+                  "\r",
+                  "pm.visualizer.set(template, constructVisualizerPayload());"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/files/duplicates?share_id=47828e73-be24-4b9d-aa81-a11e97773de4",
+              "host": ["{{BASE_URL}}"],
+              "path": ["files", "duplicates"],
+              "query": [
+                {
+                  "key": "share_id",
+                  "value": "47828e73-be24-4b9d-aa81-a11e97773de4",
+                  "description": "Optional specific share_id"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "operations",
+      "item": [
+        {
+          "name": "List operation logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/operations",
+              "host": ["{{BASE_URL}}"],
+              "path": ["operations"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "crawl",
+                  "description": "Filter by type",
+                  "disabled": true
+                },
+                {
+                  "key": "action",
+                  "value": "get",
+                  "description": "Filter by action",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "success",
+                  "description": "Filter by status",
+                  "disabled": true
+                },
+                {
+                  "key": "shareId",
+                  "value": "49b011da-8c6c-4e50-8784-a9f7a454d99c",
+                  "description": "Filter by share ID",
+                  "disabled": true
+                },
+                {
+                  "key": "since",
+                  "value": "2025-01-21T00:00:00Z",
+                  "description": "Filter by time",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Limit results",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "Create initial user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\": \"admin\",\r\n    \"password\": \"replacewithyourpassword\",\r\n    \"email\": \"admin@example.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/users/first-admin",
+              "host": ["{{BASE_URL}}"],
+              "path": ["users", "first-admin"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create new admin user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer admin_token",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\": \"admin\",\r\n    \"password\": \"Replacewithyourpassword\",\r\n    \"email\": \"admin@example.com\"\r\n  }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/users/admin",
+              "host": ["{{BASE_URL}}"],
+              "path": ["users", "admin"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create new user",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/users/admin",
+              "host": ["{{BASE_URL}}"],
+              "path": ["users", "admin"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get auth token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonData = pm.response.json();\r",
+                  "pm.collectionVariables.set(\"token\", jsonData.access_token);\r",
+                  "\r",
+                  "// Set collection authorization\r",
+                  "pm.globals.set(\"Authorization\", `Bearer ${jsonData.access_token}`);"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "type": "text",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "admin",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "Replacewithyourpassword",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/token",
+              "host": ["{{BASE_URL}}"],
+              "path": ["token"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "health",
+      "item": [
+        {
+          "name": "Get system health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/health",
+              "host": ["{{BASE_URL}}"],
+              "path": ["health"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "license",
+      "item": [
+        {
+          "name": "Get license status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/license/status",
+              "host": ["{{BASE_URL}}"],
+              "path": ["license", "status"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{Authorization}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "token_type",
+      "value": ""
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ]
+}
