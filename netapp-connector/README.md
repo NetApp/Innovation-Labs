@@ -84,6 +84,10 @@ Trouble deploying the connector? Check the [Troubleshooting](#troubleshooting) s
 
 The connector is managed via API. The latest API documentation for your deployed connector can be found at `http://localhost:8080/docs` or `http://localhost:8080/redoc`
 
+### User Quickstart
+
+The User Quickstart guide is available [here](USER_QUICKSTART.md).
+
 ## Roadmap
 
 Roadmap for the NetApp Connector for M365 Copilot is shared under an NDA. Please reach out to your NetApp representative for more information.
