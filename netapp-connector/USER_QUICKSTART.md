@@ -7,7 +7,19 @@ This guide assumes that you have deployed the NetApp connector and are ready to 
 The easiest way to get started is by using the pre-built Docker image:
 
 ```bash
-docker pull ghcr.io/netapp/netappconnector:latest
+docker pull ghcr.io/netapp/netapp-copilot-connector:latest
+```
+
+or for a specific version:
+
+```bash
+docker pull ghcr.io/netapp/netapp-copilot-connector:2.0.1
+```
+
+Or you can import the tar file provided by the NetApp Connector team:
+
+```bash
+docker load -i netapp-connector.tar
 ```
 
 ### Running the Container
