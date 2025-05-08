@@ -1,0 +1,50 @@
+services:
+  init:
+    image: busybox:latest
+    command: >
+      sh -c "
+        mkdir -p /data &&
+        chown -R 1000:1000 /data &&
+        chmod -R 700 /data &&
+        echo 'Database directory initialized'
+      "
+    volumes:
+      - type: bind
+        source: ./data
+        target: /data
+        read_only: false
+    env_file:
+      - .env
+
+  netapp-connector:
+    image: netapp-copilot-connector:latest
+    cap_add:
+      - SYS_ADMIN
+      - DAC_READ_SEARCH
+      - DAC_OVERRIDE
+    security_opt:
+      - apparmor:unconfined
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - PORT=8080
+      - PYTHONUNBUFFERED=1
+      - DB_PATH=data/database.db
+    volumes:
+      - type: bind
+        source: ./data
+        target: /data
+        read_only: false
+      - type: bind
+        source: ./logs
+        target: /app/logs
+        read_only: false
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+    restart: unless-stopped
+    depends_on:
+      - init

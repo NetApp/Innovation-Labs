@@ -16,7 +16,7 @@ or for a specific version:
 docker pull ghcr.io/netapp/netapp-copilot-connector:2.0.1
 ```
 
-Or you can import the tar file provided by the NetApp Connector team:
+Or you can import the tar file from the offline distribution package:
 
 ```bash
 docker load -i netapp-connector.tar
@@ -24,53 +24,21 @@ docker load -i netapp-connector.tar
 
 ### Running the Container
 
-1. Create a directory to store persistent data:
+1. Download the [Sample .env file](./dist/.env.example) and rename it to `.env`.
+2. Configure the `.env` file with the required environment variables. The following environment variables are required:
 
-```bash
-mkdir -p /path/to/data
-```
+````bash
+# NetApp Settings
+NETAPP_CONNECTOR_LICENSE=your-licence-key-here # Mandatory
 
-2. Run the container with the required environment variables:
+# Microsoft Graph configuration
+MS_GRAPH_CLIENT_ID=your-client-id-here # Mandatory
+MS_GRAPH_CLIENT_SECRET=your-client-secret-here # Mandatory
+MS_GRAPH_TENANT_ID=your-tenant-id-here # Mandatory```
+````
 
-```bash
-docker run -d \
-  --name netapp-connector \
-  -p 8000:8000 \
-  -v /path/to/data:/app/data \
-  -e JWT_SECRET_KEY="your_secret_key" \  # This is optional
-  -e NETAPP_CONNECTOR_LICENSE="your-license-key" \
-  -e MS_GRAPH_CLIENT_ID="your-client-id" \
-  -e MS_GRAPH_CLIENT_SECRET="your-client-secret" \
-  -e MS_GRAPH_TENANT_ID="your-tenant-id" \
-  ghcr.io/netapp/netappconnector:latest
-```
-
-### Using Docker Compose
-
-For a more production-ready setup, you can use Docker Compose:
-
-```yaml
-services:
-  netapp-connector:
-    image: ghcr.io/netapp/netappconnector:latest
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./data:/app/data
-    environment:
-      - JWT_SECRET_KEY=your_secret_key
-      - NETAPP_CONNECTOR_LICENSE=your-license-key
-      - MS_GRAPH_CLIENT_ID=your-client-id
-      - MS_GRAPH_CLIENT_SECRET=your-client-secret
-      - MS_GRAPH_TENANT_ID=your-tenant-id
-      # Optional configurations
-      - PORT=8080
-      - ACCESS_TOKEN_EXPIRE_MINUTES=60
-      - LOG_LEVEL=INFO
-    restart: unless-stopped
-```
-
-Save this as `docker-compose.yml` and run:
+3. Download the latest docker-compose file from the [dist](./dist) directory.
+4. Run the following docker-compose command to deploy the connector:
 
 ```bash
 docker-compose up -d
