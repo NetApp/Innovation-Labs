@@ -1,0 +1,25 @@
+---
+main:
+  name: netapp-connector-main
+  replicaCount: 1
+  image:
+    repository: ghcr.io/netapp
+    tag: 2.0.5
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8080
+  env:
+    PORT: 8080
+    PYTHONUNBUFFERED: 1
+    DB_PATH: "data/database.db"
+  persistence:
+    enabled: true
+    accessMode: ReadWriteOnce
+    size: 1Gi
+    mountPath: /data
+  credentials:
+    MS_GRAPH_CLIENT_ID: "tobeset"
+    MS_GRAPH_CLIENT_SECRET: "tobeset"
+    MS_GRAPH_TENANT_ID: "tobeset"
+    NETAPP_CONNECTOR_LICENSE: "tobeset"
