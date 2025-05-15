@@ -15,6 +15,8 @@ The NetApp Connector for M365 Copilot is a containerized solution that enables y
 
 ## Getting Started
 
+Note: If you are using a Kubernetes cluster, please see the [Helm Deployment](helm/README.md) document for more information. (Credit to @romdalf for the helm chart)
+
 ### Prerequisites
 
 #### Network Requirements
@@ -130,43 +132,6 @@ Simply pull the latest image from the repository and redeploy the connector. The
 All graph data is stored in the **Primary Provisioned Geography** location. This applies even if an organization has satellite regions, as explained here [Plan for Microsoft 365 Multi-Geo - Microsoft 365 Enterprise | Microsoft Learn](https://learn.microsoft.com/en-us/microsoft-365/enterprise/plan-for-multi-geo?view=o365-worldwide) but the graph index is only in the primary region (in order to provide a unified search experience across all the tenants).
 
 ## Troubleshooting
-
-### The connector is not accessible on port 8080
-
-By default the connector will start on port 8080. If this port is already in use, you can change the port in the docker-compose.yml file or .env file. Change the port mapping in the `ports` section of the `netapp-connector` service.
-
-```yaml
-netapp-connector:
-  build:
-    context: .
-    dockerfile: Dockerfile
-  cap_add:
-    - SYS_ADMIN
-    - DAC_READ_SEARCH
-    - DAC_OVERRIDE
-  security_opt:
-    - apparmor:unconfined
-  ports:
-    - "8080:8080" # Change this to the desired port
-  env_file:
-    - .env
-  environment:
-    - PORT=8080 # Change this to the desired port
-    - PYTHONUNBUFFERED=1
-    - DB_PATH=${DB_PATH:-data/database.db}
-    - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-    - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
-    - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
-    - MS_GRAPH_CLIENT_ID=${MS_GRAPH_CLIENT_ID}
-    - MS_GRAPH_CLIENT_SECRET=${MS_GRAPH_CLIENT_SECRET}
-    - MS_GRAPH_TENANT_ID=${MS_GRAPH_TENANT_ID}
-    - MS_GRAPH_CONNECTOR_ID=${MS_GRAPH_CONNECTOR_ID:-netappcopilot}
-    - MS_GRAPH_CONNECTOR_NAME=${MS_GRAPH_CONNECTOR_NAME:-"NetApp Connector"}
-    - MS_GRAPH_CONNECTOR_DESCRIPTION=${MS_GRAPH_CONNECTOR_DESCRIPTION:-"NetApp Connector for Microsoft 365 Copilot"}
-    - NETAPP_CONNECTOR_LICENSE=${NETAPP_CONNECTOR_LICENSE}
-  volumes:
-  # Truncated for brevity
-```
 
 ### The connnector starts, then stops immediately
 
