@@ -44,9 +44,9 @@ MS_GRAPH_TENANT_ID=your-tenant-id-here # Mandatory```
 docker-compose up -d
 ```
 
-### Using Helm (Alpha)
+### Using Helm
 
-Detailed instructions for deploying the NetApp Connector using Helm are available in the [Helm Quickstart](HELM_QUICKSTART.md).
+If you are using Kubernetes, you can deploy the connector using Helm. Please refer to the [Helm Deployment](helm/README.md) document for more information.
 
 ## 2. Using the API and creating an admin user
 

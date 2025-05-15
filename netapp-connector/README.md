@@ -61,7 +61,9 @@ You have successfully registered the connector in Azure ENTRA. You will need the
 
 ### Deploy the connector
 
-The connector is deployed as a containerized solution. You can deploy the connector using Docker, Podman, or Kubernetes. The simplest way to deploy the connector is using Docker Compose.
+The connector is deployed as a containerized solution. You can deploy the connector using Docker, Podman, or Kubernetes. The simplest way to deploy the connector is using Docker Compose, however enterprise customers may want to deploy the connector using Kubernetes for production deployments. Please refer to the [Helm Deployment](helm/README.md) document for more information.
+
+#### Deploy using Docker Compose
 
 1. Download the latest release and (optionally) the offline tar image of the connector from this repo. By default the release will reference the latest online package available on thie repo.
 2. Configure the .env file with the required environment variables. The following environment variables are required:
