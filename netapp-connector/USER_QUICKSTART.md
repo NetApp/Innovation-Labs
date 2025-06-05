@@ -4,6 +4,9 @@ This guide assumes that you have deployed the NetApp connector and are ready to 
 
 ## 1. Getting Started
 
+[!IMPORTANT]
+The NetApp Connector for M365 Copilot is currently in **Private Preview**. This means that the connector is not yet fully supported and may have some limitations. The connector requires a license to activate. You can request access to the connector by joining the Early Access Program (EAP). Please book a meeting with the following link to join the EAP: [Book a meeting with NetApp](https://outlook.office.com/bookwithme/user/d636d7a02ad8477c9af9a0cbb029af4d@netapp.com/meetingtype/nm-mXkp-TUO1CdzOmFfIBw2?anonymous&ismsaljsauthenabled&ep=mlink).
+
 The easiest way to get started is by using the pre-built Docker image:
 
 ```bash
@@ -68,21 +71,9 @@ Once you have the collection, you can import it into Postman and start using it 
 
 The API documentation is available at `http://localhost:8000/docs` after starting the connector.
 
-#### Create a new admin user
+#### Retrieving the Admin User
 
-Send a POST request to `{{HOST:PORT}}/users/first-admin` with the following payload:
-
-```json
-{
-  "username": "admin",
-  "password": "YourPassword",
-  "email": "admin@example.com"
-}
-```
-
-**_Note_**: This user will be created as an admin user and will have full access to the connector. It will NOT have any connectivity to the NetApp shares of the data contained within them.
-
-You will receive a status 200 acknowledgment if the user is successfully created.
+The connector will automatically create an admin user with the username `admin` (or your custom admin username) and generate a secure password when it is first started. You can retrieve this user by inspecting the logs of the connector container. The password will be displayed in the logs when the connector starts up for the first time.
 
 #### Authenticate the user
 
