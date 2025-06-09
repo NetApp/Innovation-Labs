@@ -1,72 +1,86 @@
-# NetApp Connector Kubernetes Helm Chart
+# NetApp Connector for Copilot 365 - Kubernetes Helm Chart
 
-This directory contains a Helm chart for deploying the NetApp Connector as a single-pod StatefulSet with persistent storage on Kubernetes.
+This directory contains a Helm chart for deploying the NetApp Connector as a StatefulSet with persistent storage on Kubernetes.
 
 ## Overview
-- **StatefulSet** ensures the pod always mounts the same persistent volume, suitable for workloads requiring stable storage.
-- **PersistentVolumeClaim** is used for data at `/data`, matching the Docker Compose setup.
-- **Init Container** initializes data directory permissions before the main app starts.
-- **Service** exposes the application on port 8080 inside the cluster (ClusterIP by default).
-- **Configurable** via `values.yaml` for image, storage, and environment variables.
+- `StatefulSet` ensures the pod always mounts the same persistent volume, suitable for workloads requiring stable storage.
+- `PersistentVolumeClaim` is used for data at `/app/data`.
+- `Service` exposes the application on port 8080 inside the cluster (ClusterIP by default).
+- **Configurable** via `--set` or `values.yaml` for image, storage, and environment variables.
 
 ## Prerequisites
 - A working Kubernetes cluster (v1.18+ recommended)
 - [Helm 3](https://helm.sh/) installed
 
 ## Installation
-1. Clone or copy this repository to your environment.
-2. Change to the `k8s` directory:
-   ```sh
-   cd k8s
-   ```
 
-## Setting Mandatory Environment Variables
+### Setting Mandatory Environment Variables
 The connector requires the following four mandatory environment variables to be set for successful operation:
 
+- `MS_GRAPH_CONNECTOR_ID` (this is the ID of the Microsoft Graph connector - only change if multiple connector instances are used)
 - `NETAPP_CONNECTOR_LICENSE` (your license key)
 - `MS_GRAPH_CLIENT_ID` (your Microsoft Graph client ID)
 - `MS_GRAPH_CLIENT_SECRET` (your Microsoft Graph client secret)
 - `MS_GRAPH_TENANT_ID` (your Microsoft tenant ID)
 
-These variables are set during the installation process using `--set` flags creating a Kubernetes Secret object. The connector will use this secret to access the required credentials.
+> [!IMPORTANT]
+> Without these variables, the connector will not function properly.
+> To customize these variables, use `--set` flags (for Helm Repository) or the `values.yaml` file (for GitHub Releases) as described below.
 
-
-3. Install the chart (replace `netapp-connector` with your desired release name and namespace):
+### Helm Repository
+1. Add the Helm repository:
    ```sh
-   helm install netapp-connector \            
-    -n netapp-connector --create-namespace . \
-    --set main.credentials.MS_GRAPH_CLIENT_ID= \                         
-    --set main.credentials.MS_GRAPH_CLIENT_SECRET= \               
-    --set main.credentials.MS_GRAPH_TENANT_ID= \                      
-    --set main.credentials.NETAPP_CONNECTOR_LICENSE= 
+   helm repo add innovation-labs https://netapp.github.io/Innovation-Labs/
    ```
-   This will deploy using the default settings in `values.yaml`.
-
-4. To customize settings (image, storage size, environment variables), edit `values.yaml` or use `--set` flags. For example:
+   If you have already added the repository, you can skip this step and update it:
    ```sh
+   helm repo update
+   ```
+1. Check out the chart repository content:
+   ```sh
+   helm search repo innovation-labs 
+   ```
+1. Install the chart:
+   ```
+   helm install netapp-connector innovation-labs/netapp-connector \
+      --namespace netapp-connector --create-namespace \
+      --set main.credentials.MS_GRAPH_CLIENT_ID="your_graph_client_id" \
+      --set main.credentials.MS_GRAPH_CLIENT_SECRET="your_graph_client_secret" \
+      --set main.credentials.MS_GRAPH_TENANT_ID="your_graph_tenant_id" \
+      --set main.credentials.NETAPP_CONNECTOR_LICENSE="your_license_key"
+   ```
+
+### GitHub Releases
+1. Download the latest release from the [GitHub Releases page](https://github.com/NetApp/Innovation-Labs/releases).
+1. Extract the chart:
+   ```sh
+   tar -xzf netapp-connector-<version>.tgz
+   cd netapp-connector
+   ```
+1. Install the chart using Helm:
+   ```
    helm install netapp-connector . \
-    -n netapp-connector --create-namespace \
-     --set main.credentials.MS_GRAPH_CLIENT_ID=<tbd> \
-     --set main.credentials.MS_GRAPH_CLIENT_SECRET=<tbd> \
-     --set main.credentials.MS_GRAPH_TENANT_ID=<tbd> \
-     --set main.credentials.NETAPP_CONNECTOR_LICENSE=<tbd> \
-     --set image.repository=<internal.container.registry>/netapp-connector \
-     --set image.tag=2.0.6 \
-     --set persistence.size=10Gi
+      --namespace netapp-connector --create-namespace \
+      --set main.credentials.MS_GRAPH_CLIENT_ID="your_graph_client_id" \
+      --set main.credentials.MS_GRAPH_CLIENT_SECRET="your_graph_client_secret" \
+      --set main.credentials.MS_GRAPH_TENANT_ID="your_graph_tenant_id" \
+      --set main.credentials.NETAPP_CONNECTOR_LICENSE="your_license_key"
    ```
 
 ## Uninstall
 To remove the deployment:
 ```sh
-helm uninstall netapp-connector -n netapp-connector
+helm delete netapp-connector --namespace netapp-connector
 ```
 
 ## Accessing the Service
 By default, the service is internal (ClusterIP). To access externally, modify `values.yaml` to set `service.type` to `NodePort` or `LoadBalancer` as appropriate for your cluster.
 
 ## Notes
-- The persistent volume will retain data even if the pod is deleted or recreated.
-- You may need to configure storage classes or provisioner depending on your Kubernetes environment.
+- Depending on your reclaim policy:
+   - You can delete the `Pod`, `StatefulSet`, and Helm Chart without losing data. Redeploying the chart will reuse the existing `PersistentVolumeClaim`.
+   - You may need to manually delete the PersistentVolumeClaim if you want to remove the data and start fresh.
+- If no default `StorageClass` is set, you may need to manually provision the `PersistentVolumeClaim`.
 - For advanced configuration (secrets, ingress, etc.), extend the chart as needed.
 
 ---
