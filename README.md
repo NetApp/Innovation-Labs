@@ -29,4 +29,4 @@ To get started with our Helm charts, follow these steps:
 ## Installing Charts
 To install a chart from our repository, refer to the specific chart's documentation for installation instructions.
 
-1. NetApp Connector for M365 Copilot: [Documentation](https://github.com/NetApp/Innovation-Labs/blob/main/netapp-connector/README.md) & [Deployment Guide](https://github.com/NetApp/Innovation-Labs/blob/main/netapp-connector/helm/README.md)
+1. NetApp Connector for M365 Copilot: [Documentation](https://github.com/NetApp/Innovation-Labs/blob/main/netapp-connector/README.md) & [Deployment Guide](https://github.com/NetApp/Innovation-Labs/blob/main/charts/netapp-copilot-connector/README.md)
