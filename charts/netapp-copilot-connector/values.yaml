@@ -1,0 +1,27 @@
+
+---
+main:
+  name: netapp-connector-main
+  replicaCount: 1
+  image:
+    repository: ghcr.io/netapp/netapp-copilot-connector
+    tag: 2.0.6
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 8080
+  env:
+    PORT: 8080
+    PYTHONUNBUFFERED: 1
+    DB_PATH: "data/database.db"
+  persistence:
+    enabled: true
+    accessMode: ReadWriteOnce
+    size: 1Gi
+    mountPath: /app/data
+  credentials:
+    MS_GRAPH_CONNECTOR_ID: "netappconnector"
+    MS_GRAPH_CLIENT_ID: "tobeset"
+    MS_GRAPH_CLIENT_SECRET: "tobeset"
+    MS_GRAPH_TENANT_ID: "tobeset"
+    NETAPP_CONNECTOR_LICENSE: "tobeset"
