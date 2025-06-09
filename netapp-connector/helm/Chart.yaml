@@ -1,6 +1,0 @@
-apiVersion: v2
-name: netapp-connector
-version: 0.1.0
-description: A Helm chart for deploying netapp-connector as a StatefulSet with persistent storage
-appVersion: "2.0.2"
-type: application
