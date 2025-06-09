@@ -10,7 +10,7 @@ To get started with our Helm charts, follow these steps:
 
 1. **Add the Helm Repository**: Use the following command to add our Helm repository to your local Helm client:
    ```bash
-   helm repo add innovation-labs https://netapp.github.io/innovation-labs-helm-charts
+   helm repo add innovation-labs https://netapp.github.io/Innovation-Labs/
    ```
 1. **Update Your Helm Repositories**: Make sure to update your local Helm repository cache:
    ```bash
@@ -20,6 +20,11 @@ To get started with our Helm charts, follow these steps:
    ```bash
    helm search repo innovation-labs
    ```
+   Expected outputs:
+    ```
+    NAME                                    CHART VERSION   APP VERSION     DESCRIPTION
+    innovation-labs/netapp-connector        2.0.6           2.0.6           A Helm chart for deploying netapp-connector as ...
+    ```
 
 ## Installing Charts
 To install a chart from our repository, refer to the specific chart's documentation for installation instructions.
