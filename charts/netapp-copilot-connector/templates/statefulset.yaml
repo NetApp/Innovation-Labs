@@ -38,6 +38,11 @@ spec:
                 configMapKeyRef:
                   name: {{ .Values.main.name }}
                   key: DB_PATH
+            - name: MS_GRAPH_CONNECTOR_DESCRIPTION
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.main.name }}
+                  key: MS_GRAPH_CONNECTOR_DESCRIPTION
             - name: MS_GRAPH_CONNECTOR_ID
               valueFrom:
                 secretKeyRef:
