@@ -5,7 +5,7 @@ main:
   replicaCount: 1
   image:
     repository: ghcr.io/netapp/netapp-copilot-connector
-    tag: 2.0.6
+    tag: 2.1.0
     pullPolicy: Always
   service:
     type: ClusterIP
@@ -21,6 +21,7 @@ main:
     mountPath: /app/data
   credentials:
     MS_GRAPH_CONNECTOR_ID: "netappconnector"
+    MS_GRAPH_CONNECTOR_DESCRIPTION: "The connector contains information contained in the on premises or on-prem file share server. This contains documents and files. These are of type DOC, DOCM, DOCX, DOT, DOTX, EML, GIF, HTML, JPEG, JPG, MHT, MHTML, MSG, NWS, OBD, OBT, ODP, ODS, ODT, ONE, PDF, PNG, POT, PPS, PPT, PPTM, PPTX, TXT, XLB, XLC, XLSB, XLS, XLSX, XLT, XLXM, XML, XPS, and ZIP."
     MS_GRAPH_CLIENT_ID: "tobeset"
     MS_GRAPH_CLIENT_SECRET: "tobeset"
     MS_GRAPH_TENANT_ID: "tobeset"
