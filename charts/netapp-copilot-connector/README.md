@@ -50,22 +50,49 @@ The connector requires the following four mandatory environment variables to be 
       --set main.credentials.NETAPP_CONNECTOR_LICENSE="your_license_key"
    ```
 
-### GitHub Releases
-1. Download the latest release from the [GitHub Releases page](https://github.com/NetApp/Innovation-Labs/releases).
-1. Extract the chart:
+## Updating
+Let's say that you are currently running the version 2.0.6 and you wish to updat to 2.1.0. 
+
+1. First, you have to update the repo:
    ```sh
-   tar -xzf netapp-connector-<version>.tgz
-   cd netapp-connector
+   helm repo update
    ```
-1. Install the chart using Helm:
+1. Check your current image version: 
+   ```sh 
+   kubectl -n netapp-connector get pods netapp-connector-main-0 -o yaml |grep image
    ```
-   helm install netapp-connector . \
-      --namespace netapp-connector --create-namespace \
-      --set main.credentials.MS_GRAPH_CLIENT_ID="your_graph_client_id" \
-      --set main.credentials.MS_GRAPH_CLIENT_SECRET="your_graph_client_secret" \
-      --set main.credentials.MS_GRAPH_TENANT_ID="your_graph_tenant_id" \
-      --set main.credentials.NETAPP_CONNECTOR_LICENSE="your_license_key"
+   Expected output: 
+   ``` 
+    image: ghcr.io/netapp/netapp-copilot-connector:2.0.6
+    imagePullPolicy: Always
+    image: ghcr.io/netapp/netapp-copilot-connector:2.0.6
+    imageID: ghcr.io/netapp/netapp-copilot-connector@sha256:f3f0af7256d0be1bb1f2959a304907f91cd5c6055bb7912449f81558179a236f
    ```
+1. Upgrade your helm deployment with **--reuse-values** to avoid losing access to your graph and license keys:
+   ```
+   helm upgrade netapp-connector innovation-labs/netapp-connector --namespace netapp-connector --reuse-values --set main.image.tag=2.1.0
+   ```
+   Expected output:
+   ```
+   Release "netapp-connector" has been upgraded. Happy Helming!
+   NAME: netapp-connector
+   LAST DEPLOYED: Fri Jun 13 16:32:53 2025
+   NAMESPACE: netapp-connector
+   STATUS: deployed
+   REVISION: 2
+   TEST SUITE: None
+   ```
+1. Check your current image version:
+   ```
+   kubectl -n netapp-connector get pods netapp-connector-main-0 -o yaml |grep image
+    image: ghcr.io/netapp/netapp-copilot-connector:2.1.0
+    imagePullPolicy: Always
+    image: ghcr.io/netapp/netapp-copilot-connector:2.1.0
+    imageID: ghcr.io/netapp/netapp-copilot-connector@sha256:7cb3e00641fe5d75935aefa876ed2d868a2760d3f9ec92cac263e8ef6c84d072
+   ```
+
+> [!NOTE] 
+> If any new values are added to the helm charts, you can added them after **--reuse-values** like we did for the image version.
 
 ## Uninstall
 To remove the deployment:
