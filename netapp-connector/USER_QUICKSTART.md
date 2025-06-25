@@ -7,7 +7,7 @@ This guide assumes that you have deployed the NetApp connector and are ready to 
 > [!IMPORTANT]
 > The NetApp Connector for M365 Copilot is currently in **Private Preview**. This means that the connector is not yet fully supported and may have some limitations. The connector requires a license to activate. You can request access to the connector by joining the Early Access Program (EAP). Please book a meeting with the following link to join the EAP: [Book a meeting with NetApp](https://outlook.office.com/bookwithme/user/d636d7a02ad8477c9af9a0cbb029af4d@netapp.com/meetingtype/nm-mXkp-TUO1CdzOmFfIBw2?anonymous&ismsaljsauthenabled&ep=mlink).
 
-The easiest way to get started is by using the pre-built Docker image:
+The easiest way to get started is by using the pre-built Docker image or [helm chart](../charts/netapp-copilot-connector/README.md). You can run the connector in a Docker container or deploy it to a Kubernetes cluster using Helm.
 
 ```bash
 docker pull ghcr.io/netapp/netapp-copilot-connector:latest
@@ -16,7 +16,7 @@ docker pull ghcr.io/netapp/netapp-copilot-connector:latest
 or for a specific version:
 
 ```bash
-docker pull ghcr.io/netapp/netapp-copilot-connector:2.0.1
+docker pull ghcr.io/netapp/netapp-copilot-connector:2.1.0
 ```
 
 Or you can import the tar file from the offline distribution package:
