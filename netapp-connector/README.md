@@ -10,6 +10,14 @@ The NetApp Connector for M365 Copilot is a containerized solution that enables y
 ## Features
 
 - **Containerized Deployment** - typical deployment time is less than 3 minutes
+- **Multiple Source Support** - supports SMB File Shares (v3.1.1 through v2.0) including:
+  - Azure NetApp Files (ANF)
+  - AWS FSxN
+  - Google Cloud Volumes NetApp (GCVN)
+  - Cloud Volumes ONTAP (CVO)
+  - Any ONTAP-based system (FAS, AFF, Select, etc.)
+- **No Data Migration Required** - connect your existing NetApp storage to M365 Copilot
+- **Item level permissioning** - the connector will automatically extract and convert files from the source file share and transfer them to Microsoft Graph, preserving item-level permissions
 - **API Interface** - RESTful API for easy integration and management of the connector, replacing the need for M365 Search and Intelligence UI
 - **Enhanced filtering** - filter data based on file type, size, and date
 - **Parallelization** - multiple threads for faster data extraction, conversion and transfer
@@ -54,11 +62,12 @@ In order for the connector to be able to securely communicate with M365 Copilot.
 7. Search for "ExternalItem.ReadWrite.OwnedBy" and select the checkbox.
 8. Search for "Directory.Read.All" and select the checkbox.
 9. Search for "User.Read" and select the checkbox.
-10. Click "Add permissions".
-11. Click "Graph admin consent for (tenant)" and click "Yes".
-12. Navigate to the "Certificates & secrets" page and click "New client secret".
-13. Fill in the required fields and click "Add".
-14. Copy the value of the client secret.
+10. Search for "User.Read.All" and select the checkbox.
+11. Click "Add permissions".
+12. Click "Graph admin consent for (tenant)" and click "Yes".
+13. Navigate to the "Certificates & secrets" page and click "New client secret".
+14. Fill in the required fields and click "Add".
+15. Copy the value of the client secret.
 
 You have successfully registered the connector in Azure ENTRA. You will need the Application ID, Directory ID, and Client Secret for the next steps.
 
@@ -91,11 +100,7 @@ Trouble deploying the connector? Check the [Troubleshooting](#troubleshooting) s
 
 ### Manage the connector
 
-The connector is managed via API. The latest API documentation for your deployed connector can be found at `http://localhost:8080/docs` or `http://localhost:8080/redoc`
-
-## Roadmap
-
-Roadmap for the NetApp Connector for M365 Copilot is shared under an NDA. Please reach out to your NetApp representative for more information.
+The connector can be managed via API or through the stand-alone admin application. The API is a RESTful interface that allows you to manage the connector, configure file shares, and monitor the status of the connector. The API documentation is available at `http://yourconnector:8080/docs`.
 
 ## Frequently Asked Questions (FAQ)
 
