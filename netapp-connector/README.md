@@ -28,7 +28,7 @@ The NetApp Connector for M365 Copilot is a containerized solution that enables y
 
 Want to get up and running quickly? Head over to the [User Quickstart](USER_QUICKSTART.md) guide for a step-by-step guide to deploying the connector and connecting your first share.
 
-Note: If you are using a Kubernetes cluster, please see the [Helm Deployment](helm/README.md) document for more information. (Credit to @romdalf for the helm chart)
+Note: If you are using a Kubernetes cluster, please see the [Helm Deployment](../charts/netapp-copilot-connector/README.md) document for more information. (Credit to @romdalf for the helm chart)
 
 ### Prerequisites
 
