@@ -1,23 +1,6 @@
 services:
-  init:
-    image: busybox:latest
-    command: >
-      sh -c "
-        mkdir -p /data &&
-        chown -R 1000:1000 /data &&
-        chmod -R 700 /data &&
-        echo 'Database directory initialized'
-      "
-    volumes:
-      - type: bind
-        source: ./data
-        target: /data
-        read_only: false
-    env_file:
-      - .env
-
   netapp-connector:
-    image: netapp-copilot-connector:latest
+    image: ghcr.io/netapp/netapp-copilot-connector:latest
     cap_add:
       - SYS_ADMIN
       - DAC_READ_SEARCH
@@ -32,19 +15,16 @@ services:
       - PORT=8080
       - PYTHONUNBUFFERED=1
       - DB_PATH=data/database.db
+      - MS_GRAPH_CLIENT_ID=${MS_GRAPH_CLIENT_ID}
+      - MS_GRAPH_CLIENT_SECRET=${MS_GRAPH_CLIENT_SECRET}
+      - MS_GRAPH_TENANT_ID=${MS_GRAPH_TENANT_ID}
+      - MS_GRAPH_CONNECTOR_ID=${MS_GRAPH_CONNECTOR_ID:-netappcopilot}
+      - MS_GRAPH_CONNECTOR_NAME=${MS_GRAPH_CONNECTOR_NAME:-"NetApp Connector"}
+      - NETAPP_CONNECTOR_LICENSE=${NETAPP_CONNECTOR_LICENSE}
     volumes:
-      - type: bind
-        source: ./data
-        target: /data
-        read_only: false
-      - type: bind
-        source: ./logs
-        target: /app/logs
-        read_only: false
-      - type: bind
-        source: /etc/localtime
-        target: /etc/localtime
-        read_only: true
+      - netapp_data:/app/data
     restart: unless-stopped
-    depends_on:
-      - init
+
+volumes:
+  netapp_data: # For persistent application data
+    driver: local
