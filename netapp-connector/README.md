@@ -30,6 +30,10 @@ Want to get up and running quickly? Head over to the [User Quickstart](USER_QUIC
 
 Note: If you are using a Kubernetes cluster, please see the [Helm Deployment](../charts/netapp-copilot-connector/README.md) document for more information. (Credit to @romdalf for the helm chart)
 
+## Security Information
+
+The NetApp Connector for M365 Copilot is designed with security in mind. All relevant security information is available in the [Security Information](SECURITY.md) document. This includes information on how the connector handles data, how it communicates with Microsoft Graph, and how it is secured.
+
 ### Prerequisites
 
 #### Network Requirements
