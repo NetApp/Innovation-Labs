@@ -16,20 +16,6 @@ spec:
       labels:
         app: {{ include "netapp-connector.name" . }}
     spec:
-      initContainers:
-        - name: netapp-connector-init-data
-          image: busybox:latest
-          command:
-            - sh
-            - -c
-            - |
-              mkdir -p {{ .Values.main.persistence.mountPath }} && \
-              chown -R 1000:1000 {{ .Values.main.persistence.mountPath }} && \
-              chmod -R 700 {{ .Values.main.persistence.mountPath }} && \
-              echo 'Database directory initialized'
-          volumeMounts:
-            - name: data
-              mountPath: {{ .Values.main.persistence.mountPath }}
       containers:
         - name: {{ .Values.main.name }}
           image: "{{ .Values.main.image.repository }}:{{ .Values.main.image.tag }}"
@@ -52,6 +38,16 @@ spec:
                 configMapKeyRef:
                   name: {{ .Values.main.name }}
                   key: DB_PATH
+            - name: MS_GRAPH_CONNECTOR_DESCRIPTION
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.main.name }}
+                  key: MS_GRAPH_CONNECTOR_DESCRIPTION
+            - name: MS_GRAPH_CONNECTOR_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.main.name }}
+                  key: MS_GRAPH_CONNECTOR_ID
             - name: MS_GRAPH_CLIENT_ID
               valueFrom:
                 secretKeyRef:
