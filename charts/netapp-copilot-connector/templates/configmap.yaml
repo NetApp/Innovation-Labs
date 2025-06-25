@@ -9,3 +9,5 @@ data:
   PORT: {{ .Values.main.env.PORT | quote }}
   PYTHONUNBUFFERED: {{ .Values.main.env.PYTHONUNBUFFERED | quote }}
   DB_PATH: {{ .Values.main.env.DB_PATH | quote }}
+
+
