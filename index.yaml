@@ -3,6 +3,17 @@ entries:
   netapp-connector:
   - apiVersion: v2
     appVersion: 2.1.0
+    created: "2025-06-27T13:43:34.719585614Z"
+    description: A Helm chart for deploying netapp-connector as a StatefulSet with
+      persistent storage
+    digest: e32c72781aad0518a724f429b485e723d36169dbba3ca3e95c8004abbe0cac1f
+    name: netapp-connector
+    type: application
+    urls:
+    - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-connector-2.1.2/netapp-connector-2.1.2.tgz
+    version: 2.1.2
+  - apiVersion: v2
+    appVersion: 2.1.0
     created: "2025-06-13T14:44:52.848491589Z"
     description: A Helm chart for deploying netapp-connector as a StatefulSet with
       persistent storage
@@ -45,4 +56,4 @@ entries:
     urls:
     - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-connector-2.0.6-1/netapp-connector-2.0.6-1.tgz
     version: 2.0.6-1
-generated: "2025-06-13T14:44:52.848510124Z"
+generated: "2025-06-27T13:43:34.719607976Z"
