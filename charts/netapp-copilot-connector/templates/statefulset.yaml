@@ -74,6 +74,7 @@ spec:
             allowPrivilegeEscalation: true
             runAsUser: 1000
             runAsGroup: 1000
+            fsGroup: 1000
           volumeMounts:
             - name: data
               mountPath: {{ .Values.main.persistence.mountPath }}
