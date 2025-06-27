@@ -16,6 +16,10 @@ spec:
       labels:
         app: {{ include "netapp-connector.name" . }}
     spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000    
       containers:
         - name: {{ .Values.main.name }}
           image: "{{ .Values.main.image.repository }}:{{ .Values.main.image.tag }}"
@@ -72,9 +76,6 @@ spec:
             capabilities:
               add: ["SYS_ADMIN", "DAC_READ_SEARCH", "DAC_OVERRIDE"]
             allowPrivilegeEscalation: true
-            runAsUser: 1000
-            runAsGroup: 1000
-            fsGroup: 1000
           volumeMounts:
             - name: data
               mountPath: {{ .Values.main.persistence.mountPath }}
