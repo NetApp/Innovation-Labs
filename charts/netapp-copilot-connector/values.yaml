@@ -28,6 +28,6 @@ main:
     NETAPP_CONNECTOR_LICENSE: "tobeset"
     HTTPS_PROXY: "" 
     PROXY_USERNAME: ""
-    PROXY_PASSWORD=: ""
+    PROXY_PASSWORD: ""
     GRAPH_VERIFY_SSL: ""
     GRAPH_TIMEOUT: ""
