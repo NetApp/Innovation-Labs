@@ -42,6 +42,31 @@ spec:
                 configMapKeyRef:
                   name: {{ .Values.main.name }}
                   key: DB_PATH
+            - name: HTTPS_PROXY
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.main.name }}
+                  key: HTTPS_PROXY
+            - name: PROXY_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.main.name }}
+                  key: PROXY_USERNAME
+            - name: PROXY_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.main.name }}
+                  key: PROXY_PASSWORD
+            - name: GRAPH_VERIFY_SSL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.main.name }}
+                  key: GRAPH_VERIFY_SSL
+            - name: NETAPP_CONNECTOR_LICENSE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.main.name }}
+                  key: GRAPH_TIMEOUT   
             - name: MS_GRAPH_CONNECTOR_DESCRIPTION
               valueFrom:
                 secretKeyRef:

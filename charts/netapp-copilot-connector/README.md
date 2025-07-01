@@ -50,6 +50,9 @@ The connector requires the following four mandatory environment variables to be 
       --set main.credentials.NETAPP_CONNECTOR_LICENSE="your_license_key"
    ```
 
+> [!NOTE] 
+> For deployment with proxy configuration, modify the values of the following parameters: ```HTTPS_PROXY```, ```PROXY_USERNAME```, ```PROXY_PASSWORD```, ```GRAPH_VERIFY_SSL```, ```GRAPH_TIMEOUT```.
+
 ## Updating
 Let's say that you are currently running the version 2.0.6 and you wish to updat to 2.1.0. 
 
