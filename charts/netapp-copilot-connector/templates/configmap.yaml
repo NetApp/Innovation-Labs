@@ -9,5 +9,9 @@ data:
   PORT: {{ .Values.main.env.PORT | quote }}
   PYTHONUNBUFFERED: {{ .Values.main.env.PYTHONUNBUFFERED | quote }}
   DB_PATH: {{ .Values.main.env.DB_PATH | quote }}
-
+  HTTPS_PROXY: {{ .Values.main.env.HTTPS_PROXY | quote }} 
+  PROXY_USERNAME: {{ .Values.main.env.PROXY_USERNAME | quote }}
+  PROXY_PASSWORD: {{ .Values.main.env.PROXY_PASSWORD | quote }}
+  GRAPH_VERIFY_SSL: {{ .Values.main.env.GRAPH_VERIFY_SSL | quote }}
+  GRAPH_TIMEOUT: {{ .Values.main.env.GRAPH_TIMEOUT | quote }}
 

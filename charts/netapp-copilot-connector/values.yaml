@@ -26,3 +26,8 @@ main:
     MS_GRAPH_CLIENT_SECRET: "tobeset"
     MS_GRAPH_TENANT_ID: "tobeset"
     NETAPP_CONNECTOR_LICENSE: "tobeset"
+    HTTPS_PROXY: "" 
+    PROXY_USERNAME: ""
+    PROXY_PASSWORD=: ""
+    GRAPH_VERIFY_SSL: ""
+    GRAPH_TIMEOUT: ""
