@@ -62,6 +62,11 @@ spec:
                 configMapKeyRef:
                   name: {{ .Values.main.name }}
                   key: GRAPH_VERIFY_SSL
+            - name: SSL_CERT_FILE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.main.name }}
+                  key: SSL_CERT_FILE
             - name: NETAPP_CONNECTOR_LICENSE
               valueFrom:
                 configMapKeyRef:
