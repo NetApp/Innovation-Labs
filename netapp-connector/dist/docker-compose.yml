@@ -14,7 +14,7 @@ services:
     environment:
       - PORT=8080
       - PYTHONUNBUFFERED=1
-      - DB_PATH=data/database.db
+      - DB_PATH=app/data/database.db
       - MS_GRAPH_CLIENT_ID=${MS_GRAPH_CLIENT_ID}
       - MS_GRAPH_CLIENT_SECRET=${MS_GRAPH_CLIENT_SECRET}
       - MS_GRAPH_TENANT_ID=${MS_GRAPH_TENANT_ID}
