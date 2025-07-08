@@ -14,4 +14,4 @@ data:
   PROXY_PASSWORD: {{ .Values.main.env.PROXY_PASSWORD | quote }}
   GRAPH_VERIFY_SSL: {{ .Values.main.env.GRAPH_VERIFY_SSL | quote }}
   GRAPH_TIMEOUT: {{ .Values.main.env.GRAPH_TIMEOUT | quote }}
-  SSL_CERT_FILE: {{ .Values.main.env.SSL_CERT_FILE_PATH | quote }}
+  SSL_CERT_FILE_PATH: {{ .Values.main.env.SSL_CERT_FILE_PATH | quote }}
