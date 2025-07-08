@@ -67,7 +67,7 @@ spec:
                 configMapKeyRef:
                   name: {{ .Values.main.name }}
                   key: SSL_CERT_FILE_PATH
-            - name: NETAPP_CONNECTOR_LICENSE
+            - name: GRAPH_TIMEOUT
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Values.main.name }}
