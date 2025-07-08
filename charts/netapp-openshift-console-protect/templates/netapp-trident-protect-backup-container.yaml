@@ -1,0 +1,394 @@
+apiVersion: console.openshift.io/v1
+kind: ConsoleQuickStart
+metadata:
+  annotations:
+    capability.openshift.io/name: Console
+    include.release.openshift.io/hypershift: "true"
+    include.release.openshift.io/ibm-cloud-managed: "true"
+    include.release.openshift.io/self-managed-high-availability: "true"
+    include.release.openshift.io/single-node-developer: "true"
+  generation: 1
+  name: netapp-trident-protect-backup-container
+  labels:
+    vendor: netapp
+spec:
+  conclusion: You can now backup and mirror your containerized application with NetApp Trident Protect.
+  description: Create your first containerized application backup using NetApp Trident Protect.
+  displayName: Create a NetApp Trident Protect backup for containers. 
+  durationMinutes: 30
+  icon: data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAwIDkwOS4wOTEiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSIyNDAwIiBoZWlnaHQ9IjE4MTAiPgogIDxwYXRoIGQ9Ik03ODcuODc5IDQzNC41NDVoMTYuODE4djguNDg1YzQuMDkxLTUuNDU1IDkuNjk3LTkuNTQ1IDE4LjQ4NS05LjU0NSAxMy43ODggMCAyNi45NyAxMC43NTggMjYuOTcgMzAuNjA2di4xNTJjMCAxOS44NDgtMTIuODc5IDMwLjYwNi0yNi45NyAzMC42MDYtOC45MzkgMC0xNC41NDUtNC4wOTEtMTguNDg1LTguNzg4djI1LjQ1NWgtMTYuODE4em00NS40NTUgMjkuNjk3di0uMTUyYzAtOS44NDgtNi42NjctMTYuMzY0LTE0LjU0NS0xNi4zNjRzLTE0LjM5NCA2LjUxNS0xNC4zOTQgMTYuMzY0di4xNTJjMCA5Ljg0OCA2LjUxNSAxNi4zNjQgMTQuMzk0IDE2LjM2NHMxNC41NDUtNi4zNjQgMTQuNTQ1LTE2LjM2NG0tMzc4LjkzOS00OC4zMzNoMTUuNzU4bDM2LjIxMiA0OC4xODJ2LTQ4LjE4MmgxNi44MTh2NzcuODc5aC0xNC41NDVsLTM3LjQyNi00OS4yNDN2NDkuMjQyaC0xNi44MTh6bTc2Ljk3IDQ4LjYzNnYtLjE1MmMwLTE2Ljk3IDEyLjEyMS0zMC43NTggMjkuMjQyLTMwLjc1OCAxOS44NDggMCAyOC43ODggMTUuMzAzIDI4Ljc4OCAzMi4xMjEgMCAxLjM2NC0uMTUyIDIuODc5LS4xNTIgNC4zOTRoLTQxLjIxMmMxLjY2NyA3LjU3NiA2Ljk3IDExLjY2NyAxNC41NDUgMTEuNjY3IDUuNjA2IDAgOS42OTctMS44MTggMTQuMzk0LTYuMDYxbDkuNTQ1IDguNDg1Yy01LjQ1NSA2LjgxOC0xMy40ODUgMTEuMDYxLTI0LjI0MiAxMS4wNjEtMTcuODc5LS4xNTItMzAuOTA5LTEyLjcyNy0zMC45MDktMzAuNzU4bTQxLjY2Ny01Yy0xLjA2MS03LjU3Ni01LjQ1NS0xMi41NzYtMTIuNDI0LTEyLjU3NnMtMTEuNTE1IDUtMTIuODc5IDEyLjU3NnptMjYuOTcgMTcuNDI0di0yOC4wM2gtNy4xMjF2LTE0LjM5NEg2MDB2LTE1LjE1MmgxNi42Njd2MTUuMTUyaDEzLjkzOXYxNC4zOTRoLTEzLjkzOXYyNS4zMDNjMCAzLjkzOSAxLjY2NyA1Ljc1OCA1LjQ1NSA1Ljc1OCAzLjAzIDAgNS45MDktLjc1OCA4LjMzMy0yLjEyMXYxMy40ODVjLTMuNDg1IDIuMTIxLTcuNTc2IDMuNDg1LTEzLjMzMyAzLjQ4NS0xMC4xNTItLjE1Mi0xNy4xMjEtNC4yNDItMTcuMTIxLTE3Ljg3OW0xMTguOTM5LTQyLjQyNGgxNi44MTh2OC40ODVjNC4wOTEtNS40NTUgOS42OTctOS41NDUgMTguNDg1LTkuNTQ1IDEzLjc4OCAwIDI2Ljk3IDEwLjc1OCAyNi45NyAzMC42MDZ2LjE1MmMwIDE5Ljg0OC0xMi44NzkgMzAuNjA2LTI2Ljk3IDMwLjYwNi04LjkzOSAwLTE0LjU0NS00LjA5MS0xOC40ODUtOC43ODh2MjUuNDU1SDcxOC45NHptNDUuMzAzIDI5LjY5N3YtLjE1MmMwLTkuODQ4LTYuNjY3LTE2LjM2NC0xNC41NDUtMTYuMzY0cy0xNC4zOTQgNi41MTUtMTQuMzk0IDE2LjM2NHYuMTUyYzAgOS44NDggNi41MTUgMTYuMzY0IDE0LjM5NCAxNi4zNjQgOC4wMyAwIDE0LjU0NS02LjM2NCAxNC41NDUtMTYuMzY0bS05Ny4xMjEtNDguNDg1aDE1LjMwM2wzMi4yNzMgNzcuODc5SDY5Ni45N2wtNy4xMjEtMTcuNDI0aC0zMC43NThsLTcuMTIxIDE3LjQyNGgtMTcuMjczem0xNy43MjcgNDUuNjA2LTEwLjMwMy0yNS4xNTItMTAuMzAzIDI1LjE1MnptLTM1Ny41NzYtNDUuNDU1djc3Ljg3OWgzNi4zNjRWNDQ2Ljk3aDIwLjc1OHY0Ni44MThoMzYuMzY0di03Ny44Nzl6Ii8+Cjwvc3ZnPgo=
+  introduction: |- 
+    ### Create a NetApp Trident Protect Backup
+    For additional information, see the [NetApp Trident Protect documentation](https://docs.netapp.com/us-en/trident/trident-protect/learn-about-trident-protect.html).
+  nextQuickStart:
+  - netapp-trident-protect-mirror
+  tasks:
+  - description: |-
+      To test the Trident Protect capabilities, we will deploy a test application that we will:  
+      - snapshot for fast and zero-cost backup and restore.
+      - backup with S3 offload to address long-term retention, disaster recovery, and migration.
+      - restore from both the snapshot and the S3 backup to validate the process.
+
+      The test application is a simple HTTP service returning the HTTP path in console and in a file under the directory `/http-hello-log`.
+
+      The source code for the application is available at [romdalf/hello](https://github.com/romdalf/hello-path).
+
+      The below YAML definition includes the following resources:
+      - `Namespace` **protect-hello-path**
+      - `Service` **protect-hello-path**
+      - `Route` **my**
+      - `StatefulSet` **protect-hello-path** with a PVC of 1Gi using the storage class `trident-ontap-nas`.
+
+      Let's deploy the application:
+
+      1. Click [Import]{{`{{highlight qs-masthead-import}}`}}, then insert a YAML definition like the following with necessary modification to fit your environment:
+      ```YAML
+      ---
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: protect-hello-path
+      ---
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: protect-hello-path
+        namespace: protect-hello-path
+        labels:
+          app: protect-hello-path
+          env: dev
+      spec:
+        type: ClusterIP
+        ports:
+        - port: 8080
+          protocol: TCP
+          targetPort: 8080
+        selector:
+          app: protect-hello-path
+          env: dev
+      ---
+      apiVersion: route.openshift.io/v1
+      kind: Route
+      metadata:
+        name: my
+        namespace: protect-hello-path
+        annotations:
+          openshift.io/host.generated: 'true'
+      spec:
+        path: /
+        to:
+          kind: Service
+          name: protect-hello-path
+        port:
+          targetPort: 8080
+        wildcardPolicy: None 
+      ---
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: protect-hello-path
+        namespace: protect-hello-path
+      spec:
+        selector:
+          matchLabels:
+            app: protect-hello-path
+            env: dev
+        serviceName: protect-hello-path
+        replicas: 1
+        template:
+          metadata:
+            labels:
+              app: protect-hello-path
+              env: dev
+          spec:
+            containers:
+              - name: protect-hello-path
+                image: ghcr.io/romdalf/hello:1.1-ubi-x86
+                imagePullPolicy: Always
+                ports:
+                  - containerPort: 8080
+                volumeMounts:
+                  - name: protect-hello-path-pvc
+                    mountPath: /http-hello-log
+        volumeClaimTemplates:
+          - metadata:
+              name: protect-hello-path-pvc
+              labels:
+                app: protect-hello-path
+                env: dev
+            spec:
+              accessModes: ["ReadWriteOnce"]
+              storageClassName: "trident-ontap-nas"
+              resources:
+                requests:
+                  storage: 1Gi
+      ```
+      2. Click **Create**.
+
+      **Notes**: 
+      - The `Application` definition should be referring the namespace in which the application is deployed in, and not the Trident Protect namespace.
+      - If your application has dependencies in other namespaces, you can add them to the `includedNamespaces` list.
+
+      If successful, the `Application` details page should open for the resource trident-protect-s3-backup in the namespace **trident-protect**.
+
+    review:
+      failedTaskHelp: This task isn’t verified yet. Try the task again.
+      instructions: |-
+        Do you see the `Application` details page within your application namespace? 
+    summary:
+      failed: Try the steps again.
+      success: Your application is now tagged for backup!
+    title: Deploy a test application to backup
+  - description: |-
+      A S3 bucket is required to offload the backups taken by Trident Protect.
+
+      **Notes:**
+      - This example has been tested on AWS with FSxN and is compatible with other flavor or ONTAP. 
+      - This step might require reaching out to your storage team. 
+
+      1. Open a console (check the embedded Web Terminal in OpenShift)
+      2. Connect via SSH to your NetApp SVM. 
+      3. Create an object-store-server (without HTTPS enabled to simplify the process)
+      ```
+      vserver object-store-server create -object-store-server fsxns3 -is-http-enabled true -is-https-enabled false
+      ```
+      4. Create a user to access the object-store-server 
+      ```
+      vserver object-store-server user create -user protect
+      ```
+      Expected output:
+      ```
+      Vserver: fsx
+        User: protect
+          Access Key: 7NUXF321RZ13P2SAB4BW
+          Secret Key: 1ajhz3xF_gw05BQ_Lzbx795W73c277rc9_NC4d02
+      Warning: The secret key won't be displayed again. Save this key for future use.
+      ```
+      Note: capture the access and secret key for later references. 
+      5. Create a group to associate the user with an access policy
+      ```
+      vserver object-store-server group create -name s3protect -users protect -policies FullAccess
+      ```
+      6. Create a S3 bucket for the documents to be stored in
+      ```
+      vserver object-store-server bucket create backups -type s3 -versioning-state enabled -size 100GB
+      ```
+      Expected output:
+      ```
+      [Job 1063] Job succeeded: Successful
+      ```
+      7. Curl the S3 endpoint 
+      ```
+      curl -X GET "http://10.0.0.154/backups"
+      ```
+      Expected output: 
+      ```XML
+      <?xml version="1.0" encoding="UTF-8"?><Error><Code>AccessDenied</Code><Message>Access Denied</Message></Error>sh-5.1
+      ```
+      **Note:** The 'Access Denied' message is expected due to the lack of credentials. If the bucket was not created, the output would return 'NoSuchBucket'. 
+
+    review:
+      failedTaskHelp: Common issues are network and firewall related.
+      instructions: |-
+        Are all the steps successful and the S3 endpoint reacheable?
+    summary:
+      failed: Try the steps again.
+      success: Congratulation, we have a S3 bucket for our backups!
+    title: Enable S3 and create a bucket with ONTAP 
+  - description: |-
+      The S3 credentials are required to access bucket for our backups taken by Trident Protect.
+
+      1. Create a `Secret` with the S3 credentials. Click on [Import]{{`{{highlight qs-masthead-import}}`}}, then insert a YAML definition like the following with necessary modification to fit your environment:  
+
+      ```YAML
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: trident-protect-s3-backup
+        namespace: trident-protect
+      type: Opaque
+      stringData:
+        accessKeyID: 7NUXF321RZ13P2SAB4BW
+        secretAccessKey: 1ajhz3xF_gw05BQ_Lzbx795W73c277rc9_NC4d02
+      ```
+      2. Click **Create**.
+
+      **Note:** The `Secret` should be created in the **trident-protect** namespace.
+      
+      If successful, the `Secret` details page should open for the resource **trident-protect-s3-backup** in the namespace **trident-protect**.
+
+    review:
+      failedTaskHelp: This task isn’t verified yet. Try the task again.
+      instructions: |-
+        #### To verify the application was successfully created:
+        1. Do you see the `Secret` **trident-protect-s3-backup** in **trident-protect** namespace?
+    summary:
+      failed: Try the steps again.
+      success: You added the Netpp Trident Protect Helm repository!
+    title: Create a Secret for the S3 credentials
+  - description: |-
+      The Trident Protect `AppVault` is the declarative definition of a S3 bucket to be used for backup, snapshot, and restore operations.
+      
+      1. Click on [Import]{{`{{highlight qs-masthead-import}}`}}, then insert a YAML definition like the following with necessary modification to fit your environment - like the `Secret` name created in the previous step:  
+
+      ```YAML
+      apiVersion: protect.trident.netapp.io/v1
+      kind: AppVault
+      metadata:
+        name: trident-protect-s3-backup
+        namespace: trident-protect
+      spec:
+        providerType: OntapS3
+        providerConfig:
+          s3:
+            bucketName: backups
+            endpoint: 10.0.0.154
+        providerCredentials:
+          accessKeyID:
+            valueFromSecret:
+              key: accessKeyID
+              name: trident-protect-s3-backup
+          secretAccessKey:
+            valueFromSecret:
+              key: secretAccessKey
+              name: trident-protect-s3-backup
+      ```
+      2. Click **Create**.
+
+      **Note:** The `AppVault` should be created in the **trident-protect** namespace.
+      
+      If successful, the `AppVault` details page should open for the resource **trident-protect-s3-backup** in the namespace **trident-protect**.
+
+
+    review:
+      failedTaskHelp: This task isn’t verified yet. Try the task again.
+      instructions: |-
+        #### To verify the build is complete:
+        Do you see the **trident-protect-s3-backup** in the `AppVault` details page within the **trident-protect** namespace?
+    summary:
+      failed: Try the steps again.
+      success: All the NetApp Trident Protect CRS are now deployed!
+    title: Create a AppVault to reference the S3 bucket
+  - description: |-
+      Each application that needs to be backed up or mirrored needs to be tagged with the Trident Protect Controller via the `Application` Trident protect object.
+
+      1. Click [Import]{{`{{highlight qs-masthead-import}}`}}, then insert a YAML definition like the following with necessary modification to fit your environment:
+      ```YAML
+      apiVersion: protect.trident.netapp.io/v1
+      kind: Application
+      metadata:
+        name: maria
+        namespace: my-app-namespace
+      spec:
+        includedNamespaces:
+          - namespace: my-app-namespace
+      ```
+      2. Click **Create**.
+
+      **Notes**: 
+      - The `Application` definition should be referring the namespace in which the application is deployed in, and not the Trident Protect namespace.
+      - If your application has dependencies in other namespaces, you can add them to the `includedNamespaces` list.
+
+      If successful, the `Application` details page should open for the resource trident-protect-s3-backup in the namespace **trident-protect**.
+
+    review:
+      failedTaskHelp: This task isn’t verified yet. Try the task again.
+      instructions: |-
+        Do you see the `Application` details page within your application namespace? 
+    summary:
+      failed: Try the steps again.
+      success: Your application is now tagged for backup!
+    title: Tag your application for backup
+  - description: |-
+      Trident Protect can take an on-demand snapshot of your application without offloading it to the S3 bucket. To do so, follow these steps:
+
+      1. Click [Import]{{`{{highlight qs-masthead-import}}`}}, then insert a YAML definition like the following with necessary modification to fit your environment:
+      ```YAML
+      apiVersion: protect.trident.netapp.io/v1
+      kind: Snapshot
+      metadata:
+        namespace: my-app-namespace
+        name: my-cr-name
+      spec:
+        applicationRef: my-application
+        appVaultRef: appvault-name
+        reclaimPolicy: Delete
+      ```
+      2. Click **Create**.
+
+      **Notes**: 
+      - The `Application` definition should be referring the namespace in which the application is deployed in, and not the Trident Protect namespace.
+      - If your application has dependencies in other namespaces, you can add them to the `includedNamespaces` list.
+
+      If successful, the `Application` details page should open for the resource trident-protect-s3-backup in the namespace **trident-protect**.
+
+    review:
+      failedTaskHelp: This task isn’t verified yet. Try the task again.
+      instructions: |-
+        Do you see the `Application` details page within your application namespace? 
+    summary:
+      failed: Try the steps again.
+      success: Your application is now tagged for backup!
+    title: Snapshot your application
+  - description: |-
+      Trident Protect can take an on-demand backup of your application offloading it to the S3 bucket. To do so, follow these steps:
+
+      1. Click [Import]{{`{{highlight qs-masthead-import}}`}}, then insert a YAML definition like the following with necessary modification to fit your environment:
+      ```YAML
+      apiVersion: protect.trident.netapp.io/v1
+      kind: Backup
+      metadata:
+        namespace: my-app-namespace
+        name: my-cr-name
+      spec:
+        applicationRef: my-application
+        appVaultRef: appvault-name
+        dataMover: Kopia
+      ```
+      2. Click **Create**.
+
+      **Notes**: 
+      - The `Application` definition should be referring the namespace in which the application is deployed in, and not the Trident Protect namespace.
+      - If your application has dependencies in other namespaces, you can add them to the `includedNamespaces` list.
+
+      If successful, the `Application` details page should open for the resource trident-protect-s3-backup in the namespace **trident-protect**.
+
+    review:
+      failedTaskHelp: This task isn’t verified yet. Try the task again.
+      instructions: |-
+        Do you see the `Application` details page within your application namespace? 
+    summary:
+      failed: Try the steps again.
+      success: Your application is now tagged for backup!
+    title: Backup your application
+  - description: |-
+      Trident Protect can take an on-demand backup of your application offloading it to the S3 bucket. To do so, follow these steps:
+
+      1. Click [Import]{{`{{highlight qs-masthead-import}}`}}, then insert a YAML definition like the following with necessary modification to fit your environment:
+      ```YAML
+      apiVersion: protect.trident.netapp.io/v1
+      kind: Backup
+      metadata:
+        namespace: my-app-namespace
+        name: my-cr-name
+      spec:
+        applicationRef: my-application
+        appVaultRef: appvault-name
+        dataMover: Kopia
+      ```
+      2. Click **Create**.
+
+      **Notes**: 
+      - The `Application` definition should be referring the namespace in which the application is deployed in, and not the Trident Protect namespace.
+      - If your application has dependencies in other namespaces, you can add them to the `includedNamespaces` list.
+
+      If successful, the `Application` details page should open for the resource trident-protect-s3-backup in the namespace **trident-protect**.
+
+    review:
+      failedTaskHelp: This task isn’t verified yet. Try the task again.
+      instructions: |-
+        Do you see the `Application` details page within your application namespace? 
+    summary:
+      failed: Try the steps again.
+      success: Your application is now tagged for backup!
+    title: Restore your application

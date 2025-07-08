@@ -1,0 +1,17 @@
+{{- if .Values.plugin.jobs.patchConsoles.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ template "netapp-openshift-console-protect.patcherName" . }}
+  namespace: {{ .Values.plugin.namespace }}
+  labels:
+    {{- include "netapp-openshift-console-protect.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "netapp-openshift-console-protect.patcherName" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "netapp-openshift-console-protect.patcherServiceAccountName" . }}
+    namespace: {{ .Values.plugin.namespace }}
+{{- end }}

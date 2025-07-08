@@ -1,0 +1,13 @@
+{{- if .Values.plugin.jobs.patchConsoles.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ template "netapp-openshift-console-protect.patcherName" . }}
+  namespace: {{ .Values.plugin.namespace }}
+  labels:
+    {{- include "netapp-openshift-console-protect.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["operator.openshift.io"]
+    resources: ["consoles"]
+    verbs: ["get","list","patch", "update"]
+{{- end }}

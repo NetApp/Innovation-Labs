@@ -1,0 +1,16 @@
+apiVersion: console.openshift.io/v1
+kind: ConsolePlugin
+metadata:
+  name: {{ .Values.plugin.name }}
+  namespace: {{ .Values.plugin.namespace }}
+  labels:
+    {{- include "netapp-openshift-console-protect.labels" . | nindent 4 }}
+spec:
+  displayName: 'netapp-openshift-console-protect'
+  backend:
+    type: Service
+    service:
+      name: {{ template "netapp-openshift-console-protect.name" . }}
+      namespace: {{ .Values.plugin.namespace }}
+      port: 9443
+      basePath: '/'
