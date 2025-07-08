@@ -20,6 +20,7 @@ main:
     GRAPH_VERIFY_SSL: ""
     GRAPH_TIMEOUT: ""
     SSL_CERT_FILE: ""
+    SSL_CERT_PATH: "/app/ssl_certs/custom_ca_bundle.pem"
   persistence:
     enabled: true
     accessMode: ReadWriteOnce
