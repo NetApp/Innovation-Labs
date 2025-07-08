@@ -109,7 +109,17 @@ spec:
           volumeMounts:
             - name: data
               mountPath: {{ .Values.main.persistence.mountPath }}
-      volumes: []
+            {{- if .Values.main.env.SSL_CERT_FILE }}
+            - name: ssl-cert
+              mountPath: /app/ssl_certs/custom_ca_bundle.pem
+              subPath: custom_ca_bundle.pem
+            {{- end }}
+      volumes:
+        {{- if .Values.main.env.SSL_CERT_FILE }}
+        - name: ssl-cert
+          secret:
+            secretName: {{ .Values.main.name }}-ssl-cert
+        {{- end }}
       restartPolicy: Always
   volumeClaimTemplates:
     - metadata:
