@@ -54,7 +54,7 @@ If you are using Kubernetes, you can deploy the connector using Helm. Please ref
 ## 2. Adding your first share
 
 > [!IMPORTANT]
-> A dedicated stand-alone desktop UI is available for Windows, MacOS and Linux: [Download the Desktop App](/client).
+> A dedicated stand-alone desktop UI is available for Windows, MacOS and Linux: [Download the Desktop App](./client).
 
 ## 3. Using the API and creating an admin user
 
