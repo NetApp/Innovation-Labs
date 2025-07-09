@@ -7,6 +7,9 @@ assignees: ''
 
 ---
 
+**Project**
+e.g. NetApp Connector for M365 Copilot
+
 **Describe the bug**
 A clear and concise description of what the bug is.
 
