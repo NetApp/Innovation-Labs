@@ -51,7 +51,12 @@ docker-compose up -d
 
 If you are using Kubernetes, you can deploy the connector using Helm. Please refer to the [Helm Deployment](helm/README.md) document for more information.
 
-## 2. Using the API and creating an admin user
+## 2. Adding your first share
+
+> [!IMPORTANT]
+> A dedicated stand-alone desktop UI is available for Windows, MacOS and Linux: [Download the Desktop App](/client).
+
+## 3. Using the API and creating an admin user
 
 Learn how to create a new administrator user for accessing and managing your NetApp shares.
 
@@ -71,9 +76,7 @@ Once you have the collection, you can import it into Postman and start using it 
 
 The API documentation is available at `http://localhost:8000/docs` after starting the connector.
 
-#### Retrieving the Admin User
-
-The connector will automatically create an admin user with the username `admin` (or your custom admin username) and generate a secure password when it is first started. You can retrieve this user by inspecting the logs of the connector container. The password will be displayed in the logs when the connector starts up for the first time.
+Note: The connector will generate a secure random admin password for you by default, be sure to retrieve this from the logs.
 
 #### Authenticate the user
 
