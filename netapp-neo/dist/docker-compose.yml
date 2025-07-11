@@ -1,6 +1,7 @@
 services:
   netapp-connector:
-    image: ghcr.io/netapp/netapp-copilot-connector:latest
+#    image: ghcr.io/netapp/netapp-copilot-connector:latest
+    image: localhost/test:dev
     cap_add:
       - SYS_ADMIN
       - DAC_READ_SEARCH
@@ -14,7 +15,7 @@ services:
     environment:
       - PORT=8080
       - PYTHONUNBUFFERED=1
-      - DB_PATH=app/data/database.db
+      - DB_PATH=data/database.db
       - MS_GRAPH_CLIENT_ID=${MS_GRAPH_CLIENT_ID}
       - MS_GRAPH_CLIENT_SECRET=${MS_GRAPH_CLIENT_SECRET}
       - MS_GRAPH_TENANT_ID=${MS_GRAPH_TENANT_ID}
