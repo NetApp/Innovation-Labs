@@ -7,7 +7,7 @@ Welcome to **NetApp Innovation Labs**! This is your gateway to explore and exper
 ## Lab Directory
 
 - [charts](https://netapp.github.io/Innovation-Labs/) - our Helm charts for deploying our Innovation Labs solutions on Kubernetes
-- [NetApp Connector for M365 Copilot](netapp-connector/README.md)
+- [NetApp Connector for M365 Copilot](netapp-neo/README.md)
 
 ## Getting Started
 To get started with our Helm charts, follow these steps:
