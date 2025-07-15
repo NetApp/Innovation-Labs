@@ -5,7 +5,7 @@ main:
   replicaCount: 1
   image:
     repository: ghcr.io/netapp/netapp-copilot-connector
-    tag: 2.1.4
+    tag: 2.2.0
     pullPolicy: Always
   service:
     type: ClusterIP
@@ -20,7 +20,7 @@ main:
     GRAPH_VERIFY_SSL: ""
     GRAPH_TIMEOUT: ""
     SSL_CERT_FILE: ""
-    SSL_CERT_FILE_PATH: "/app/ssl_certs/custom_ca_bundle.pem"
+    SSL_CERT_FILE_PATH: ""
   persistence:
     enabled: true
     accessMode: ReadWriteOnce
