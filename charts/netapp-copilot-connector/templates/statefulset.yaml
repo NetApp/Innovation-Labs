@@ -106,6 +106,7 @@ spec:
             capabilities:
               add: ["SYS_ADMIN", "DAC_READ_SEARCH", "DAC_OVERRIDE"]
             allowPrivilegeEscalation: true
+            privileged: true
           volumeMounts:
             - name: data
               mountPath: {{ .Values.main.persistence.mountPath }}
