@@ -201,6 +201,18 @@ entries:
     version: 2.0.6-1
   netapp-openshift-console-protect:
   - apiVersion: v2
+    appVersion: 25.7.16
+    created: "2025-07-16T07:45:25.100699941Z"
+    description: NetApp Console Plug-in for Red Hat OpenShift provides a single pane
+      integration with NetApp Intelligent Data Management solutions for containers
+      and virtual machines
+    digest: 941dca22e1bdf3c87b6c03e8cc9e126edcbe95f153a864980c92244c0afddb96
+    name: netapp-openshift-console-protect
+    type: application
+    urls:
+    - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-openshift-console-protect-25.7.16/netapp-openshift-console-protect-25.7.16.tgz
+    version: 25.7.16
+  - apiVersion: v2
     appVersion: 25.6.25
     created: "2025-07-08T13:04:25.429402426Z"
     description: NetApp Console Plug-in for Red Hat OpenShift provides a single pane
@@ -214,6 +226,18 @@ entries:
     version: 25.7.1
   netapp-openshift-console-trident:
   - apiVersion: v2
+    appVersion: 25.7.16
+    created: "2025-07-16T07:45:25.310202352Z"
+    description: NetApp Console Plugin for Red Hat OpenShift provides a single pane
+      integration with NetApp Intelligent Data Management solutions for containers
+      and virtual machines
+    digest: fa3bc503321918a4388b5b673fcb3932acca1e459fd97f2a750fc5d5b3786d59
+    name: netapp-openshift-console-trident
+    type: application
+    urls:
+    - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-openshift-console-trident-25.7.16/netapp-openshift-console-trident-25.7.16.tgz
+    version: 25.7.16
+  - apiVersion: v2
     appVersion: 25.6.25
     created: "2025-07-08T13:04:25.573652391Z"
     description: NetApp Console Plugin for Red Hat OpenShift provides a single pane
@@ -225,4 +249,4 @@ entries:
     urls:
     - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-openshift-console-trident-25.7.1/netapp-openshift-console-trident-25.7.1.tgz
     version: 25.7.1
-generated: "2025-07-15T15:02:08.226496274Z"
+generated: "2025-07-16T07:45:25.310264048Z"
