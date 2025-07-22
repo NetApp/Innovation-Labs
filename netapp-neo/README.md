@@ -1,14 +1,16 @@
-# NetApp Connector for M365 Copilot
+# NetApp Neo: Connector for M365 Copilot
 
 ## Introduction
 
-The NetApp Connector for M365 Copilot is a containerized solution that enables you to connect any NetApp platform to Microsoft M365 Copilot without the need to migrate or rearchitect your existing data architecture.
+The NetApp Neo: Connector for M365 Copilot is a containerized solution that enables you to connect any NetApp platform to Microsoft M365 Copilot without the need to migrate or rearchitect your existing data architecture.
 
 > [!IMPORTANT]
-> The NetApp Connector for M365 Copilot is currently in **Private Preview**. This means that the connector is not yet fully supported and may have some limitations. The connector requires a license to activate. You can request access to the connector by joining the Early Access Program (EAP). Please book a meeting with the following link to join the EAP: [Book a meeting with NetApp](https://outlook.office.com/bookwithme/user/d636d7a02ad8477c9af9a0cbb029af4d@netapp.com/meetingtype/nm-mXkp-TUO1CdzOmFfIBw2?anonymous&ismsaljsauthenabled&ep=mlink).
+> The NetApp Neo: Connector for M365 Copilot is currently in **Private Preview**. This means that the connector is not yet fully supported and may have some limitations. The connector requires a license to activate. You can request access to the connector by joining the Early Access Program (EAP). Please book a meeting with the following link to join the EAP: [Book a meeting with NetApp](https://outlook.office.com/bookwithme/user/d636d7a02ad8477c9af9a0cbb029af4d@netapp.com/meetingtype/nm-mXkp-TUO1CdzOmFfIBw2?anonymous&ismsaljsauthenabled&ep=mlink).
 
 ## Features
 
+- **OCR and Optimized Extraction** - the connector automatically extracts accurate text from complex documents, making it easier to search and find relevant information in your files (the only connector in the market to provide this feature)
+- **GPU Support** - the connector can leverage GPU acceleration for 2-5x faster data extraction and conversion, improving performance and reducing processing time (this is a world-first for a Copilot connector)
 - **Containerized Deployment** - typical deployment time is less than 3 minutes
 - **Multiple Source Support** - supports SMB File Shares (v3.1.1 through v2.0) including:
   - Azure NetApp Files (ANF)
@@ -16,6 +18,7 @@ The NetApp Connector for M365 Copilot is a containerized solution that enables y
   - Google Cloud Volumes NetApp (GCVN)
   - Cloud Volumes ONTAP (CVO)
   - Any ONTAP-based system (FAS, AFF, Select, etc.)
+  - Any SMB file share (non-NetApp) that supports SMB v3.1.1 through v2.0
 - **No Data Migration Required** - connect your existing NetApp storage to M365 Copilot
 - **Item level permissioning** - the connector will automatically extract and convert files from the source file share and transfer them to Microsoft Graph, preserving item-level permissions
 - **API Interface** - RESTful API for easy integration and management of the connector, replacing the need for M365 Search and Intelligence UI
@@ -32,7 +35,7 @@ Note: If you are using a Kubernetes cluster, please see the [Helm Deployment](..
 
 ## Security Information
 
-The NetApp Connector for M365 Copilot is designed with security in mind. All relevant security information is available in the [Security Information](SECURITY.md) document. This includes information on how the connector handles data, how it communicates with Microsoft Graph, and how it is secured.
+The NetApp Neo: Connector for M365 Copilot is designed with security in mind. All relevant security information is available in the [Security Information](SECURITY.md) document. This includes information on how the connector handles data, how it communicates with Microsoft Graph, and how it is secured.
 
 ### Prerequisites
 
@@ -64,14 +67,13 @@ In order for the connector to be able to securely communicate with M365 Copilot.
 5. Select "Microsoft Graph" and then "Application permissions".
 6. Search for "ExternalConnection.ReadWrite.OwnedBy" and select the checkbox.
 7. Search for "ExternalItem.ReadWrite.OwnedBy" and select the checkbox.
-8. Search for "Directory.Read.All" and select the checkbox.
-9. Search for "User.Read" and select the checkbox.
-10. Search for "User.Read.All" and select the checkbox.
-11. Click "Add permissions".
-12. Click "Graph admin consent for (tenant)" and click "Yes".
-13. Navigate to the "Certificates & secrets" page and click "New client secret".
-14. Fill in the required fields and click "Add".
-15. Copy the value of the client secret.
+8. Search for "User.Read" and select the checkbox.
+9. Search for "User.Read.All" and select the checkbox.
+10. Click "Add permissions".
+11. Click "Graph admin consent for (tenant)" and click "Yes".
+12. Navigate to the "Certificates & secrets" page and click "New client secret".
+13. Fill in the required fields and click "Add".
+14. Copy the value of the client secret.
 
 You have successfully registered the connector in Azure ENTRA. You will need the Application ID, Directory ID, and Client Secret for the next steps.
 
@@ -108,13 +110,13 @@ The connector can be managed via API or through the stand-alone admin applicatio
 
 ## Frequently Asked Questions (FAQ)
 
-### What is the NetApp Connector for M365 Copilot?
+### What is the NetApp Neo: Connector for M365 Copilot?
 
-The NetApp Connector for M365 Copilot is a containerized solution that enables you to connect any NetApp platform to Microsoft M365 Copilot without the need to migrate or rearchitect your existing data architecture. The connector is deployed as a containerized solution and provides an API interface for easy integration and management of the connector. The connector supports enhanced filtering, parallelization, and large document chunking.
+The NetApp Neo: Connector for M365 Copilot is a containerized solution that enables you to connect any NetApp platform to Microsoft M365 Copilot without the need to migrate files or rearchitect your existing data architecture. The connector is deployed as a containerized solution and provides an API interface for easy integration and management of the connector. The connector supports enhanced filtering, parallelization, and large document chunking.
 
-### What are the supported sources for the NetApp Connector for M365 Copilot?
+### What are the supported sources for the NetApp Neo: Connector for M365 Copilot?
 
-The NetApp Connector for M365 Copilot supports the following sources:
+The NetApp Neo: Connector for M365 Copilot supports the following sources:
 
 - SMB File Shares (v3.1.1 through v2.0). SMB 3.1.1 is recommended for optimal performance due to multi-channel support and performance improvements over prior SMB versions. This includes:
   - Azure NetApp Files (ANF)
@@ -125,17 +127,17 @@ The NetApp Connector for M365 Copilot supports the following sources:
 
 ### What about non-NetApp sources?
 
-The NetApp Connector for M365 Copilot is designed to work at protocol level and is not specifically locked to NetApp platforms. Please reach out to your NetApp representative for more information.
+The NetApp Neo: Connector for M365 Copilot is designed to work at protocol level and is not specifically locked to NetApp platforms. Please reach out to your NetApp representative for more information.
 
-### How is the NetApp Connector for M365 Copilot licensed?
+### How is the NetApp Neo: Connector for M365 Copilot licensed?
 
-The NetApp Connector for M365 Copilot is licensed per licensed user of M365 Copilot. The license is perpetual and includes 1 year of support and maintenance. The license is tied to the connector and is not transferable. The license does not require an internet connection for activation.
+The NetApp Neo: Connector for M365 Copilot is licensed per licensed user of M365 Copilot. The license is perpetual and includes 1 year of support and maintenance. The license is tied to the connector and is not transferable. The license does not require an internet connection for activation.
 
-### Does the NetApp Connector for M365 Copilot support multiple file shares?
+### Does the NetApp Neo: Connector for M365 Copilot support multiple file shares?
 
-Yes, the NetApp Connector for M365 Copilot supports multiple file shares. You can configure multiple file shares in the connector and manage them through the API interface. A shares API endpoint is available for managing and monitoring the file shares. Theoretically, there is no limit to the number of file shares that can be connected to the connector. In a real-world deployment, the number of file shares that can be connected to the connector is limited by the performance of the connector and the underlying storage system and as such should be tested in early testing before deploying to production.
+Yes, the NetApp Neo: Connector for M365 Copilot supports multiple file shares. You can configure multiple file shares in the connector and manage them through the API interface. A shares API endpoint is available for managing and monitoring the file shares. Theoretically, there is no limit to the number of file shares that can be connected to the connector. In a real-world deployment, the number of file shares that can be connected to the connector is limited by the performance of the connector and the underlying storage system and as such should be tested in early testing before deploying to production.
 
-### How do I upgrade the NetApp Connector for M365 Copilot?
+### How do I upgrade the NetApp Neo: Connector for M365 Copilot?
 
 Simply pull the latest image from the repository and redeploy the connector. The connector will automatically upgrade to the latest version. Please ensure that you have a valid license key for the connector.
 

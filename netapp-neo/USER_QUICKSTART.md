@@ -47,6 +47,9 @@ MS_GRAPH_TENANT_ID=your-tenant-id-here # Mandatory```
 docker-compose up -d
 ```
 
+> [!TIP]
+> You can enable GPU support by uncommenting the `deploy` section in the `docker-compose.yml` file. This will allow the connector to leverage GPU acceleration for faster data extraction and conversion. Make sure you have the NVIDIA Container Toolkit installed on your host machine.
+
 ### Using Helm
 
 If you are using Kubernetes, you can deploy the connector using Helm. Please refer to the [Helm Deployment](helm/README.md) document for more information.

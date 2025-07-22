@@ -1,6 +1,13 @@
 services:
   netapp-connector:
     image: ghcr.io/netapp/netapp-copilot-connector:latest # Alternatively, you can specify a specific version tag i.e. 2.1.7
+    # deploy: # Uncomment this section to enable GPU support
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1 # Adjust count based on your GPU availability
+    #           capabilities: [gpu]
     cap_add:
       - SYS_ADMIN
       - DAC_READ_SEARCH
