@@ -1,11 +1,10 @@
-
 ---
 main:
   name: netapp-connector-main
   replicaCount: 1
   image:
     repository: ghcr.io/netapp/netapp-copilot-connector
-    tag: 2.2.0
+    tag: 2.2.2
     pullPolicy: Always
   service:
     type: ClusterIP
@@ -14,7 +13,7 @@ main:
     PORT: 8080
     PYTHONUNBUFFERED: 1
     DB_PATH: "data/database.db"
-    HTTPS_PROXY: "" 
+    HTTPS_PROXY: ""
     PROXY_USERNAME: ""
     PROXY_PASSWORD: ""
     GRAPH_VERIFY_SSL: ""
