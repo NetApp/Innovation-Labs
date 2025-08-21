@@ -19,12 +19,6 @@ or for a specific version:
 docker pull ghcr.io/netapp/netapp-copilot-connector:2.7.0
 ```
 
-Or you can import the tar file from the offline distribution package:
-
-```bash
-docker load -i netapp-connector.tar
-```
-
 ### Running the Container
 
 1. Download the [Sample .env file](./dist/.env.example) and rename it to `.env`.
@@ -73,3 +67,14 @@ Once the connector is running and you have added your first share, you can start
 The API documentation is available at `http://YourConnectorIP:8000/docs` after starting the connector. Please refer to our [API User Guide](./USER_API_GUIDE.md) for more details on how to use the API.
 
 If you have any feedback or questions regarding the NetApp Connector or its Documentation, please reach out to us open a GitHub issue at [NetApp Innovation Labs](https://github.com/NetApp/Innovation-Labs/issues).
+
+## 5. (Advanced) Firewall permissions
+
+If your organization's proxy or firewalls block communication to unknown domains, add the following rules to the 'allow' list:
+
+| M365 Enterprise                              | M365 Government (GCC)                       | M365 GCCH                                                           |
+| -------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------- |
+| \*.office.com                                | \*.office.com                               | _.office.com, _.office365.us                                        |
+| https://login.microsoftonline.com            | https://login.microsoftonline.com           | https://login.microsoftonline.com, https://login.microsoftonline.us |
+| https://graph.microsoft.com/                 | https://graph.microsoft.com/                | https://graph.microsoft.com/, https://graph.microsoft.us/           |
+| https://huggingface.co/ds4sd/docling-models/ | https://huggingface.co/ds4sd/docling-models | https://huggingface.co/ds4sd/docling-models                         |

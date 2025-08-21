@@ -49,7 +49,7 @@ The NetApp Neo: Connector for M365 Copilot is designed with security in mind. Al
 #### Software Requirements
 
 - Microsoft 365 Copilot License
-- Docker / Podman installed on the machine where the connector will be deployed
+- Docker installed on the machine where the connector will be deployed
 - Access to the offline tar image of the connector
 - (Optional) Docker Compose installed on the machine where the connector will be deployed
 - (Optional) Access to a Kubernetes cluster for deployment
@@ -79,7 +79,7 @@ You have successfully registered the connector in Azure ENTRA. You will need the
 
 ### Deploy the connector
 
-The connector is deployed as a containerized solution. You can deploy the connector using Docker, Podman, or Kubernetes. The simplest way to deploy the connector is using Docker Compose, however enterprise customers may want to deploy the connector using Kubernetes for production deployments. Please refer to the [Helm Deployment](helm/README.md) document for more information.
+The connector is deployed as a containerized solution. You can deploy the connector using Docker or Kubernetes. The simplest way to deploy the connector is using Docker Compose, however enterprise customers may want to deploy the connector using Kubernetes for production deployments. Please refer to the [Helm Deployment](helm/README.md) document for more information.
 
 #### Deploy using Docker Compose
 

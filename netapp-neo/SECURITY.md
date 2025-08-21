@@ -2,8 +2,6 @@
 
 ## Overview
 
-The NetApp Copilot Connector is a secure enterprise application that enables Microsoft 365 Copilot to access and index content from NetApp file shares. This document provides comprehensive security information for security teams evaluating the connector's architecture, implementation, and security controls.
-
 ## Application Architecture
 
 ### High-Level Architecture
@@ -31,6 +29,19 @@ The NetApp Copilot Connector is a secure enterprise application that enables Mic
 3. **Microsoft Graph Connector**: Uploads indexed content to Microsoft Graph for Copilot integration
 4. **Database Layer**: SQL-based storage for metadata, user accounts, and operational logs
 5. **Security Manager**: Centralized security services for authentication, encryption, and access control
+
+### Firewall Rules
+
+If your organization's proxy or firewalls block communication to unknown domains, add the following rules to the 'allow' list:
+
+The NetApp Copilot Connector is a secure enterprise application that enables Microsoft 365 Copilot to access and index content from NetApp file shares. This document provides comprehensive security information for security teams evaluating the connector's architecture, implementation, and security controls.
+
+| M365 Enterprise                              | M365 Government (GCC)                       | M365 GCCH                                                           |
+| -------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------- |
+| \*.office.com                                | \*.office.com                               | _.office.com, _.office365.us                                        |
+| https://login.microsoftonline.com            | https://login.microsoftonline.com           | https://login.microsoftonline.com, https://login.microsoftonline.us |
+| https://graph.microsoft.com/                 | https://graph.microsoft.com/                | https://graph.microsoft.com/, https://graph.microsoft.us/           |
+| https://huggingface.co/ds4sd/docling-models/ | https://huggingface.co/ds4sd/docling-models | https://huggingface.co/ds4sd/docling-models                         |
 
 ## Security Architecture
 
