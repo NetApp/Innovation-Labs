@@ -4,7 +4,7 @@ main:
   replicaCount: 1
   image:
     repository: ghcr.io/netapp/netapp-copilot-connector
-    tag: 2.2.2
+    tag: "{{ .Chart.AppVersion }}"
     pullPolicy: Always
   service:
     type: ClusterIP
