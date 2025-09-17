@@ -5,7 +5,7 @@ plugin:
   description: "NetApp Console Plug-in for Red Hat OpenShift provides a single pane integration with NetApp Intelligent Data Management solutions for containers and virtual machines"
   image:
     repository: ghcr.io/netapp/netapp-openshift-console-trident
-    tag: "{{ .Chart.AppVersion }}"
+    tag: ""
     pullPolicy: Always 
   imageCredentials:
     registry: ghcr.io

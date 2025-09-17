@@ -20,7 +20,7 @@ spec:
         - name: {{ .Values.plugin.name }}-registry-secret
       containers:
         - name: {{ template "netapp-openshift-console-trident.name" . }}
-          image: "{{ .Values.plugin.image.repository }}:{{ .Values.plugin.image.tag }}"
+          image: "{{ .Values.plugin.image.repository }}:{{ default .Chart.AppVersion .Values.plugin.image.tag }}"
           ports:
             - containerPort: {{ .Values.plugin.port }}
               protocol: TCP
