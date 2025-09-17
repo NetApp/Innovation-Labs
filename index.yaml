@@ -223,6 +223,18 @@ entries:
     version: 2.0.6-1
   netapp-openshift-console-protect:
   - apiVersion: v2
+    appVersion: 25.7.30
+    created: "2025-09-17T08:56:17.679722121Z"
+    description: NetApp Protect Console Plug-in for Red Hat OpenShift ecosystem provides
+      a single pane integration with NetApp Intelligent Data Management solutions
+      for containers and virtual machines
+    digest: e4b792af23963530be1cd362c1c2fb04e33ef446e1ffe7e2311a1b5f9e99596c
+    name: netapp-openshift-console-protect
+    type: application
+    urls:
+    - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-openshift-console-protect-25.9.17/netapp-openshift-console-protect-25.9.17.tgz
+    version: 25.9.17
+  - apiVersion: v2
     appVersion: 25.7.16
     created: "2025-07-16T07:45:25.100699941Z"
     description: NetApp Console Plug-in for Red Hat OpenShift provides a single pane
@@ -248,6 +260,18 @@ entries:
     version: 25.7.1
   netapp-openshift-console-trident:
   - apiVersion: v2
+    appVersion: 25.7.29
+    created: "2025-09-17T08:56:17.925545426Z"
+    description: NetApp Trident Console Plugin for Red Hat OpenShift ecosystem provides
+      a single pane integration with NetApp Intelligent Data Management solutions
+      for containers and virtual machines
+    digest: c43caacfc55db4917c720b48a6bd0118b35c07e4a2ef828b839f88463e7af00d
+    name: netapp-openshift-console-trident
+    type: application
+    urls:
+    - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-openshift-console-trident-25.9.17/netapp-openshift-console-trident-25.9.17.tgz
+    version: 25.9.17
+  - apiVersion: v2
     appVersion: 25.7.16
     created: "2025-07-16T07:45:25.310202352Z"
     description: NetApp Console Plugin for Red Hat OpenShift provides a single pane
@@ -271,4 +295,4 @@ entries:
     urls:
     - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-openshift-console-trident-25.7.1/netapp-openshift-console-trident-25.7.1.tgz
     version: 25.7.1
-generated: "2025-08-27T20:11:50.285757554Z"
+generated: "2025-09-17T08:56:17.925633391Z"
