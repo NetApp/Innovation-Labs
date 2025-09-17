@@ -224,6 +224,18 @@ entries:
   netapp-openshift-console-protect:
   - apiVersion: v2
     appVersion: 25.7.30
+    created: "2025-09-17T10:03:43.458139306Z"
+    description: NetApp Protect Console Plug-in for Red Hat OpenShift ecosystem provides
+      a single pane integration with NetApp Intelligent Data Management solutions
+      for containers and virtual machines
+    digest: 7b3971d74ab93e333a69bac3d89e7ac51b4d4633c57e123c15cd4eef93693019
+    name: netapp-openshift-console-protect
+    type: application
+    urls:
+    - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-openshift-console-protect-25.9.19/netapp-openshift-console-protect-25.9.19.tgz
+    version: 25.9.19
+  - apiVersion: v2
+    appVersion: 25.7.30
     created: "2025-09-17T09:46:06.072757698Z"
     description: NetApp Protect Console Plug-in for Red Hat OpenShift ecosystem provides
       a single pane integration with NetApp Intelligent Data Management solutions
@@ -273,6 +285,18 @@ entries:
   netapp-openshift-console-trident:
   - apiVersion: v2
     appVersion: 25.7.29
+    created: "2025-09-17T10:03:43.694093557Z"
+    description: NetApp Trident Console Plugin for Red Hat OpenShift ecosystem provides
+      a single pane integration with NetApp Intelligent Data Management solutions
+      for containers and virtual machines
+    digest: f145e3f1593fde1d9cfaa3e155f742835d6f46a1e5f64c38e0b0db32079c0d84
+    name: netapp-openshift-console-trident
+    type: application
+    urls:
+    - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-openshift-console-trident-25.9.19/netapp-openshift-console-trident-25.9.19.tgz
+    version: 25.9.19
+  - apiVersion: v2
+    appVersion: 25.7.29
     created: "2025-09-17T09:46:06.247664424Z"
     description: NetApp Trident Console Plugin for Red Hat OpenShift ecosystem provides
       a single pane integration with NetApp Intelligent Data Management solutions
@@ -319,4 +343,4 @@ entries:
     urls:
     - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-openshift-console-trident-25.7.1/netapp-openshift-console-trident-25.7.1.tgz
     version: 25.7.1
-generated: "2025-09-17T09:46:06.247739224Z"
+generated: "2025-09-17T10:03:43.694179157Z"
