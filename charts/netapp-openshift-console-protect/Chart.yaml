@@ -2,5 +2,5 @@ apiVersion: v2
 name: netapp-openshift-console-protect
 description: "NetApp Protect Console Plug-in for Red Hat OpenShift ecosystem provides a single pane integration with NetApp Intelligent Data Management solutions for containers and virtual machines"
 type: application
-version: 25.9.17
-appVersion: 25.7.30
+version: 25.9.18
+appVersion: "25.7.30"
