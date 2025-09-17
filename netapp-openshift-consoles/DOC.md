@@ -39,10 +39,7 @@ innovation-labs/netapp-openshift-console-trident        25.7.1          25.6.25 
 ### Install the NetApp Trident Console Plugin for Red Hat OpenShift
 Run the Helm install command:
 ```sh
-helm install netapp-openshift-console-trident innovation-labs/netapp-openshift-console-trident \
-  --namespace netapp-openshift-console-trident --create-namespace \
-  --set plugin.imageCredentials.registry=ghcr.io \ 
-  --set plugin.imageCredentials.username=<github_handle> --set plugin.imageCredentials.token=<token> 
+helm install netapp-openshift-console-trident innovation-labs/netapp-openshift-console-trident --namespace netapp-openshift-console-trident --create-namespace --set plugin.imageCredentials.registry=ghcr.io --set plugin.imageCredentials.username=<github_handle> --set plugin.imageCredentials.token=<token> 
 ``` 
 
 > [!IMPORTANT]
@@ -52,10 +49,7 @@ helm install netapp-openshift-console-trident innovation-labs/netapp-openshift-c
 ### Install the NetApp Protect Console Plugin for Red Hat OpenShift
 Run the Helm install command:
 ```sh
-helm install netapp-openshift-console-protect innovation-labs/netapp-openshift-console-protect \
-  --namespace netapp-openshift-console-protect --create-namespace \
-  --set plugin.imageCredentials.registry=ghcr.io \ 
-  --set plugin.imageCredentials.username=<github_handle> --set plugin.imageCredentials.token=<token> 
+helm install netapp-openshift-console-protect innovation-labs/netapp-openshift-console-protect --namespace netapp-openshift-console-protect --create-namespace --set plugin.imageCredentials.registry=ghcr.io --set plugin.imageCredentials.username=<github_handle> --set plugin.imageCredentials.token=<token> 
 ``` 
 
 > [!NOTE]
