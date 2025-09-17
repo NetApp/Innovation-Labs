@@ -41,8 +41,8 @@ Run the Helm install command:
 ```sh
 helm install netapp-openshift-console-trident innovation-labs/netapp-openshift-console-trident \
   --namespace netapp-openshift-console-trident --create-namespace \
-  --set plugin.imageCredentials.registry=ghcr.io \
-  --set plugin.image.tag=25.7.30 
+  --set plugin.imageCredentials.registry=ghcr.io \ 
+  --set plugin.imageCredentials.username=<github_handle> --set plugin.imageCredentials.token=<token> 
 ``` 
 
 > [!IMPORTANT]
@@ -54,8 +54,8 @@ Run the Helm install command:
 ```sh
 helm install netapp-openshift-console-protect innovation-labs/netapp-openshift-console-protect \
   --namespace netapp-openshift-console-protect --create-namespace \
-  --set plugin.imageCredentials.registry=ghcr.io \
-  --set plugin.image.tag=25.7.30 
+  --set plugin.imageCredentials.registry=ghcr.io \ 
+  --set plugin.imageCredentials.username=<github_handle> --set plugin.imageCredentials.token=<token> 
 ``` 
 
 > [!NOTE]
