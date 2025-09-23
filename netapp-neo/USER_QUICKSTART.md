@@ -1,6 +1,6 @@
 # NetApp Connector User Quick Start Guide (v3.0+)
 
-This guide assumes that you have deployed the NetApp connector and are ready to start using it. If you have not yet deployed the connector, please refer to the [NetApp Connector README](/C:/Program%20Files/Joplin/resources/app.asar/README.md "README.md").
+This guide assumes that you have deployed the NetApp connector and are ready to start using it. If you have not yet deployed the connector, please refer to the [NetApp Connector README](./README.md "README.md").
 
 > \[!IMPORTANT\]  
 > The NetApp Connector for M365 Copilot is currently in **Private Preview**. This means that the connector is not yet fully supported and may have some limitations. The connector requires a license to activate. You can request access to the connector by joining the Early Access Program (EAP). Please book a meeting with the following link to join the EAP: [Book a meeting with NetApp](https://outlook.office.com/bookwithme/user/d636d7a02ad8477c9af9a0cbb029af4d@netapp.com/meetingtype/nm-mXkp-TUO1CdzOmFfIBw2?anonymous&ismsaljsauthenabled&ep=mlink).
@@ -23,8 +23,8 @@ docker pull ghcr.io/netapp/netapp-copilot-connector:3.0.0
 
 1.  **Download the sample configuration files:**
 
-    - Download the [Sample .env file](/C:/Program%20Files/Joplin/resources/app.asar/.env.example ".env.example") and rename it to `.env`
-    - Download the [docker-compose.yml](/C:/Program%20Files/Joplin/resources/app.asar/docker-compose.yml "docker-compose.yml") file
+    - Download the [Sample .env file](./dist/.env.example ".env.example") and rename it to `.env`
+    - Download the [docker-compose.yml](./dist/docker-compose.yml "docker-compose.yml") file
 
 2.  **Configure the `.env` file with the required environment variables:**
 
@@ -68,7 +68,7 @@ docker-compose up -d
 
 ### Using Helm
 
-If you are using Kubernetes, you can deploy the connector using Helm. Please refer to the [Helm Deployment](/C:/Program%20Files/Joplin/resources/app.asar/charts/netapp-copilot-connector/README.md "charts/netapp-copilot-connector/README.md") document for more information.
+If you are using Kubernetes, you can deploy the connector using Helm. Please refer to the [Helm Deployment](../charts/netapp-copilot-connector/README.md "charts/netapp-copilot-connector/README.md") document for more information.
 
 ### Database Options
 
@@ -90,7 +90,7 @@ DATABASE_URL=mysql://user:password@localhost:3306/netapp_connector
 ## 2\. Initial Setup and First Admin User
 
 > \[!IMPORTANT\]  
-> A dedicated stand-alone desktop UI is available for Windows, MacOS and Linux: [Download the Desktop App](/C:/Program%20Files/Joplin/resources/app.asar/client "./client").
+> A dedicated stand-alone desktop UI is available for Windows, MacOS and Linux: [Download the Desktop App](./client "./client").
 
 The easiest way to set up the connector and create your first admin user is through the desktop application. The desktop app provides a user-friendly interface for:
 
@@ -188,7 +188,7 @@ You can monitor the crawl progress through:
 2.  **Enable Connector Results**: Ensure you have selected **_Include Connector Results_** for the NetApp Connector
 3.  **Test in Microsoft 365 Copilot**: Try searching for content from your indexed files using natural language queries
 
-![Select Include Connector Results in the Search and Intelligence Admin Centre](/C:/Program%20Files/Joplin/resources/app.asar/media/2025-07-15_09-47-23.png)
+![Select Include Connector Results in the Search and Intelligence Admin Centre](./media/2025-07-15_09-47-23.png)
 
 ## 6\. New Features in Version 3.0+
 
@@ -295,7 +295,7 @@ ENCRYPTION_KEY=your_generated_key_here
 
 The NetApp Connector provides a comprehensive REST API for programmatic access. The interactive API documentation is available at `http://localhost:8080/docs` after starting the connector.
 
-For detailed API usage examples and advanced operations, please refer to our [API User Guide](/netapp-neo/USER_API_GUIDE.md).
+For detailed API usage examples and advanced operations, please refer to our [API User Guide](./USER_API_GUIDE.md).
 
 ## 10\. Firewall Permissions
 
