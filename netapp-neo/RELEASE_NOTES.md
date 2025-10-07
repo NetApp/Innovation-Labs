@@ -1,9 +1,6 @@
-# 3.0.3 (6/10/25)
-
-- Fix: Changed file detection - in certain scenarios the connector incorrectly identified unchanged files as changes resulting in unnecessary extraction on those files
-
 # 3.0.2 (6/10/25)
 
+- Fix: Changed file detection - in certain scenarios the connector incorrectly identified unchanged files as changes resulting in unnecessary extraction on those files
 - Fix: Stale share status if connector is interrupted during a prior run
 
 # 3.0.1 (2/10/25)
