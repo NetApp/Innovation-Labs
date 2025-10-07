@@ -41,6 +41,7 @@ MS_GRAPH_CLIENT_SECRET=your-client-secret-here
 MS_GRAPH_TENANT_ID=your-tenant-id-here
 
 # Database Configuration (Required- PostgreSQL is recommended)
+DB_TYPE=postgres # Options postgres, mysql
 ## For PostgreSQL:
 DATABASE_URL=postgresql://user:password@localhost:5432/netapp_connector
 ## or for MySQL:
