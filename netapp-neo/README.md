@@ -69,11 +69,12 @@ In order for the connector to be able to securely communicate with M365 Copilot.
 7. Search for "ExternalItem.ReadWrite.OwnedBy" and select the checkbox.
 8. Search for "User.Read" and select the checkbox.
 9. Search for "User.Read.All" and select the checkbox.
-10. Click "Add permissions".
-11. Click "Graph admin consent for (tenant)" and click "Yes".
-12. Navigate to the "Certificates & secrets" page and click "New client secret".
-13. Fill in the required fields and click "Add".
-14. Copy the value of the client secret.
+10. Search for "Group.Read.All" and select the checkbox
+11. Click "Add permissions".
+12. Click "Graph admin consent for (tenant)" and click "Yes".
+13. Navigate to the "Certificates & secrets" page and click "New client secret".
+14. Fill in the required fields and click "Add".
+15. Copy the value of the client secret.
 
 You have successfully registered the connector in Azure ENTRA. You will need the Application ID, Directory ID, and Client Secret for the next steps.
 
