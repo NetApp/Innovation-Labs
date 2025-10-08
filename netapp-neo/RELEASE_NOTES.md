@@ -1,3 +1,10 @@
+# 2.2.5 (8-10-25)
+
+- Fix: Fix: items were not being uploaded to MS Graph in certain scenarios
+
+> \[!IMPORTANT\]  
+>  The 2.x.x code line is the last series to support internal database. As of 3.x.x an external database (postgres/mysql) is required for the connector
+
 # 3.0.2 (6/10/25)
 
 - Fix: Changed file detection - in certain scenarios the connector incorrectly identified unchanged files as changes resulting in unnecessary extraction on those files
