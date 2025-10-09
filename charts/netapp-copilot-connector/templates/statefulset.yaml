@@ -22,7 +22,7 @@ spec:
         fsGroup: 1000    
       containers:
         - name: {{ .Values.main.name }}
-          image: "{{ .Values.main.image.repository }}:{{ .Values.main.image.tag }}"
+          image: "{{ .Values.main.image.repository }}:{{ default .Chart.AppVersion .Values.main.image.tag }}"
           imagePullPolicy: {{ .Values.main.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.main.service.port }}

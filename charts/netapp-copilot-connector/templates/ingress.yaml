@@ -1,0 +1,41 @@
+{{- $ing := .Values.main.ingress | default dict -}}
+{{- if $ing.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.main.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ include "netapp-connector.name" . }}
+  {{- with $ing.annotations }}
+  annotations:
+{{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with $ing.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  rules:
+  {{- if $ing.host }}
+    - host: {{ $ing.host | quote }}
+      http:
+        paths:
+          - path: {{ $ing.path | default "/" }}
+            pathType: {{ $ing.pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ .Values.main.name }}
+                port:
+                  number: {{ .Values.main.service.port | int }}
+  {{- else }}
+    - http:
+        paths:
+          - path: {{ $ing.path | default "/" }}
+            pathType: {{ $ing.pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ .Values.main.name }}
+                port:
+                  number: {{ .Values.main.service.port | int }}
+  {{- end }}
+{{- end }}

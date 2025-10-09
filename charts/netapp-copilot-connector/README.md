@@ -1,117 +1,140 @@
-# NetApp Connector for Copilot 365 - Kubernetes Helm Chart
+# NetApp Connector for Microsoft 365 Copilot - Helm Chart
 
-This directory contains a Helm chart for deploying the NetApp Connector as a StatefulSet with persistent storage on Kubernetes.
+This Helm chart deploys the NetApp Connector for Microsoft 365 Copilot on a Kubernetes cluster using a `StatefulSet` for stable, persistent storage.
 
 ## Overview
-- `StatefulSet` ensures the pod always mounts the same persistent volume, suitable for workloads requiring stable storage.
-- `PersistentVolumeClaim` is used for data at `/app/data`.
-- `Service` exposes the application on port 8080 inside the cluster (ClusterIP by default).
-- **Configurable** via `--set` or `values.yaml` for image, storage, and environment variables.
+
+The chart bootstraps a deployment of the NetApp Connector, which includes the following Kubernetes resources:
+- **StatefulSet**: Manages the connector pod, ensuring stable network identity and storage.
+- **PersistentVolumeClaim**: Provides persistent storage for connector data (e.g., database).
+- **Service**: Exposes the connector within the cluster on a stable endpoint.
+- **Secret**: Securely stores sensitive credentials like Microsoft Graph API keys and the NetApp license.
+- **ConfigMap**: Manages non-sensitive environment variables and configuration.
+- **Ingress**: (Optional) Manages external access to the connector service.
 
 ## Prerequisites
-- A working Kubernetes cluster (v1.18+ recommended)
-- [Helm 3](https://helm.sh/) installed
 
-## Installation
+- Kubernetes cluster (v1.19+ recommended)
+- Helm package manager (v3+)
+- A default StorageClass configured in your cluster for PersistentVolume provisioning.
 
-### Setting Mandatory Environment Variables
-The connector requires the following four mandatory environment variables to be set for successful operation:
+## Installation Guide
 
-- `MS_GRAPH_CONNECTOR_ID` (this is the ID of the Microsoft Graph connector - only change if multiple connector instances are used)
-- `NETAPP_CONNECTOR_LICENSE` (your license key)
-- `MS_GRAPH_CLIENT_ID` (your Microsoft Graph client ID)
-- `MS_GRAPH_CLIENT_SECRET` (your Microsoft Graph client secret)
-- `MS_GRAPH_TENANT_ID` (your Microsoft tenant ID)
+### 1. Add Helm Repository
 
-> [!IMPORTANT]
-> Without these variables, the connector will not function properly.
-> To customize these variables, use `--set` flags (for Helm Repository) or the `values.yaml` file (for GitHub Releases) as described below.
+First, add the NetApp Innovation Labs repository to your Helm client.
 
-### Helm Repository
-1. Add the Helm repository:
-   ```sh
-   helm repo add innovation-labs https://netapp.github.io/Innovation-Labs/
-   ```
-   If you have already added the repository, you can skip this step and update it:
-   ```sh
-   helm repo update
-   ```
-1. Check out the chart repository content:
-   ```sh
-   helm search repo innovation-labs 
-   ```
-1. Install the chart:
-   ```
-   helm install netapp-connector innovation-labs/netapp-connector \
-      --namespace netapp-connector --create-namespace \
-      --set main.credentials.MS_GRAPH_CLIENT_ID="your_graph_client_id" \
-      --set main.credentials.MS_GRAPH_CLIENT_SECRET="your_graph_client_secret" \
-      --set main.credentials.MS_GRAPH_TENANT_ID="your_graph_tenant_id" \
-      --set main.credentials.NETAPP_CONNECTOR_LICENSE="your_license_key"
-   ```
-
-> [!NOTE] 
-> For deployment with proxy configuration, modify the values of the following parameters: ```HTTPS_PROXY```, ```PROXY_USERNAME```, ```PROXY_PASSWORD```, ```GRAPH_VERIFY_SSL```, ```GRAPH_TIMEOUT```.
-
-## Updating
-Let's say that you are currently running the version 2.0.6 and you wish to updat to 2.1.0. 
-
-1. First, you have to update the repo:
-   ```sh
-   helm repo update
-   ```
-1. Check your current image version: 
-   ```sh 
-   kubectl -n netapp-connector get pods netapp-connector-main-0 -o yaml |grep image
-   ```
-   Expected output: 
-   ``` 
-    image: ghcr.io/netapp/netapp-copilot-connector:2.0.6
-    imagePullPolicy: Always
-    image: ghcr.io/netapp/netapp-copilot-connector:2.0.6
-    imageID: ghcr.io/netapp/netapp-copilot-connector@sha256:f3f0af7256d0be1bb1f2959a304907f91cd5c6055bb7912449f81558179a236f
-   ```
-1. Upgrade your helm deployment with **--reuse-values** to avoid losing access to your graph and license keys:
-   ```
-   helm upgrade netapp-connector innovation-labs/netapp-connector --namespace netapp-connector --reuse-values --set main.image.tag=2.1.0
-   ```
-   Expected output:
-   ```
-   Release "netapp-connector" has been upgraded. Happy Helming!
-   NAME: netapp-connector
-   LAST DEPLOYED: Fri Jun 13 16:32:53 2025
-   NAMESPACE: netapp-connector
-   STATUS: deployed
-   REVISION: 2
-   TEST SUITE: None
-   ```
-1. Check your current image version:
-   ```
-   kubectl -n netapp-connector get pods netapp-connector-main-0 -o yaml |grep image
-    image: ghcr.io/netapp/netapp-copilot-connector:2.1.0
-    imagePullPolicy: Always
-    image: ghcr.io/netapp/netapp-copilot-connector:2.1.0
-    imageID: ghcr.io/netapp/netapp-copilot-connector@sha256:7cb3e00641fe5d75935aefa876ed2d868a2760d3f9ec92cac263e8ef6c84d072
-   ```
-
-> [!NOTE] 
-> If any new values are added to the helm charts, you can added them after **--reuse-values** like we did for the image version.
-
-## Uninstall
-To remove the deployment:
 ```sh
-helm delete netapp-connector --namespace netapp-connector
+helm repo add innovation-labs https://netapp.github.io/Innovation-Labs/
+helm repo update
 ```
 
-## Accessing the Service
-By default, the service is internal (ClusterIP). To access externally, modify `values.yaml` to set `service.type` to `NodePort` or `LoadBalancer` as appropriate for your cluster.
+### 2. Install the Chart
 
-## Notes
-- Depending on your reclaim policy:
-   - You can delete the `Pod`, `StatefulSet`, and Helm Chart without losing data. Redeploying the chart will reuse the existing `PersistentVolumeClaim`.
-   - You may need to manually delete the PersistentVolumeClaim if you want to remove the data and start fresh.
-- If no default `StorageClass` is set, you may need to manually provision the `PersistentVolumeClaim`.
-- For advanced configuration (secrets, ingress, etc.), extend the chart as needed.
+There are two primary methods for installing the chart: using command-line flags (ideal for testing) or a custom values file (recommended for production).
+
+#### Method 1: Using Command-Line Flags (for Development)
+
+For quick tests, you can pass parameters directly using the `--set` flag.
+
+```sh
+helm install netapp-connector innovation-labs/netapp-connector \
+  --namespace netapp-connector \
+  --create-namespace \
+  --set main.credentials.MS_GRAPH_CLIENT_ID="<your-graph-client-id>" \
+  --set main.credentials.MS_GRAPH_CLIENT_SECRET="<your-graph-client-secret>" \
+  --set main.credentials.MS_GRAPH_TENANT_ID="<your-graph-tenant-id>" \
+  --set main.credentials.NETAPP_CONNECTOR_LICENSE="<your-license-key>"
+```
+
+#### Method 2: Using a Custom Values File (Recommended for Production)
+
+For production environments, it is highly recommended to use a custom `values.yaml` file to manage your configuration. This makes your deployment more readable, repeatable, and easier to manage in version control.
+
+1.  Create a file named `my-values.yaml` with your configuration:
+
+    ```yaml
+    # my-values.yaml
+    main:
+      # --- Required Credentials ---
+      credentials:
+        MS_GRAPH_CLIENT_ID: "<your-graph-client-id>"
+        MS_GRAPH_CLIENT_SECRET: "<your-graph-client-secret>"
+        MS_GRAPH_TENANT_ID: "<your-graph-tenant-id>"
+        NETAPP_CONNECTOR_LICENSE: "<your-license-key>"
+
+      # --- Optional Ingress Configuration ---
+      ingress:
+        enabled: true
+        host: "connector.your-domain.com"
+        # className: "nginx" # Uncomment and set your IngressClass if needed
+    ```
+
+    > [!WARNING]
+    > Do not commit `my-values.yaml` with plain-text secrets to a public version control repository. Use a secret management tool like Azure Key Vault, HashiCorp Vault, or SOPS for handling sensitive data in production.
+
+2.  Install the chart using your custom values file:
+
+    ```sh
+    helm install netapp-connector innovation-labs/netapp-connector \
+      --namespace netapp-connector \
+      --create-namespace \
+      -f my-values.yaml
+    ```
+
+> [!IMPORTANT]
+> The connector will not start correctly without the four mandatory `main.credentials` values being set, regardless of the installation method.
+
+## Upgrading the Chart
+
+To upgrade an existing release, use `helm upgrade`. The `--reuse-values` flag is recommended to preserve your existing configuration, including secrets. You can then override specific values, like the image tag.
+
+```sh
+# 1. Update your local chart repository
+helm repo update
+
+# 2. Upgrade the release to a new version (e.g., 2.2.5)
+helm upgrade netapp-connector innovation-labs/netapp-connector \
+  --namespace netapp-connector \
+  --reuse-values \
+  --set main.image.tag="2.2.5"
+```
+
+## Uninstallation
+
+To uninstall and delete the `netapp-connector` release:
+
+```sh
+helm uninstall netapp-connector --namespace netapp-connector
+```
+
+> [!NOTE]
+> This command removes the StatefulSet, Service, and other resources but **does not delete the PersistentVolumeClaim (PVC)**. Your data will be preserved. To permanently delete all data, you must manually delete the PVC.
+
+## Configuration Parameters
+
+The following table lists the configurable parameters of the NetApp Connector chart and their default values.
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `main.name` | The base name for all created resources. | `netapp-connector-main` |
+| `main.replicaCount` | Number of connector pods to run. Only 1 is supported. | `1` |
+| `main.image.repository` | The container image repository. | `ghcr.io/netapp/netapp-copilot-connector` |
+| `main.image.tag` | The container image tag. If empty, defaults to the chart's `appVersion`. | `""` |
+| `main.image.pullPolicy` | The image pull policy. | `Always` |
+| `main.service.type` | The type of Kubernetes service to create. | `ClusterIP` |
+| `main.service.port` | The port exposed by the service and container. | `8080` |
+| `main.ingress.enabled` | If true, create an Ingress resource. | `false` |
+| `main.ingress.host` | The hostname for the Ingress rule. Required if Ingress is enabled. | `nil` |
+| `main.ingress.path` | The path for the Ingress rule. | `/` |
+| `main.ingress.pathType` | The path type for the Ingress rule (`Prefix`, `Exact`, `ImplementationSpecific`). | `Prefix` |
+| `main.ingress.className` | The `ingressClassName` to associate with the Ingress. | `""` |
+| `main.persistence.enabled` | If true, create a `PersistentVolumeClaim`. | `true` |
+| `main.persistence.accessMode` | The access mode for the PVC. | `ReadWriteOnce` |
+| `main.persistence.size` | The size of the persistent volume. | `1Gi` |
+| `main.persistence.mountPath` | The path inside the container where the volume is mounted. | `/app/data` |
+| `main.env.*` | Non-sensitive environment variables. See `values.yaml` for all options. | (various) |
+| `main.credentials.*` | Sensitive credentials stored in a Secret. **Must be provided by the user.** | (placeholders) |
 
 ---
 For more information, see the official [Helm documentation](https://helm.sh/docs/) and [Kubernetes documentation](https://kubernetes.io/docs/home/).

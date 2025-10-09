@@ -4,11 +4,17 @@ main:
   replicaCount: 1
   image:
     repository: ghcr.io/netapp/netapp-copilot-connector
-    tag: "{{ .Chart.AppVersion }}"
+    tag: ""
     pullPolicy: Always
   service:
     type: ClusterIP
     port: 8080
+  ingress:
+    enabled: false
+    host:
+    path: /
+    pathType: Prefix
+    className:
   env:
     PORT: 8080
     PYTHONUNBUFFERED: 1
