@@ -325,18 +325,6 @@ entries:
     urls:
     - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-openshift-console-protect-25.7.16/netapp-openshift-console-protect-25.7.16.tgz
     version: 25.7.16
-  - apiVersion: v2
-    appVersion: 25.6.25
-    created: "2025-07-08T13:04:25.429402426Z"
-    description: NetApp Console Plug-in for Red Hat OpenShift provides a single pane
-      integration with NetApp Intelligent Data Management solutions for containers
-      and virtual machines
-    digest: fca5a999e33573ecc2c97044ef3e9bbd0bbefc53fad9273d04dad2f696b89529
-    name: netapp-openshift-console-protect
-    type: application
-    urls:
-    - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-openshift-console-protect-25.7.1/netapp-openshift-console-protect-25.7.1.tgz
-    version: 25.7.1
   netapp-openshift-console-trident:
   - apiVersion: v2
     appVersion: 25.7.29
