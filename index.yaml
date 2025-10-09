@@ -21,26 +21,6 @@ entries:
     urls:
     - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-connector-26.10.3/netapp-connector-26.10.3.tgz
     version: 26.10.3
-  - apiVersion: v2
-    appVersion: 2.2.5
-    created: "2025-10-09T09:29:25.569880994Z"
-    description: NetApp Neo v2.x for Microsoft 365 Copilot Connector Helm Chart
-    digest: 6157837d9ccb8c2b418bb4fd834b99fb5b2b4f0474f3e189333124a5644b38c2
-    name: netapp-connector
-    type: application
-    urls:
-    - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-connector-26.10.2/netapp-connector-26.10.2.tgz
-    version: 26.10.2
-  - apiVersion: v2
-    appVersion: 2.2.5
-    created: "2025-10-09T09:09:30.275469909Z"
-    description: NetApp Neo v2.x for Microsoft 365 Copilot Connector Helm Chart
-    digest: 0a50d01f934ae869dd57c2cca6cbfab01cc12c88d15eba207347afbcd8b9b308
-    name: netapp-connector
-    type: application
-    urls:
-    - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-connector-26.10.1/netapp-connector-26.10.1.tgz
-    version: 26.10.1
   netapp-openshift-console-protect:
   - apiVersion: v2
     appVersion: 25.7.30
