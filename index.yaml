@@ -4,7 +4,7 @@ entries:
   - apiVersion: v2
     appVersion: 2.2.5
     created: "2025-10-09T09:58:32.609890623Z"
-    description: NetApp Neo v2.x for Microsoft 365 Copilot Connector Helm Chart
+    description: Last Update of NetApp Neo v2.x for Microsoft 365 Copilot Connector Helm Chart
     digest: 60714da66f344a67ad87bc0d990a293d24af3c1059e5c115f4dc041e6e046666
     name: netapp-connector
     type: application
@@ -14,8 +14,7 @@ entries:
   - apiVersion: v2
     appVersion: 2.2.5
     created: "2025-10-09T09:48:16.460723037Z"
-    description: A Helm chart for deploying netapp-connector as a StatefulSet with
-      persistent storage
+    description: NetApp Neo v2.x for Microsoft 365 Copilot Connector Helm Chart
     digest: ff37894d48d0f90746a6ea43ecf4e4880a514e2ae49f5a2af333c063e16c511b
     name: netapp-connector
     type: application
@@ -25,8 +24,7 @@ entries:
   - apiVersion: v2
     appVersion: 2.2.5
     created: "2025-10-09T09:29:25.569880994Z"
-    description: A Helm chart for deploying netapp-connector as a StatefulSet with
-      persistent storage
+    description: NetApp Neo v2.x for Microsoft 365 Copilot Connector Helm Chart
     digest: 6157837d9ccb8c2b418bb4fd834b99fb5b2b4f0474f3e189333124a5644b38c2
     name: netapp-connector
     type: application
@@ -36,8 +34,7 @@ entries:
   - apiVersion: v2
     appVersion: 2.2.5
     created: "2025-10-09T09:09:30.275469909Z"
-    description: A Helm chart for deploying netapp-connector as a StatefulSet with
-      persistent storage
+    description: NetApp Neo v2.x for Microsoft 365 Copilot Connector Helm Chart
     digest: 0a50d01f934ae869dd57c2cca6cbfab01cc12c88d15eba207347afbcd8b9b308
     name: netapp-connector
     type: application
