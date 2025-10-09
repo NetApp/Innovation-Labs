@@ -15,6 +15,10 @@ main:
     path: /
     pathType: Prefix
     className:
+    tls: []
+    # - secretName: chart-example-tls
+    #   hosts:
+    #     - chart-example.local    
   env:
     PORT: 8080
     PYTHONUNBUFFERED: 1

@@ -1,10 +1,10 @@
-# NetApp Connector for Microsoft 365 Copilot - Helm Chart
+# NetApp Neo for Microsoft 365 Copilot - Helm Chart
 
-This Helm chart deploys the NetApp Connector for Microsoft 365 Copilot on a Kubernetes cluster using a `StatefulSet` for stable, persistent storage.
+This Helm chart deploys NetApp Neo for Microsoft 365 Copilot on a Kubernetes cluster using a `StatefulSet` for stable, persistent storage.
 
 ## Overview
 
-The chart bootstraps a deployment of the NetApp Connector, which includes the following Kubernetes resources:
+The chart bootstraps a deployment of NetApp Neo, which includes the following Kubernetes resources:
 - **StatefulSet**: Manages the connector pod, ensuring stable network identity and storage.
 - **PersistentVolumeClaim**: Provides persistent storage for connector data (e.g., database).
 - **Service**: Exposes the connector within the cluster on a stable endpoint.
@@ -26,7 +26,6 @@ First, add the NetApp Innovation Labs repository to your Helm client.
 
 ```sh
 helm repo add innovation-labs https://netapp.github.io/Innovation-Labs/
-helm repo update
 ```
 
 ### 2. Install the Chart
@@ -68,6 +67,10 @@ For production environments, it is highly recommended to use a custom `values.ya
         enabled: true
         host: "connector.your-domain.com"
         # className: "nginx" # Uncomment and set your IngressClass if needed
+        tls:
+          - secretName: my-connector-tls-secret
+            hosts:
+              - connector.your-domain.com
     ```
 
     > [!WARNING]
@@ -113,7 +116,7 @@ helm uninstall netapp-connector --namespace netapp-connector
 
 ## Configuration Parameters
 
-The following table lists the configurable parameters of the NetApp Connector chart and their default values.
+The following table lists the configurable parameters of NetApp Neo chart and their default values.
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
@@ -129,6 +132,7 @@ The following table lists the configurable parameters of the NetApp Connector ch
 | `main.ingress.path` | The path for the Ingress rule. | `/` |
 | `main.ingress.pathType` | The path type for the Ingress rule (`Prefix`, `Exact`, `ImplementationSpecific`). | `Prefix` |
 | `main.ingress.className` | The `ingressClassName` to associate with the Ingress. | `""` |
+| `main.ingress.tls` | Ingress TLS configuration (list of objects with `secretName` and `hosts`). | `[]` |
 | `main.persistence.enabled` | If true, create a `PersistentVolumeClaim`. | `true` |
 | `main.persistence.accessMode` | The access mode for the PVC. | `ReadWriteOnce` |
 | `main.persistence.size` | The size of the persistent volume. | `1Gi` |

@@ -15,6 +15,10 @@ spec:
   {{- with $ing.className }}
   ingressClassName: {{ . }}
   {{- end }}
+  {{- with $ing.tls }}
+  tls:
+{{ toYaml . | nindent 4 }}
+  {{- end }}
   rules:
   {{- if $ing.host }}
     - host: {{ $ing.host | quote }}
