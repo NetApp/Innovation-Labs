@@ -386,28 +386,4 @@ entries:
     urls:
     - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-openshift-console-trident-25.9.17/netapp-openshift-console-trident-25.9.17.tgz
     version: 25.9.17
-  - apiVersion: v2
-    appVersion: 25.7.16
-    created: "2025-07-16T07:45:25.310202352Z"
-    description: NetApp Console Plugin for Red Hat OpenShift provides a single pane
-      integration with NetApp Intelligent Data Management solutions for containers
-      and virtual machines
-    digest: fa3bc503321918a4388b5b673fcb3932acca1e459fd97f2a750fc5d5b3786d59
-    name: netapp-openshift-console-trident
-    type: application
-    urls:
-    - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-openshift-console-trident-25.7.16/netapp-openshift-console-trident-25.7.16.tgz
-    version: 25.7.16
-  - apiVersion: v2
-    appVersion: 25.6.25
-    created: "2025-07-08T13:04:25.573652391Z"
-    description: NetApp Console Plugin for Red Hat OpenShift provides a single pane
-      integration with NetApp Intelligent Data Management solutions for containers
-      and virtual machines
-    digest: 0c742bb7ab093f387c70baac678c75d7443a20ae82bd413ccf07f096af67559e
-    name: netapp-openshift-console-trident
-    type: application
-    urls:
-    - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-openshift-console-trident-25.7.1/netapp-openshift-console-trident-25.7.1.tgz
-    version: 25.7.1
 generated: "2025-10-09T09:58:32.610172209Z"
