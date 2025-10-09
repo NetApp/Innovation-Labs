@@ -1,6 +1,6 @@
 apiVersion: v2
 name: netapp-connector
-version: 26.10.3
-description: A Helm chart for deploying netapp-connector as a StatefulSet with persistent storage
+version: 26.10.4
+description: NetApp Neo v2.x for Microsoft 365 Copilot Connector Helm Chart
 appVersion: "2.2.5"
 type: application

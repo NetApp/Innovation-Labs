@@ -37,7 +37,7 @@ There are two primary methods for installing the chart: using command-line flags
 For quick tests, you can pass parameters directly using the `--set` flag.
 
 ```sh
-helm install netapp-connector innovation-labs/netapp-connector --version 26.10.3 \
+helm install netapp-connector innovation-labs/netapp-connector --version 26.10.4 \
   --namespace netapp-connector \
   --create-namespace \
   --set main.credentials.MS_GRAPH_CLIENT_ID="<your-graph-client-id>" \
