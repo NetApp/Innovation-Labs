@@ -1,8 +1,0 @@
-version: 1.0.0
-files:
-  - url: NetApp-Connector-for-M365-Copilot-Setup-1.0.0.exe
-    sha512: j1W7htFyrKhI3rYeCzpX2Bj4q4BPIIXq8s87/1BNlsw+4XkU4/URfpqD1F5Wh5QRGquNh5VxXvJv9azKz8vVug==
-    size: 169608219
-path: NetApp-Connector-for-M365-Copilot-Setup-1.0.0.exe
-sha512: j1W7htFyrKhI3rYeCzpX2Bj4q4BPIIXq8s87/1BNlsw+4XkU4/URfpqD1F5Wh5QRGquNh5VxXvJv9azKz8vVug==
-releaseDate: '2025-07-04T09:09:54.746Z'
