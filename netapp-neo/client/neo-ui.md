@@ -57,7 +57,7 @@ services:
     environment:      
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: neodbsecret
-      POSTGRES_DB: neodb
+      POSTGRES_DB: neoconnectortest
     ports:
       - 5432:5432
     networks:
