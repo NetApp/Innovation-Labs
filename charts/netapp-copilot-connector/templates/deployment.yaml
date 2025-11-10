@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: {{ .Values.main.name }}
   namespace: {{ .Release.Namespace }}
@@ -102,14 +102,22 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.main.name }}
                   key: NETAPP_CONNECTOR_LICENSE
+            - name: DB_TYPE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.main.name }}
+                  key: DB_TYPE
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.main.name }}
+                  key: DATABASE_URL
           securityContext:
             capabilities:
               add: ["SYS_ADMIN", "DAC_READ_SEARCH", "DAC_OVERRIDE"]
             allowPrivilegeEscalation: true
             privileged: true
           volumeMounts:
-            - name: data
-              mountPath: {{ .Values.main.persistence.mountPath }}
             {{- if .Values.main.env.SSL_CERT_FILE }}
             - name: ssl-cert
               mountPath: /app/ssl_certs/custom_ca_bundle.pem
@@ -122,11 +130,3 @@ spec:
             secretName: {{ .Values.main.name }}-ssl-cert
         {{- end }}
       restartPolicy: Always
-  volumeClaimTemplates:
-    - metadata:
-        name: data
-      spec:
-        accessModes: [ {{ .Values.main.persistence.accessMode }} ]
-        resources:
-          requests:
-            storage: {{ .Values.main.persistence.size }}
