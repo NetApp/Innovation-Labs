@@ -3,6 +3,16 @@ entries:
   netapp-connector:
   - apiVersion: v2
     appVersion: 3.0.4
+    created: "2025-11-17T10:12:51.408288101Z"
+    description: NetApp Neo v3.x for Microsoft 365 Copilot Connector Helm Chart
+    digest: dc5c7b8ee6887b85e7ecb602bf1e39bee96bad3bc5babfbdc1007dba5f2c5e3b
+    name: netapp-connector
+    type: application
+    urls:
+    - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-connector-25.11.3/netapp-connector-25.11.3.tgz
+    version: 25.11.3
+  - apiVersion: v2
+    appVersion: 3.0.4
     created: "2025-11-17T09:44:18.22882067Z"
     description: NetApp Neo v3.x for Microsoft 365 Copilot Connector Helm Chart
     digest: 79abdc5bdf4d32520c96770a03eb1889707af14359619150051ed0e12261ec58
@@ -71,4 +81,4 @@ entries:
     urls:
     - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-openshift-console-trident-25.9.19/netapp-openshift-console-trident-25.9.19.tgz
     version: 25.9.19
-generated: "2025-11-17T09:44:18.228845958Z"
+generated: "2025-11-17T10:12:51.408308188Z"
