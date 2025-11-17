@@ -46,7 +46,7 @@ ui:
     tag: "3.0.4"
     pullPolicy: Always
   service:
-    type: ClusterIP
+    type: ClusterIP             
     port: 80
   ingress:
     enabled: false
