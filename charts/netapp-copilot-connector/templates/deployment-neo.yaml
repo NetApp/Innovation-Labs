@@ -5,16 +5,19 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ include "netapp-connector.name" . }}
+    component: {{ .Values.main.name }}
 spec:
   selector:
     matchLabels:
       app: {{ include "netapp-connector.name" . }}
+      component: {{ .Values.main.name }}
   serviceName: {{ .Values.main.name }}
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.main.replicaCount }}
   template:
     metadata:
       labels:
         app: {{ include "netapp-connector.name" . }}
+        component: {{ .Values.main.name }}
     spec:
       securityContext:
         runAsUser: 1000

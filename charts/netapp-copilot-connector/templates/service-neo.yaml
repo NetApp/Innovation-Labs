@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.main.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ include "netapp-connector.name" . }}
+    component: {{ .Values.main.name }}
+spec:
+  selector:
+    app: {{ include "netapp-connector.name" . }}
+    component: {{ .Values.main.name }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.main.service.port }}
+      targetPort: {{ .Values.main.env.PORT }}
+  type: {{ .Values.main.service.type }}
