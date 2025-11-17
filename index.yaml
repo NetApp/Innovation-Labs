@@ -4,6 +4,7 @@ entries:
   - apiVersion: v2
     appVersion: 3.0.4
     created: "2025-11-10T17:59:02.248237915Z"
+    deprecated: true
     description: NetApp Neo v3.x for Microsoft 365 Copilot Connector Helm Chart
     digest: 8e13eacdb7bfc30b72db489ad49a747f803f1f2d648ae623c7a320124b95bc0a
     name: netapp-connector
@@ -11,10 +12,10 @@ entries:
     urls:
     - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-connector-26.11.1/netapp-connector-26.11.1.tgz
     version: 26.11.1
-    deprecated: true
   - apiVersion: v2
     appVersion: 2.2.5
     created: "2025-10-09T09:58:32.609890623Z"
+    deprecated: true
     description: Last Update of NetApp Neo v2.x for Microsoft 365 Copilot Connector
       Helm Chart
     digest: 60714da66f344a67ad87bc0d990a293d24af3c1059e5c115f4dc041e6e046666
@@ -23,10 +24,10 @@ entries:
     urls:
     - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-connector-26.10.4/netapp-connector-26.10.4.tgz
     version: 26.10.4
-    deprecated: true
   - apiVersion: v2
     appVersion: 2.2.5
     created: "2025-10-09T09:48:16.460723037Z"
+    deprecated: true
     description: NetApp Neo v2.x for Microsoft 365 Copilot Connector Helm Chart
     digest: ff37894d48d0f90746a6ea43ecf4e4880a514e2ae49f5a2af333c063e16c511b
     name: netapp-connector
@@ -34,7 +35,16 @@ entries:
     urls:
     - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-connector-26.10.3/netapp-connector-26.10.3.tgz
     version: 26.10.3
-    deprecated: true
+  - apiVersion: v2
+    appVersion: 3.0.4
+    created: "2025-11-17T09:44:18.22882067Z"
+    description: NetApp Neo v3.x for Microsoft 365 Copilot Connector Helm Chart
+    digest: 79abdc5bdf4d32520c96770a03eb1889707af14359619150051ed0e12261ec58
+    name: netapp-connector
+    type: application
+    urls:
+    - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-connector-25.11.2/netapp-connector-25.11.2.tgz
+    version: 25.11.2
   - apiVersion: v2
     appVersion: 3.0.4
     created: "2025-11-17T09:34:29.088364612Z"
@@ -95,4 +105,4 @@ entries:
     urls:
     - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-openshift-console-trident-25.9.19/netapp-openshift-console-trident-25.9.19.tgz
     version: 25.9.19
-generated: "2025-11-17T09:34:29.088385782Z"
+generated: "2025-11-17T09:44:18.228845958Z"
