@@ -1,0 +1,20 @@
+{{- if .Values.postgresql.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.postgresql.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ include "netapp-connector.name" . }}
+    component: {{ .Values.postgresql.name }}
+spec:
+  type: {{ .Values.postgresql.service.type }}
+  ports:
+    - name: postgres
+      port: {{ .Values.postgresql.service.port }}
+      targetPort: postgres
+      protocol: TCP
+  selector:
+    app: {{ include "netapp-connector.name" . }}
+    component: {{ .Values.postgresql.name }}
+{{- end }}

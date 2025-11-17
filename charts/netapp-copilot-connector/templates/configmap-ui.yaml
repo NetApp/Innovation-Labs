@@ -3,6 +3,9 @@ kind: ConfigMap
 metadata:
   name: neo-ui-nginx-config
   namespace: netapp-connector
+  labels:
+    app: {{ include "netapp-connector.name" . }}
+    component: {{ .Values.ui.name }}  
 data:
   default.conf: |
     server {

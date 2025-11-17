@@ -5,10 +5,12 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ include "netapp-connector.name" . }}
+    component: {{ .Values.main.name }}
 data:
   PORT: {{ .Values.main.env.PORT | quote }}
   PYTHONUNBUFFERED: {{ .Values.main.env.PYTHONUNBUFFERED | quote }}
   DB_PATH: {{ .Values.main.env.DB_PATH | quote }}
+  DB_TYPE: {{ .Values.main.env.DB_TYPE | quote }}
   HTTPS_PROXY: {{ .Values.main.env.HTTPS_PROXY | quote }} 
   PROXY_USERNAME: {{ .Values.main.env.PROXY_USERNAME | quote }}
   PROXY_PASSWORD: {{ .Values.main.env.PROXY_PASSWORD | quote }}

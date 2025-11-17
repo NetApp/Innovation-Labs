@@ -22,7 +22,27 @@ spec:
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
-        fsGroup: 1000    
+        fsGroup: 1000
+      {{- if .Values.postgresql.enabled }}
+      initContainers:
+        - name: wait-for-db
+          image: docker.io/library/postgres:16.10-alpine3.21
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h {{ .Values.postgresql.name }} -p {{ .Values.postgresql.service.port }} -U {{ .Values.postgresql.auth.username }}; do
+                echo "Waiting for PostgreSQL to be ready..."
+                sleep 2
+              done
+              echo "PostgreSQL is ready!"
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgresql.name }}-secret
+                  key: password
+      {{- end }}
       containers:
         - name: {{ .Values.main.name }}
           image: "{{ .Values.main.image.repository }}:{{ default .Chart.AppVersion .Values.main.image.tag }}"
@@ -107,7 +127,7 @@ spec:
                   key: NETAPP_CONNECTOR_LICENSE
             - name: DB_TYPE
               valueFrom:
-                secretKeyRef:
+                configMapKeyRef:
                   name: {{ .Values.main.name }}
                   key: DB_TYPE
             - name: DATABASE_URL
