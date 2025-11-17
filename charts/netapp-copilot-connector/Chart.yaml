@@ -1,6 +1,6 @@
 apiVersion: v2
 name: netapp-connector
-version: 26.11.1
+version: 25.11.1
 description: NetApp Neo v3.x for Microsoft 365 Copilot Connector Helm Chart
 appVersion: "3.0.4"
 type: application
