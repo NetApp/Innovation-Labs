@@ -12,6 +12,7 @@ entries:
     urls:
     - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-connector-26.11.1/netapp-connector-26.11.1.tgz
     version: 26.11.1
+    deprecated: true
   - apiVersion: v2
     appVersion: 2.2.5
     created: "2025-10-09T09:58:32.609890623Z"
@@ -24,6 +25,7 @@ entries:
     urls:
     - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-connector-26.10.4/netapp-connector-26.10.4.tgz
     version: 26.10.4
+    deprecated: true
   - apiVersion: v2
     appVersion: 2.2.5
     created: "2025-10-09T09:48:16.460723037Z"
@@ -35,6 +37,7 @@ entries:
     urls:
     - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-connector-26.10.3/netapp-connector-26.10.3.tgz
     version: 26.10.3
+    deprecated: true
   - apiVersion: v2
     appVersion: 3.0.4
     created: "2025-11-17T09:44:18.22882067Z"
