@@ -11,7 +11,6 @@ spec:
     matchLabels:
       app: {{ include "netapp-connector.name" . }}
       component: {{ .Values.ui.name }}
-  serviceName: {{ .Values.ui.name }}
   replicas: {{ .Values.ui.replicaCount }}
   template:
     metadata:

@@ -53,7 +53,8 @@ There are two primary methods for installing the chart: using command-line flags
 
 #### Method 1: Using Command-Line Flags (for Development)
 
-##### Option A: With Built-in PostgreSQL (Auto-configured)
+<details>
+  <summary> Option A: With Built-in PostgreSQL (Auto-configured)</summary>
 
 ```sh
 helm install netapp-connector innovation-labs/netapp-connector --version 25.11.4 \
@@ -73,7 +74,10 @@ helm install netapp-connector innovation-labs/netapp-connector --version 25.11.4
 > When `postgresql.enabled=true`, the `DATABASE_URL` is automatically generated as:
 > `postgresql://postgres:your-secure-password@neodb:5432/netappconnector`
 
-##### Option B: With External Database
+</details>  
+
+<details>
+<summary> Option B: With External Database </summary>
 
 ```sh
 helm install netapp-connector innovation-labs/netapp-connector --version 25.11.4 \
@@ -89,136 +93,135 @@ helm install netapp-connector innovation-labs/netapp-connector --version 25.11.4
   --set main.env.DATABASE_URL="postgresql://user:password@external-host:5432/database"
 ```
 
+</details>
+
+
 #### Method 2: Using a Custom Values File (Recommended for Production)
 
 For production environments, it is highly recommended to use a custom `values.yaml` file to manage your configuration. This makes your deployment more readable, repeatable, and easier to manage in version control.
 
-1.  Create a file named `my-values.yaml` with your configuration:
+##### Create a file named `my-values.yaml` with your configuration:
 
-    **Option A: With Built-in PostgreSQL**
-    ```yaml
-    # my-values.yaml
-    # PostgreSQL Database Configuration
-    postgresql:
-      enabled: true
-      auth:
-        username: postgres
-        password: "your-secure-password"
-        database: netappconnector
-      persistence:
-        enabled: true
-        storageClass: ""  # Use default StorageClass, or specify "managed-premium" for AKS
-        size: 10Gi
-      resources:
-        requests:
-          cpu: 250m
-          memory: 256Mi
-        limits:
-          cpu: 1000m
-          memory: 1Gi
+<details>
+<summary>Option A: With Built-in PostgreSQL</summary>
 
-    main:
-      # --- Required Credentials ---
-      credentials:
-        MS_GRAPH_CONNECTOR_ID: "netappconnector"
-        MS_GRAPH_CLIENT_ID: "<your-graph-client-id>"
-        MS_GRAPH_CLIENT_SECRET: "<your-graph-client-secret>"
-        MS_GRAPH_TENANT_ID: "<your-graph-tenant-id>"
-        NETAPP_CONNECTOR_LICENSE: "<your-license-key>"
+```yaml
+# my-values.yaml
+# PostgreSQL Database Configuration
+postgresql:
+  enabled: true
+  auth:
+    username: postgres
+    password: "your-secure-password"
+    database: netappconnector
+  persistence:
+    enabled: true
+    storageClass: ""  # Use default StorageClass, or specify "managed-premium" for AKS
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+main:
+  # --- Required Credentials ---
+  credentials:
+    MS_GRAPH_CONNECTOR_ID: "netappconnector"
+    MS_GRAPH_CLIENT_ID: "<your-graph-client-id>"
+    MS_GRAPH_CLIENT_SECRET: "<your-graph-client-secret>"
+    MS_GRAPH_TENANT_ID: "<your-graph-tenant-id>"
+    NETAPP_CONNECTOR_LICENSE: "<your-license-key>"
+  # --- Database Configuration ---
+  # DATABASE_URL is auto-generated when postgresql.enabled=true
+  env:
+    DB_TYPE: "postgres"
+    # Leave DATABASE_URL empty to auto-generate from postgresql settings
+    DATABASE_URL: ""
+  # --- Optional Backend Ingress Configuration ---
+  ingress:
+    enabled: true
+    host: "api.connector.your-domain.com"
+    className: "nginx"  # or any relevant value to your environment
+    tls:
+      - secretName: connector-api-tls-secret
+        hosts:
+          - api.connector.your-domain.com
+ui:
+  # --- Optional UI Ingress Configuration ---
+  ingress:
+    enabled: true
+    host: "connector.your-domain.com"
+    className: "nginx"
+    tls:
+      - secretName: connector-ui-tls-secret
+        hosts:
+          - connector.your-domain.com
+```
+</details>
 
-      # --- Database Configuration ---
-      # DATABASE_URL is auto-generated when postgresql.enabled=true
-      env:
-        DB_TYPE: "postgres"
-        # Leave DATABASE_URL empty to auto-generate from postgresql settings
-        DATABASE_URL: ""
+<details>
+<summary>Option B: With External Database</summary>
 
-      # --- Optional Backend Ingress Configuration ---
-      ingress:
-        enabled: true
-        host: "api.connector.your-domain.com"
-        className: "nginx"  # or any relevant value to your environment
-        tls:
-          - secretName: connector-api-tls-secret
-            hosts:
-              - api.connector.your-domain.com
+```yaml
+# my-values.yaml
+# Disable built-in PostgreSQL
+postgresql:
+  enabled: false
+main:
+  # --- Required Credentials ---
+  credentials:
+    MS_GRAPH_CONNECTOR_ID: "netappconnector"
+    MS_GRAPH_CLIENT_ID: "<your-graph-client-id>"
+    MS_GRAPH_CLIENT_SECRET: "<your-graph-client-secret>"
+    MS_GRAPH_TENANT_ID: "<your-graph-tenant-id>"
+    NETAPP_CONNECTOR_LICENSE: "<your-license-key>"
+  # --- External Database Configuration ---
+  env:
+    DB_TYPE: "postgres"  # or "mysql"
+    # For PostgreSQL
+    DATABASE_URL: "postgresql://username@servername:password@servername.postgres.database.mydomain.com:5432/database_name" # parameter like ?sslmode=require could be added
+    # For MySQL
+    # DATABASE_URL: "mysql://username:password@hostname:3306/database_name"
+  # --- Optional Backend Ingress Configuration ---
+  ingress:
+    enabled: true
+    host: "api.connector.your-domain.com"
+    className: "nginx"  # or any relevant value to your environment
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    tls:
+      - secretName: connector-api-tls-secret
+        hosts:
+          - api.connector.your-domain.com
+ui:
+  # --- Optional UI Ingress Configuration ---
+  ingress:
+    enabled: true
+    host: "connector.your-domain.com"
+    className: "nginx"  # or any relevant value to your environment
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    tls:
+      - secretName: connector-ui-tls-secret
+        hosts:
+          - connector.your-domain.com
+```
+> [!WARNING]
+> **Security Best Practices:**
+> - Do not commit `my-values.yaml` with plain-textsecrets to version control
+> - Use a Key Vault with the CSI Secret Store Driverfor production
+> - Consider a KMS with Managed Identity for database authentication   
+</details>   
 
-    ui:
-      # --- Optional UI Ingress Configuration ---
-      ingress:
-        enabled: true
-        host: "connector.your-domain.com"
-        className: "nginx"
-        tls:
-          - secretName: connector-ui-tls-secret
-            hosts:
-              - connector.your-domain.com
-    ```
-
-    **Option B: With External Database**
-    ```yaml
-    # my-values.yaml
-    # Disable built-in PostgreSQL
-    postgresql:
-      enabled: false
-
-    main:
-      # --- Required Credentials ---
-      credentials:
-        MS_GRAPH_CONNECTOR_ID: "netappconnector"
-        MS_GRAPH_CLIENT_ID: "<your-graph-client-id>"
-        MS_GRAPH_CLIENT_SECRET: "<your-graph-client-secret>"
-        MS_GRAPH_TENANT_ID: "<your-graph-tenant-id>"
-        NETAPP_CONNECTOR_LICENSE: "<your-license-key>"
-
-      # --- External Database Configuration ---
-      env:
-        DB_TYPE: "postgres"  # or "mysql"
-        # For PostgreSQL
-        DATABASE_URL: "postgresql://username@servername:password@servername.postgres.database.mydomain.com:5432/database_name" # parameter like ?sslmode=require could be added
-        # For MySQL
-        # DATABASE_URL: "mysql://username:password@hostname:3306/database_name"
-
-      # --- Optional Backend Ingress Configuration ---
-      ingress:
-        enabled: true
-        host: "api.connector.your-domain.com"
-        className: "nginx"  # or any relevant value to your environment
-        annotations:
-          cert-manager.io/cluster-issuer: "letsencrypt-prod"
-        tls:
-          - secretName: connector-api-tls-secret
-            hosts:
-              - api.connector.your-domain.com
-
-    ui:
-      # --- Optional UI Ingress Configuration ---
-      ingress:
-        enabled: true
-        host: "connector.your-domain.com"
-        className: "nginx"  # or any relevant value to your environment
-        annotations:
-          cert-manager.io/cluster-issuer: "letsencrypt-prod"
-        tls:
-          - secretName: connector-ui-tls-secret
-            hosts:
-              - connector.your-domain.com
-    ```
-
-    > [!WARNING]
-    > **Security Best Practices:**
-    > - Do not commit `my-values.yaml` with plain-text secrets to version control
-    > - Use a Key Vault with the CSI Secret Store Driver for production
-    > - Consider a KMS with Managed Identity for database authentication
-
-2.  Install the chart using your custom values file:
-
-    ```sh
-    helm install netapp-connector innovation-labs/netapp-connector --version 25.11.4 \
-      --namespace netapp-connector \
-      --create-namespace \
-      -f my-values.yaml
-    ```
+##### Install the chart using your custom values file:
+```sh
+helm install netapp-connector innovation-labsnetapp-connector --version 25.11.4 \
+  --namespace netapp-connector \
+  --create-namespace \
+  -f my-values.yaml
+```
 
 > [!IMPORTANT]
 > The connector requires the following mandatory values to start correctly:
@@ -237,7 +240,8 @@ For production environments, it is highly recommended to use a custom `values.ya
 
 The connector requires a database (PostgreSQL or MySQL) for storing connector data. You have two options:
 
-### Option 1: Built-in PostgreSQL (**Recommended for Development/Testing**)
+<details>
+<summary> Option 1: Built-in PostgreSQL (Recommended for Development/Testing)</summary>
 
 Enable the integrated PostgreSQL deployment by setting `postgresql.enabled: true`. This will deploy a PostgreSQL StatefulSet with persistent storage.
 
@@ -265,8 +269,10 @@ postgresql:
 ```
 postgresql://postgres:secure-password@neodb:5432/netappconnector
 ```
+</details>
 
-### Option 2: External Database (**Recommended for Production**)
+<details>
+<summary> Option 2: External Database (Recommended for Production)</summary>
 
 Use an external PostgreSQL or MySQL database by setting `postgresql.enabled: false` and providing the connection details.
 
@@ -331,12 +337,15 @@ main:
 > - Store connection strings in **Azure Key Vault** or **AWS Secrets Manager**
 > - Enable **Microsoft Defender for Cloud** or **Amazon GuardDuty** for threat protection
 > - Use **Azure Private Endpoint** or **AWS PrivateLink** to keep database traffic within your VNet/VPC
+</details>
+
 
 ## Accessing the Application
 
 After installation, you can access the application in several ways:
 
-### Option 1: Port Forwarding (Development)
+<details>
+<summary> Option 1: Port Forwarding (Development)</summary>
 
 Forward the UI service port to your local machine:
 
@@ -345,8 +354,10 @@ kubectl port-forward -n netapp-connector svc/netapp-connector-ui 8080:80
 ```
 
 Then access the UI at `http://localhost:8080`
+</details>
 
-### Option 2: Ingress (Production)
+<details>
+<summary> Option 2: Ingress (Production)</summary>
 
 Enable Ingress in your `values.yaml` to expose the UI externally. The UI will automatically proxy API requests to the backend service.
 
@@ -378,8 +389,10 @@ ui:
         hosts:
           - connector.your-domain.com
 ```
+</details>
 
-### Option 3: Load Balancer (Public IP)
+<details>
+<summary> Option 3: Load Balancer (Public IP)</summary>
 
 For direct access without Ingress:
 
@@ -401,6 +414,7 @@ ui:
       service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
       service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
 ```
+</details>
 
 ## Component Communication
 
