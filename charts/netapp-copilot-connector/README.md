@@ -522,7 +522,7 @@ helm uninstall netapp-connector --namespace netapp-connector
 | `ui.name` | The base name for UI resources. | `netapp-connector-ui` |
 | `ui.replicaCount` | Number of UI pods to run. | `1` |
 | `ui.image.repository` | The UI container image repository. | `ghcr.io/beezy-dev/neo-ui-framework` |
-| `ui.image.tag` | The UI container image tag. | `3.0.4` |
+| `ui.image.tag` | The UI container image tag. | `3.0.4-2` |
 | `ui.image.pullPolicy` | The image pull policy. | `Always` |
 | `ui.service.type` | The type of Kubernetes service to create for UI. | `ClusterIP` |
 | `ui.service.port` | The port exposed by the UI service. | `80` |

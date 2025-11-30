@@ -100,7 +100,7 @@ services:
       - NETAPP_CONNECTOR_LICENSE=${NETAPP_CONNECTOR_LICENSE}
 
   neoui:
-    image: ghcr.io/beezy-dev/neo-ui-framework:3.0.4
+    image: ghcr.io/beezy-dev/neo-ui-framework:3.0.4-2
     container_name: neoui
     ports:
       - "8080:80"
@@ -152,7 +152,7 @@ Expected output:
 ONTAINER ID  IMAGE                                          COMMAND         CREATED         STATUS         PORTS                   NAMES
 5eb9df04e9dd  docker.io/library/postgres:16.10-alpine3.21    postgres        12 minutes ago  Up 12 minutes  0.0.0.0:5432->5432/tcp  neodb
 2eaffee6a8c0  ghcr.io/netapp/netapp-copilot-connector:3.0.4                  12 minutes ago  Up 12 minutes  0.0.0.0:8081->8080/tcp  neo
-78b5ea86b582  ghcr.io/beezy-dev/neo-ui-framework:3.0.4       /entrypoint.sh  12 minutes ago  Up 12 minutes  0.0.0.0:8080->80/tcp    neoui
+78b5ea86b582  ghcr.io/beezy-dev/neo-ui-framework:3.0.4-2       /entrypoint.sh  12 minutes ago  Up 12 minutes  0.0.0.0:8080->80/tcp    neoui
 873d425a8179  docker.io/dockurr/samba:latest                                 12 minutes ago  Up 12 minutes  0.0.0.0:445->445/tcp    neosmb
 ```
 
