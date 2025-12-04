@@ -29,17 +29,7 @@ The NetApp Neo: Connector for M365 Copilot is a containerized solution that enab
 
 ## Getting Started
 
-Want to get up and running quickly? Head over to  
-
-- the Neo v3.x [User Quickstart for M365](./USER_QUICKSTART_M365.md) guide for a step-by-step guide to deploying the connector and connecting your first share.
-- the Neo v2.x (**phasing out**) [User Quickstart for M365](./DEPLOY-V2.md) guide for a step-by-step guide to deploying the connector and connecting your first share.
-
-## Security Information
-
-The NetApp Neo: Connector for M365 Copilot is designed with security in mind. All relevant security information is available in the [Security Information](SECURITY.md) document. This includes information on how the connector handles data, how it communicates with Microsoft Graph, and how it is secured.
-
-## Frequently Asked Questions (FAQ)
-Most frequently asked questions are available in our [NEO FAQ](FAQ.md)
+Want to get up and running quickly? Head over to [User Documentation](https://netapp.github.io/netapp-connector-docs/)
 
 ## Support
 
