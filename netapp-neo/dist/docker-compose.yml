@@ -34,8 +34,8 @@ services:
     restart: unless-stopped
     networks:
       - netapp-neo
-    depends_on:
-      - db # Ensure the database starts before NEO - Remove this line if you're using an existing database externally
+    depends_on: # Ensure the database starts before NEO - Remove this section if you're using an existing database externally
+      - db
 
   neoui:
     image: ghcr.io/beezy-dev/neo-ui-framework:3.0.4-2
@@ -43,7 +43,7 @@ services:
     ports:
       - "8080:80"
     environment:
-      - NEO_API=http://neo:8080 # ← add this
+      - NEO_API=http://neo:8080
     networks:
       - netapp-neo
     restart: unless-stopped
@@ -54,5 +54,5 @@ networks:
   netapp-neo:
     driver: bridge
 
-volumes:
+volumes: # Remove this section if you're using an external database
   postgres_data:
