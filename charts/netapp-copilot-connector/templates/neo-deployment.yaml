@@ -59,76 +59,6 @@ spec:
                 configMapKeyRef:
                   name: {{ .Values.main.name }}
                   key: PYTHONUNBUFFERED
-            - name: DB_PATH
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Values.main.name }}
-                  key: DB_PATH
-            - name: HTTPS_PROXY
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Values.main.name }}
-                  key: HTTPS_PROXY
-            - name: PROXY_USERNAME
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Values.main.name }}
-                  key: PROXY_USERNAME
-            - name: PROXY_PASSWORD
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Values.main.name }}
-                  key: PROXY_PASSWORD
-            - name: GRAPH_VERIFY_SSL
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Values.main.name }}
-                  key: GRAPH_VERIFY_SSL
-            - name: SSL_CERT_FILE
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Values.main.name }}
-                  key: SSL_CERT_FILE_PATH
-            - name: GRAPH_TIMEOUT
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Values.main.name }}
-                  key: GRAPH_TIMEOUT   
-            - name: MS_GRAPH_CONNECTOR_DESCRIPTION
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.main.name }}
-                  key: MS_GRAPH_CONNECTOR_DESCRIPTION
-            - name: MS_GRAPH_CONNECTOR_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.main.name }}
-                  key: MS_GRAPH_CONNECTOR_ID
-            - name: MS_GRAPH_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.main.name }}
-                  key: MS_GRAPH_CLIENT_ID
-            - name: MS_GRAPH_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.main.name }}
-                  key: MS_GRAPH_CLIENT_SECRET
-            - name: MS_GRAPH_TENANT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.main.name }}
-                  key: MS_GRAPH_TENANT_ID
-            - name: NETAPP_CONNECTOR_LICENSE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.main.name }}
-                  key: NETAPP_CONNECTOR_LICENSE
-            - name: DB_TYPE
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Values.main.name }}
-                  key: DB_TYPE
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
@@ -139,16 +69,4 @@ spec:
               add: ["SYS_ADMIN", "DAC_READ_SEARCH", "DAC_OVERRIDE"]
             allowPrivilegeEscalation: true
             privileged: true
-          volumeMounts:
-            {{- if .Values.main.env.SSL_CERT_FILE }}
-            - name: ssl-cert
-              mountPath: /app/ssl_certs/custom_ca_bundle.pem
-              subPath: custom_ca_bundle.pem
-            {{- end }}
-      volumes:
-        {{- if .Values.main.env.SSL_CERT_FILE }}
-        - name: ssl-cert
-          secret:
-            secretName: {{ .Values.main.name }}-ssl-cert
-        {{- end }}
       restartPolicy: Always

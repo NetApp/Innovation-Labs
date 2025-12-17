@@ -21,31 +21,14 @@ main:
     #     - chart-example.local    
   env:
     PORT: 8080
-    PYTHONUNBUFFERED: 1
-    HTTPS_PROXY: ""
-    PROXY_USERNAME: ""
-    PROXY_PASSWORD: ""
-    GRAPH_VERIFY_SSL: ""
-    GRAPH_TIMEOUT: ""
-    SSL_CERT_FILE: ""
-    SSL_CERT_FILE_PATH: ""
-    DB_TYPE: postgres # or mysql
-    # DATABASE_URL is auto-generated when postgresql.enabled=true
-    # For external database, set it explicitly:
+    PYTHONUNBUFFERED: "1"
     DATABASE_URL: ""  # Leave empty to auto-generate from postgresql settings
-  credentials:
-    MS_GRAPH_CONNECTOR_ID: "netappconnector"
-    MS_GRAPH_CONNECTOR_DESCRIPTION: "The connector contains information contained in the on premises or on-prem file share server. This contains documents and files. These are of type DOC, DOCM, DOCX, DOT, DOTX, EML, GIF, HTML, JPEG, JPG, MHT, MHTML, MSG, NWS, OBD, OBT, ODP, ODS, ODT, ONE, PDF, PNG, POT, PPS, PPT, PPTM, PPTX, TXT, XLB, XLC, XLSB, XLS, XLSX, XLT, XLXM, XML, XPS, and ZIP."
-    MS_GRAPH_CLIENT_ID: "tobeset"
-    MS_GRAPH_CLIENT_SECRET: "tobeset"
-    MS_GRAPH_TENANT_ID: "tobeset"
-    NETAPP_CONNECTOR_LICENSE: "tobeset"
 ui:
   name: netapp-connector-ui
   replicaCount: 1
   image:
     repository: ghcr.io/beezy-dev/neo-ui-framework
-    tag: "3.0.4-1"
+    tag: "3.1.0"
     pullPolicy: Always
   service:
     type: ClusterIP             

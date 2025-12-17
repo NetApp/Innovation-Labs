@@ -8,7 +8,7 @@ The chart bootstraps a deployment of NetApp Neo, which includes the following Ku
 - **Deployments**: Manages both the backend connector and UI pods with configurable replicas and rolling updates.
 - **Services**: Exposes the connector and UI within the cluster on stable endpoints.
 - **Secrets**: Securely stores sensitive credentials like Microsoft Graph API keys, NetApp license, and database connection details.
-- **ConfigMaps**: Manages non-sensitive environment variables, configuration, and nginx proxy settings for the UI.
+- **ConfigMaps**: Provide non-sensitive backend environment variables. The UI now bundles its nginx config, so no ConfigMap mount is required.
 - **StatefulSet**: (Optional) Manages PostgreSQL database with persistent storage when enabled.
 - **Ingress**: (Optional) Manages external access to both the connector and UI services.
 
@@ -26,6 +26,8 @@ The chart deploys up to three main components:
 - **InitContainer Health Check**: Ensures PostgreSQL is ready before starting the backend connector
 - **Nginx Reverse Proxy**: UI automatically proxies API requests from `/api/*` to the backend service
 - **Separation of Concerns**: Non-sensitive configuration in ConfigMaps, sensitive data in Secrets
+- **Self-contained UI nginx config**: UI image 3.1.0 embeds the nginx template; ConfigMap/volume mounts are no longer needed.
+- **Post-install configuration and credential management**: For appVersion ≥3.1.0, Microsoft Graph credentials and licenses are configured through the product UI/API after deployment.
 
 ## Prerequisites
 
@@ -51,28 +53,22 @@ helm repo update
 
 There are two primary methods for installing the chart: using command-line flags (ideal for testing) or a custom values file (recommended for production).
 
+> [!TIP]
+> Deploying an older appVersion (<3.1.0)? Then use version 25.11.7 of the chart to continue using `--set main.credentials.*` flags to pre-seed Microsoft Graph values.
+
 #### Method 1: Using Command-Line Flags (for Development)
 
 <details>
   <summary> Option A: With Built-in PostgreSQL (Auto-configured)</summary>
 
 ```sh
-helm install netapp-connector innovation-labs/netapp-connector --version 25.11.4 \
+helm install netapp-connector innovation-labs/netapp-connector --version 25.12.1 \
   --namespace netapp-connector \
   --create-namespace \
   --set postgresql.enabled=true \
   --set postgresql.auth.password="your-secure-password" \
-  --set postgresql.auth.database="netappconnector" \
-  --set main.credentials.MS_GRAPH_CONNECTOR_ID="netappconnector" \
-  --set main.credentials.MS_GRAPH_CLIENT_ID="<your-graph-client-id>" \
-  --set main.credentials.MS_GRAPH_CLIENT_SECRET="<your-graph-client-secret>" \
-  --set main.credentials.MS_GRAPH_TENANT_ID="<your-graph-tenant-id>" \
-  --set main.credentials.NETAPP_CONNECTOR_LICENSE="<your-license-key>"
+  --set postgresql.auth.database="netappconnector"
 ```
-
-> [!NOTE]
-> When `postgresql.enabled=true`, the `DATABASE_URL` is automatically generated as:
-> `postgresql://postgres:your-secure-password@neodb:5432/netappconnector`
 
 </details>  
 
@@ -80,15 +76,10 @@ helm install netapp-connector innovation-labs/netapp-connector --version 25.11.4
 <summary> Option B: With External Database </summary>
 
 ```sh
-helm install netapp-connector innovation-labs/netapp-connector --version 25.11.4 \
+helm install netapp-connector innovation-labs/netapp-connector --version 25.12.1 \
   --namespace netapp-connector \
   --create-namespace \
   --set postgresql.enabled=false \
-  --set main.credentials.MS_GRAPH_CONNECTOR_ID="netappconnector" \
-  --set main.credentials.MS_GRAPH_CLIENT_ID="<your-graph-client-id>" \
-  --set main.credentials.MS_GRAPH_CLIENT_SECRET="<your-graph-client-secret>" \
-  --set main.credentials.MS_GRAPH_TENANT_ID="<your-graph-tenant-id>" \
-  --set main.credentials.NETAPP_CONNECTOR_LICENSE="<your-license-key>" \
   --set main.env.DB_TYPE="postgres" \
   --set main.env.DATABASE_URL="postgresql://user:password@external-host:5432/database"
 ```
@@ -126,18 +117,8 @@ postgresql:
       cpu: 1000m
       memory: 1Gi
 main:
-  # --- Required Credentials ---
-  credentials:
-    MS_GRAPH_CONNECTOR_ID: "netappconnector"
-    MS_GRAPH_CLIENT_ID: "<your-graph-client-id>"
-    MS_GRAPH_CLIENT_SECRET: "<your-graph-client-secret>"
-    MS_GRAPH_TENANT_ID: "<your-graph-tenant-id>"
-    NETAPP_CONNECTOR_LICENSE: "<your-license-key>"
-  # --- Database Configuration ---
-  # DATABASE_URL is auto-generated when postgresql.enabled=true
+  # --- Internal Database Configuration ---
   env:
-    DB_TYPE: "postgres"
-    # Leave DATABASE_URL empty to auto-generate from postgresql settings
     DATABASE_URL: ""
   # --- Optional Backend Ingress Configuration ---
   ingress:
@@ -170,16 +151,8 @@ ui:
 postgresql:
   enabled: false
 main:
-  # --- Required Credentials ---
-  credentials:
-    MS_GRAPH_CONNECTOR_ID: "netappconnector"
-    MS_GRAPH_CLIENT_ID: "<your-graph-client-id>"
-    MS_GRAPH_CLIENT_SECRET: "<your-graph-client-secret>"
-    MS_GRAPH_TENANT_ID: "<your-graph-tenant-id>"
-    NETAPP_CONNECTOR_LICENSE: "<your-license-key>"
   # --- External Database Configuration ---
   env:
-    DB_TYPE: "postgres"  # or "mysql"
     # For PostgreSQL
     DATABASE_URL: "postgresql://username@servername:password@servername.postgres.database.mydomain.com:5432/database_name" # parameter like ?sslmode=require could be added
     # For MySQL
@@ -211,13 +184,14 @@ ui:
 > [!WARNING]
 > **Security Best Practices:**
 > - Do not commit `my-values.yaml` with plain-textsecrets to version control
-> - Use a Key Vault with the CSI Secret Store Driverfor production
+> - Use a Key Vault with the CSI Secret Store Driver for production
 > - Consider a KMS with Managed Identity for database authentication   
+
 </details>   
 
 ##### Install the chart using your custom values file:
 ```sh
-helm install netapp-connector innovation-labsnetapp-connector --version 25.11.4 \
+helm install netapp-connector innovation-labsnetapp-connector --version 25.12.1 \
   --namespace netapp-connector \
   --create-namespace \
   -f my-values.yaml
@@ -225,11 +199,6 @@ helm install netapp-connector innovation-labsnetapp-connector --version 25.11.4 
 
 > [!IMPORTANT]
 > The connector requires the following mandatory values to start correctly:
-> - `main.credentials.MS_GRAPH_CONNECTOR_ID` - Unique identifier for your connector instance
-> - `main.credentials.MS_GRAPH_CLIENT_ID` - M365 Copilot Application (Client) ID
-> - `main.credentials.MS_GRAPH_CLIENT_SECRET` - M365 Copilot Application Client Secret
-> - `main.credentials.MS_GRAPH_TENANT_ID` - M365 Copilot Tenant ID
-> - `main.credentials.NETAPP_CONNECTOR_LICENSE` - NetApp Neo license key
 > - `main.env.DATABASE_URL` - Connection string (auto-generated if `postgresql.enabled=true`)
 > 
 > **Database Options:**
@@ -442,8 +411,8 @@ helm repo update
 helm upgrade netapp-connector innovation-labs/netapp-connector \
   --namespace netapp-connector \
   --reuse-values \
-  --set main.image.tag="3.0.5" \
-  --set ui.image.tag="3.0.5"
+  --set main.image.tag="3.1.0" \
+  --set ui.image.tag="3.1.0"
 ```
 
 **Upgrading with a values file:**
@@ -499,21 +468,7 @@ helm uninstall netapp-connector --namespace netapp-connector
 | `main.ingress.tls` | Ingress TLS configuration. | `[]` |
 | `main.env.PORT` | The port the backend application runs on. | `8080` |
 | `main.env.PYTHONUNBUFFERED` | Python unbuffered output. | `1` |
-| `main.env.DB_TYPE` | Database type (`postgres` or `mysql`). | `postgres` |
 | `main.env.DATABASE_URL` | Database connection URL. Auto-generated if `postgresql.enabled=true`. | `""` |
-| `main.env.HTTPS_PROXY` | HTTPS proxy configuration. | `""` |
-| `main.env.PROXY_USERNAME` | Proxy username if authentication is required. | `""` |
-| `main.env.PROXY_PASSWORD` | Proxy password if authentication is required. | `""` |
-| `main.env.GRAPH_VERIFY_SSL` | Whether to verify SSL certificates for Microsoft Graph calls. | `""` |
-| `main.env.SSL_CERT_FILE` | Custom SSL certificate file content. | `""` |
-| `main.env.SSL_CERT_FILE_PATH` | Path to SSL certificate file. | `""` |
-| `main.env.GRAPH_TIMEOUT` | Timeout for Microsoft Graph API calls. | `""` |
-| `main.credentials.MS_GRAPH_CONNECTOR_ID` | Microsoft Graph connector ID. **Required.** | `netappconnector` |
-| `main.credentials.MS_GRAPH_CONNECTOR_DESCRIPTION` | Description of the connector. | `(default description)` |
-| `main.credentials.MS_GRAPH_CLIENT_ID` | Microsoft Graph client ID. **Required.** | `tobeset` |
-| `main.credentials.MS_GRAPH_CLIENT_SECRET` | Microsoft Graph client secret. **Required.** | `tobeset` |
-| `main.credentials.MS_GRAPH_TENANT_ID` | Microsoft Graph tenant ID. **Required.** | `tobeset` |
-| `main.credentials.NETAPP_CONNECTOR_LICENSE` | NetApp connector license key. **Required.** | `tobeset` |
 
 ### UI Configuration
 
@@ -522,7 +477,7 @@ helm uninstall netapp-connector --namespace netapp-connector
 | `ui.name` | The base name for UI resources. | `netapp-connector-ui` |
 | `ui.replicaCount` | Number of UI pods to run. | `1` |
 | `ui.image.repository` | The UI container image repository. | `ghcr.io/beezy-dev/neo-ui-framework` |
-| `ui.image.tag` | The UI container image tag. | `3.0.4` |
+| `ui.image.tag` | UI image tag. | `3.1.0` |
 | `ui.image.pullPolicy` | The image pull policy. | `Always` |
 | `ui.service.type` | The type of Kubernetes service to create for UI. | `ClusterIP` |
 | `ui.service.port` | The port exposed by the UI service. | `80` |
@@ -542,7 +497,7 @@ helm uninstall netapp-connector --namespace netapp-connector
 | `postgresql.enabled` | Enable or disable PostgreSQL deployment. | `false` |
 | `postgresql.name` | The name for PostgreSQL resources. | `neodb` |
 | `postgresql.image.repository` | PostgreSQL container image repository. | `docker.io/library/postgres` |
-| `postgresql.image.tag` | PostgreSQL container image tag. | `16.10-alpine3.21` |
+| `postgresql.image.tag` | PostgreSQL image tag. | `16.10-alpine3.21` |
 | `postgresql.image.pullPolicy` | PostgreSQL image pull policy. | `IfNotPresent` |
 | `postgresql.auth.username` | PostgreSQL username. | `postgres` |
 | `postgresql.auth.password` | PostgreSQL password. **Should be changed for production.** | `neodbsecret` |
@@ -551,9 +506,8 @@ helm uninstall netapp-connector --namespace netapp-connector
 | `postgresql.service.port` | PostgreSQL service port. | `5432` |
 | `postgresql.persistence.enabled` | Enable persistent storage for PostgreSQL. | `true` |
 | `postgresql.persistence.storageClass` | StorageClass for PostgreSQL PVC. Empty uses default. | `""` |
-| `postgresql.persistence.accessMode` | Access mode for PostgreSQL PVC. | `ReadWriteOnce` |
-| `postgresql.persistence.size` | Size of PostgreSQL persistent volume. | `8Gi` |
-| `postgresql.persistence.annotations` | Annotations for PostgreSQL PVC. | `{}` |
+| `postgresql.persistence.accessMode` | PVC access mode. | `ReadWriteOnce` |
+| `postgresql.persistence.annotations` | PVC annotations. | `{}` |
 | `postgresql.resources` | Resource requests and limits for PostgreSQL pod. | `{}` |
 
 ## Networking Architecture
@@ -1078,8 +1032,11 @@ aws rds create-db-instance \
 
 | Chart Version | App Version | Changes |
 |---------------|-------------|---------|
-| 25.11.4 | 3.0.4 | - Added PostgreSQL StatefulSet with auto-configured DATABASE_URL<br>- Added initContainer for database readiness check<br>- Separated ConfigMap and Secret for security<br>- Added nginx reverse proxy configuration for UI<br>- Azure best practices documentation |
-| 25.11.2 | 3.0.4 | Initial release with Deployment-based architecture |
+| 25.12.1 | 3.1.0 | Default Neo Core and Console images updated to 3.1.0; PostgreSQL images bumped to 16.10-alpine3.21; Microsoft Graph credentials now configured post-install; documentation refreshed |
+| 25.11.7 | 3.0.4 | Bumping version of Neo UI Framework version to 3.0.4-2 for both the helm chart and docker file deployment |
+| 25.11.6 | 3.0.4 | netapp-copilot-connector minor fix: renaming resources, bumping neo-ui tag to 3.0.4-1 |
+| 25.11.5 | 3.0.4 | netapp-copilot-connector minor fix: removing unused configmap, removing serviceName from deployment templates, fixing value assignment from values file for namespace, and reshaping documentation |
+| 25.11.4 | 3.0.4 | Initial release with Deployment-based architecture |
 
 ## Support and Contributing
 
