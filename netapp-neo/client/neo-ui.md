@@ -25,7 +25,7 @@ First, we need to set up the following .env file to configure the database.
 # NetApp Settings (Required)
 DATABASE_URL=postgresql://postgres:neodbsecret@neodb:5432/neoconnectortest      # <== Needs to be changed! 
 ## or for MySQL:
-#DATABASE_URL=mysql://user:password@localhost:3306/netapp_connector
+#DATABASE_URL=mysql://user:password@localhost:3306/neoconnectortest
 ```
 
 ### Deploy
@@ -156,15 +156,16 @@ This will trigger a restart of Neo's container with the configured settings:
 Once Neo has restarted, the page will reload with the status "Complete", and a button "Admin Credentials" will appear to recover the temporary credentials:
 <img width="1884" height="952" alt="image" src="https://github.com/user-attachments/assets/7db70db5-77dc-4cb9-9472-9fe912c7c0f5" />
 
-### Admin Password
-> [!IMPORTANT]
-> This temporary password will not be accessible again once you have logged in with the credentials.
-> Make sure to either save it in your password manager or change it in the Users page.
-
 Credentials
 <img width="1884" height="952" alt="image" src="https://github.com/user-attachments/assets/1e063c89-e210-4c3a-9bbf-110c070b834c" />
 Updating credentials
 <img width="1884" height="952" alt="image" src="https://github.com/user-attachments/assets/0e602ddb-5d68-49f6-a0bb-1cf82539cb27" />
+
+> [!IMPORTANT]
+> This temporary password will not be accessible again once you have logged in with the credentials.
+> Make sure to either save it in your password manager or change it in the Users page.
+
+<img width="1884" height="952" alt="image" src="https://github.com/user-attachments/assets/ba62c004-d7c1-498c-8082-0af298372d7f" />
 
 #### via API
 Neo can also be configured via the API, available at ```http://your.ip:8081/docs``` or ```http://myhost.mydomain.tld:8081/docs```.
