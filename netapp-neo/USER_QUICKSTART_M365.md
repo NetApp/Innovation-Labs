@@ -1,75 +1,24 @@
 # NetApp Neo deployment User Quick Start Guide (v3.x)
 
-> \[!IMPORTANT\]  
-> NetApp Neo for M365 Copilot is currently in **Private Preview**. This means that the connector is not yet fully supported and may have some limitations. The connector requires a license to activate. You can request access to the connector by joining the Early Access Program (EAP). Please book a meeting with the following link to join the EAP: [Book a meeting with NetApp](https://outlook.office.com/bookwithme/user/d636d7a02ad8477c9af9a0cbb029af4d@netapp.com/meetingtype/nm-mXkp-TUO1CdzOmFfIBw2?anonymous&ismsaljsauthenabled&ep=mlink).
-
-> \[!IMPORTANT\]  
-> AWS ECS (Fargate) is NOT supported. This is due to the containers being unable to mount shares to the container(s) - a critical requirement of NetApp Neo.
+> \[!IMPORTANT\]
+>
+> - **THIS GUIDE HAS BEEN SUPERSEDED.** Please refer to the latest version of this guide at: [NetApp Project Neo Documentation](https://netapp.github.io/netapp-connector-docs/)
+> - NetApp Neo for M365 Copilot is currently in **Private Preview**. This means that the connector is not yet fully supported and may have some limitations. The connector requires a license to activate. You can request access to the connector by joining the Early Access Program (EAP). Please book a meeting with the following link to join the EAP: [Book a meeting with NetApp](https://outlook.office.com/bookwithme/user/d636d7a02ad8477c9af9a0cbb029af4d@netapp.com/meetingtype/nm-mXkp-TUO1CdzOmFfIBw2?anonymous&ismsaljsauthenabled&ep=mlink).
+> - AWS ECS (Fargate) is NOT supported. This is due to the containers being unable to mount shares to the container(s) - a critical requirement of NetApp Neo.
 
 ## 1\. Prerequisites
 
-### Network Requirements
-
-- **Port 443** open for outbound traffic to the MS Graph API
-- **Port 8080** open for internal management of the connector
-- **Port 445** open for SMB file share access
-- SMB File Share(s) must be routable to the connector
-
-### Software Requirements
-
-- Microsoft 365 Copilot License
-- Docker installed on the machine where the connector will be deployed
-- Access to the offline tar image of the connector
-- (Optional) Docker Compose installed on the machine where the connector will be deployed
-- (Optional) Access to a Kubernetes cluster for deployment
-
-### Register the connector in Azure Entra
-
-In order for the connector to be able to securely communicate with M365 Copilot.
-
-![Select App Registration in the Add menu in Microsoft Azure Entra](./media/2025-03-10_20-17-27.png)
-
-1. Navigate to the Azure Entra portal and select "Add" and select the "App Registration" option.
-2. Fill in the required fields and click "Register". (No Redirect URI is required)
-3. Copy the Application (client) ID and Directory (tenant) ID from the Overview page.
-4. Navigate to the "API permissions" page and select "Add a permission".
-5. Select "Microsoft Graph" and then "Application permissions".
-6. Search for "ExternalConnection.ReadWrite.OwnedBy" and select the checkbox.
-7. Search for "ExternalItem.ReadWrite.OwnedBy" and select the checkbox.
-8. Search for "User.Read" and select the checkbox.
-9. Search for "User.Read.All" and select the checkbox.
-10. Search for "Group.Read.All" and select the checkbox
-11. Click "Add permissions".
-12. Click "Graph admin consent for (tenant)" and click "Yes".
-13. Navigate to the "Certificates & secrets" page and click "New client secret".
-14. Fill in the required fields and click "Add".
-15. Copy the value of the client secret.
-
-You have successfully registered the connector in Azure ENTRA. You will need the Application ID, Directory ID, and Client Secret for the next steps. 
-
+Please refer to the latest prerequisites here: [Prerequisites](https://netapp.github.io/netapp-connector-docs/prerequisites.html)
 
 ## 2\. Getting Started
 
-The easiest way to get started is by using the pre-built container image. You can run the connector using Docker/Podman or deploy it to a Kubernetes cluster using Helm.
+Please refer to the latest quickstart instructions here: [Quick Start](https://netapp.github.io/netapp-connector-docs/quick-start.html)
 
 ### Database Options
 
-**Version 3.0+ supports multiple database backends:**
+Please refer to the latest database options here: [Database Options](https://netapp.github.io/netapp-connector-docs/prerequisites.html#database-options)
 
-- **PostgreSQL**: For production deployments with high availability (Recommended)
-- **MySQL**: Alternative production database option
-
-To use PostgreSQL or MySQL, set the `DATABASE_URL` environment variable:
-
-```bash
-# PostgreSQL example
-DATABASE_URL=postgresql://user:password@localhost:5432/netapp_connector
-
-# MySQL example
-DATABASE_URL=mysql://user:password@localhost:3306/netapp_connector
-```
-
-### Deploy using Docker/Podman 
+### Deploy using Docker/Podman
 
 #### Pull the image
 
@@ -80,7 +29,7 @@ docker pull ghcr.io/netapp/netapp-copilot-connector:latest
 or for a specific version:
 
 ```bash
-docker pull ghcr.io/netapp/netapp-copilot-connector:3.0.0
+docker pull ghcr.io/netapp/netapp-copilot-connector:3.1.0
 ```
 
 > \[!TIP\]  
@@ -92,56 +41,21 @@ docker pull ghcr.io/netapp/netapp-copilot-connector:3.0.0
 >
 > For GPU support, uncomment the `deploy` section in the `docker-compose.yml` file and ensure you have the appropriate GPU runtime installed.
 
-#### Configure and Run
-
-1.  **Download the sample configuration files:**
-
-    - Download the [Sample .env file](./dist/.env.example ".env.example") and rename it to `.env`
-    - Download the [docker-compose.yml](./dist/docker-compose.yml "docker-compose.yml") file
-
-2.  **Configure the `.env` file with the required environment variables:**
-
-```bash
-# NetApp Settings (Required)
-NETAPP_CONNECTOR_LICENSE=your-licence-key-here
-
-# Microsoft Graph configuration (Required)
-MS_GRAPH_CLIENT_ID=your-client-id-here
-MS_GRAPH_CLIENT_SECRET=your-client-secret-here
-MS_GRAPH_TENANT_ID=your-tenant-id-here
-
-# Database Configuration (Required- PostgreSQL is recommended)
-DB_TYPE=postgres # Options postgres, mysql
-## For PostgreSQL:
-DATABASE_URL=postgresql://user:password@localhost:5432/netapp_connector
-## or for MySQL:
-DATABASE_URL=mysql://user:password@localhost:3306/netapp_connector
-
-# Authentication (Optional - defaults provided)
-JWT_SECRET_KEY=your-secret-key-here
-ACCESS_TOKEN_EXPIRE_MINUTES=1440
-
-# Multi-container deployments (Optional)
-ENCRYPTION_KEY=your-shared-encryption-key
-```
-
 3.  **Run the connector using Docker Compose:**
 
 ```bash
 docker-compose up -d
 ```
 
-4.  **Access the connector** 
+4.  **Access the connector**
 
 The connector will be deployed and will be accessible on port 8080. You can access the API documentation at `http://localhost:8080/docs`.
 
 Trouble deploying the connector? Check the [Troubleshooting](#troubleshooting) section for common issues.
 
-
 ### Deploy using Kubernetes and Helm
 
 If you are using Kubernetes, you can deploy the connector using Helm. Please refer to the [Helm Deployment](../charts/netapp-copilot-connector/README.md "charts/netapp-copilot-connector/README.md") document for more information.
-
 
 ## 3\. Initial Setup and First Admin User
 
