@@ -3,47 +3,29 @@
 
 This guide provides the necessary steps to deploy a "battery-included" Neo instance, using Docker or Podman, for **DEVELOPMENT and TESTING**, that includes:
 
-- an official postgres instance, version 16.10-alpine3.21 
-- version 3.0.4 of Neo 
-- version 3.0.4 of Neo UI
+- an official PostgreSQL instance, version 16.10-alpine3.21 
+- version 3.1.0 of Neo 
+- version 3.1.0 of Neo UI
 
-For testing purposes, a local SAMBA service is also be included. 
+For testing purposes, a local SAMBA service is also included. 
 
 > [!IMPORTANT]
-> This guide leverage ```podman``` as a container runtime which calls for ```sudo``` due to its rootless nature and Neo needing rootful permissions to
+> This guide leverages ```podman``` as a container runtime, which calls for ```sudo``` due to its rootless nature and Neo needing rootful permissions to
 > mount the shares.    
 > When using ```docker```, just replace ```sudo podman``` by ```docker```.
 
 ## Deployment Guide
 
-Create a directory called "neo-test" within your home directory tree or any location of your choice to host all the below configuration files.
+Create a directory called "neo-test" in your home directory or any location of your choice to host the configuration files below.
 
 ### Environment variables
-First we need to setup the following .env file to capture the necessary information such licensing and MS Graph details if M365 Copilot is a potential use case. 
+First, we need to set up the following .env file to configure the database. 
 
 ```INI
 # NetApp Settings (Required)
-NETAPP_CONNECTOR_LICENSE=
-
-# Microsoft Graph configuration (Required)
-MS_GRAPH_CONNECTOR_ID=neoconnectortest                                          # <== Needs to be changed!    
-#MS_GRAPH_CLIENT_ID=""                                                          
-#MS_GRAPH_CLIENT_SECRET=""
-#MS_GRAPH_TENANT_ID=""
-
-# Database Configuration (Required- PostgreSQL is recommended)
-DB_TYPE=postgres                                                                # Options postgres, mysql
-## For PostgreSQL:
 DATABASE_URL=postgresql://postgres:neodbsecret@neodb:5432/neoconnectortest      # <== Needs to be changed! 
 ## or for MySQL:
-#DATABASE_URL=mysql://user:password@localhost:3306/netapp_connector
-
-# Authentication (Optional - defaults provided)
-#JWT_SECRET_KEY=your-secret-key-here
-#ACCESS_TOKEN_EXPIRE_MINUTES=1440
-
-# Multi-container deployments (Optional)
-#ENCRYPTION_KEY=your-shared-encryption-key
+#DATABASE_URL=mysql://user:password@localhost:3306/neoconnectortest
 ```
 
 ### Deploy
@@ -67,7 +49,7 @@ services:
     restart: unless-stopped
 
   neo:
-    image: ghcr.io/netapp/netapp-copilot-connector:3.0.4 
+    image: ghcr.io/netapp/netapp-copilot-connector:3.1.0 
     container_name: neo
     # deploy: # Uncomment this section to enable GPU support
     #   resources:
@@ -91,16 +73,9 @@ services:
     environment:
       - PORT=8080
       - PYTHONUNBUFFERED=1
-      - DB_PATH=data/database.db
-      - MS_GRAPH_CLIENT_ID=${MS_GRAPH_CLIENT_ID}
-      - MS_GRAPH_CLIENT_SECRET=${MS_GRAPH_CLIENT_SECRET}
-      - MS_GRAPH_TENANT_ID=${MS_GRAPH_TENANT_ID}
-      - MS_GRAPH_CONNECTOR_ID=${MS_GRAPH_CONNECTOR_ID:-netappcopilot}
-      - MS_GRAPH_CONNECTOR_NAME=${MS_GRAPH_CONNECTOR_NAME:-"NetApp Connector"}
-      - NETAPP_CONNECTOR_LICENSE=${NETAPP_CONNECTOR_LICENSE}
 
   neoui:
-    image: ghcr.io/beezy-dev/neo-ui-framework:3.0.4
+    image: ghcr.io/beezy-dev/neo-ui-framework:3.1.0
     container_name: neoui
     ports:
       - "8080:80"
@@ -140,7 +115,7 @@ volumes:
 
 Then start:
 ```BASH
-sudo podman compose -f neo-all-in.yml up -d
+sudo podman compose -f neo-all-in.yml up --build -d
 ```
 
 Verify that all containers are started and running:
@@ -149,66 +124,57 @@ sudo podman ps
 ```
 Expected output:
 ```BASH
-ONTAINER ID  IMAGE                                          COMMAND         CREATED         STATUS         PORTS                   NAMES
-5eb9df04e9dd  docker.io/library/postgres:16.10-alpine3.21    postgres        12 minutes ago  Up 12 minutes  0.0.0.0:5432->5432/tcp  neodb
-2eaffee6a8c0  ghcr.io/netapp/netapp-copilot-connector:3.0.4                  12 minutes ago  Up 12 minutes  0.0.0.0:8081->8080/tcp  neo
-78b5ea86b582  ghcr.io/beezy-dev/neo-ui-framework:3.0.4       /entrypoint.sh  12 minutes ago  Up 12 minutes  0.0.0.0:8080->80/tcp    neoui
-873d425a8179  docker.io/dockurr/samba:latest                                 12 minutes ago  Up 12 minutes  0.0.0.0:445->445/tcp    neosmb
+CONTAINER ID  IMAGE                                          COMMAND     CREATED        STATUS        PORTS                   NAMES
+d8bbf02435fb  docker.io/library/postgres:16.10-alpine3.21    postgres    7 seconds ago  Up 8 seconds  0.0.0.0:5432->5432/tcp  neodb
+1aefb8db34e8  ghcr.io/netapp/netapp-copilot-connector:3.1.0              6 seconds ago  Up 7 seconds  0.0.0.0:8081->8080/tcp  neo
+792aa53a0689  ghcr.io/beezy-dev/neo-ui-framework:3.1.0                   5 seconds ago  Up 6 seconds  0.0.0.0:8080->80/tcp    neoui
+670ec2f91cdf  docker.io/dockurr/samba:latest                             4 seconds ago  Up 4 seconds  0.0.0.0:445->445/tcp    neosmb
 ```
 
-#### Admin Password
+The logs can be gathered on a different console window with the following command:
+```BASH
+sudo podman compose -f neo-all-in.yml logs -f
+```
+
+### Configure
+
+#### via GUI
+Neo Console is available at ```http://your.ip:8080``` or ```http://myhost.mydomain.tld:8080``` and will welcome you with the following screen:  
+
+<img width="1891" height="962" alt="image" src="https://github.com/user-attachments/assets/87732882-7995-4266-83a2-3e31f59c57e8" />
+
+Go to Settings and select the tab Neo Core to start the configuration
+<img width="1891" height="962" alt="image" src="https://github.com/user-attachments/assets/2cfa73d9-33a1-4165-ab25-1628a579c6f6" />
+
+Once a valid license key is entered and saved, the page will refresh to show the following status:
+<img width="1884" height="952" alt="image" src="https://github.com/user-attachments/assets/5ed90473-fb88-4cbe-971f-fe305a73b98a" />
+
+At this stage, the M365 Copilot Graph or other settings can be configured now or later. Once the desired configuration is complete, click "Setup Complete".  
+This will trigger a restart of Neo's container with the configured settings:
+<img width="1884" height="952" alt="image" src="https://github.com/user-attachments/assets/2711319d-f4f4-47d4-afa8-1b2e037289c6" />
+
+Once Neo has restarted, the page will reload with the status "Complete", and a button "Admin Credentials" will appear to recover the temporary credentials:
+<img width="1884" height="952" alt="image" src="https://github.com/user-attachments/assets/7db70db5-77dc-4cb9-9472-9fe912c7c0f5" />
+
+Credentials
+<img width="1884" height="952" alt="image" src="https://github.com/user-attachments/assets/1e063c89-e210-4c3a-9bbf-110c070b834c" />
+Updating credentials
+<img width="1884" height="952" alt="image" src="https://github.com/user-attachments/assets/0e602ddb-5d68-49f6-a0bb-1cf82539cb27" />
+
 > [!IMPORTANT]
-> This temporary password will not appear again if you restart the container. If you failed to capture it, stop
-> both neodb and neo containers, delete the neodb container and volume, and restart from step one.
+> This temporary password will not be accessible again once you have logged in with the credentials.
+> Make sure to either save it in your password manager or change it in the Users page.
 
-At the first run, recover the temporary ```admin``` password in the container logs:
+<img width="1884" height="952" alt="image" src="https://github.com/user-attachments/assets/ba62c004-d7c1-498c-8082-0af298372d7f" />
 
-```bash
-docker logs neo
-``` 
-Expected output:
-```LOG
-....
-2025-11-10 09:32:54.841 | INFO     | app.enumeration_crawler:start:1133 - EnumerationFirstCrawler started successfully
-2025-11-10 09:32:54.841 | INFO     | app.main:lifespan:202 - EnumerationFirstCrawler started successfully
-2025-11-10 09:32:55.049 | INFO     | app.main:lifespan:230 -
-==================== AUTO-GENERATED ADMIN ACCOUNT ====================
-Username: admin
-Password: 7e;2?r><kT&7At:x]j^(
-====================================================================
-Please log in and change this password immediately!
-
-
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                                                                              ║
-║    ✅ NetApp NEO Connector Started Successfully!                            ║
-║                                                                              ║
-║    🌐 API Server: Ready                                                      ║
-║    📊 Database: Initialized                                                  ║
-║    🔗 Microsoft Graph: Connected                                             ║
-║    📁 SMB Virtual File System: Ready                                         ║
-║                                                                              ║
-║    Ready to serve Microsoft 365 Copilot requests!                            ║
-║                                                                              ║
-╚══════════════════════════════════════════════════════════════════════════════╝
-
-2025-11-10 09:32:55.049 | INFO     | app.background_task_manager:submit_task:138 - Submitted background task 8c740c66-6ddb-4650-b65d-dd980e17835b: schedule_existing_shares
-2025-11-10 09:32:55.049 | INFO     | app.main:lifespan:302 - ⚡ Share scheduling started in background (task_id: 8c740c66-6ddb-4650-b65d-dd980e17835b)
-....
-```
-
-#### Access the UI
-
-Open a browser and point to your host IP on port 8080 like so: http://192.168.122.245:8080 or http://myhost.mydomain.tld:8080
-Make sure that you don't have any firewall rules blocking you. 
-
-The first page will indicate how to login using the password you have recovered, then go in ```Users``` and change your password.
+#### via API
+Neo can also be configured via the API, available at ```http://your.ip:8081/docs``` or ```http://myhost.mydomain.tld:8081/docs```.
 
 ## Troubleshooting
 
 ### postgres
 
-Check if the DB was created using both method to verify DB and networking at the same time:
+Check if the DB was created using both methods to verify the DB and networking at the same time:
 
 - ```sudo podman exec -it neodb psql -h localhost -U postgres -l```     
 - ```psql -U postgres -h 192.168.122.245 -p 5432 postgres -l``` 
@@ -229,24 +195,24 @@ Expected output:
 
 ### Neo
 
-Check the logs to and share these with the team for any potential issues you might encounter:
+Check the logs and share these with the team for any potential issues you might encounter:
 ```bash
 sudo podman logs -f neo
 ```
 
 ### Neo UI 
 
-Check the logs to and share these with the team for any potential issues you might encounter:
+Check the logs and share these with the team for any potential issues you might encounter:
 ```bash
 sudo podman logs -f neo
 ```
 
-Check the web console in Browser for additional error messages.
+Check the web console in the Browser for additional error messages.
 
 
 ### Samba (optional)
 
-Check the logs to and share these with the team for any potential issues you might encounter:
+Check the logs and share these with the team for any potential issues you might encounter:
 ```bash
 sudo podman logs -f neo
 ```

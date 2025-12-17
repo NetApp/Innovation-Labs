@@ -45,19 +45,20 @@ In order for the connector to be able to securely communicate with M365 Copilot.
 14. Fill in the required fields and click "Add".
 15. Copy the value of the client secret.
 
-You have successfully registered the connector in Azure ENTRA. You will need the Application ID, Directory ID, and Client Secret for the next steps. 
+You have successfully registered the connector in Azure ENTRA. You will need the Application ID, Directory ID, and Client Secret for the next steps.
 
 ## 2\. Getting Started
 
 The easiest way to get started is by using the pre-built container image. You can run the connector using Docker/Podman or deploy it to a Kubernetes cluster using Helm.
 
-### Deploy using Docker/Podman 
+### Deploy using Docker/Podman
 
 #### Pull the image
 
 ```bash
 docker pull ghcr.io/netapp/netapp-copilot-connector:2.2.5
 ```
+
 > \[!TIP\]
 > Neo v2.x latest and last GA version is 2.2.5.
 
@@ -84,7 +85,7 @@ NETAPP_CONNECTOR_LICENSE=<License key for the connector> # Please see License se
 docker-compose up -d
 ```
 
-4.  **Access the connector** 
+4.  **Access the connector**
 
 The connector will be deployed and will be accessible on port 8080. You can access the API documentation at `http://localhost:8080/docs`.
 
@@ -97,6 +98,7 @@ This Helm chart deploys NetApp Neo for Microsoft 365 Copilot on a Kubernetes clu
 ## Overview
 
 The chart bootstraps a deployment of NetApp Neo, which includes the following Kubernetes resources:
+
 - **StatefulSet**: Manages the connector pod, ensuring stable network identity and storage.
 - **PersistentVolumeClaim**: Provides persistent storage for connector data (e.g., database).
 - **Service**: Exposes the connector within the cluster on a stable endpoint.
@@ -210,32 +212,31 @@ helm uninstall netapp-connector --namespace netapp-connector
 
 The following table lists the configurable parameters of NetApp Neo chart and their default values.
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `main.name` | The base name for all created resources. | `netapp-connector-main` |
-| `main.replicaCount` | Number of connector pods to run. Only 1 is supported. | `1` |
-| `main.image.repository` | The container image repository. | `ghcr.io/netapp/netapp-copilot-connector` |
-| `main.image.tag` | The container image tag. If empty, defaults to the chart's `appVersion`. | `""` |
-| `main.image.pullPolicy` | The image pull policy. | `Always` |
-| `main.service.type` | The type of Kubernetes service to create. | `ClusterIP` |
-| `main.service.port` | The port exposed by the service and container. | `8080` |
-| `main.ingress.enabled` | If true, create an Ingress resource. | `false` |
-| `main.ingress.host` | The hostname for the Ingress rule. Required if Ingress is enabled. | `nil` |
-| `main.ingress.path` | The path for the Ingress rule. | `/` |
-| `main.ingress.pathType` | The path type for the Ingress rule (`Prefix`, `Exact`, `ImplementationSpecific`). | `Prefix` |
-| `main.ingress.className` | The `ingressClassName` to associate with the Ingress. | `""` |
-| `main.ingress.tls` | Ingress TLS configuration (list of objects with `secretName` and `hosts`). | `[]` |
-| `main.persistence.enabled` | If true, create a `PersistentVolumeClaim`. | `true` |
-| `main.persistence.accessMode` | The access mode for the PVC. | `ReadWriteOnce` |
-| `main.persistence.size` | The size of the persistent volume. | `1Gi` |
-| `main.persistence.mountPath` | The path inside the container where the volume is mounted. | `/app/data` |
-| `main.env.*` | Non-sensitive environment variables. See `values.yaml` for all options. | (various) |
-| `main.credentials.*` | Sensitive credentials stored in a Secret. **Must be provided by the user.** | (placeholders) |
+| Parameter                     | Description                                                                       | Default                                   |
+| ----------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------- |
+| `main.name`                   | The base name for all created resources.                                          | `netapp-connector-main`                   |
+| `main.replicaCount`           | Number of connector pods to run. Only 1 is supported.                             | `1`                                       |
+| `main.image.repository`       | The container image repository.                                                   | `ghcr.io/netapp/netapp-copilot-connector` |
+| `main.image.tag`              | The container image tag. If empty, defaults to the chart's `appVersion`.          | `""`                                      |
+| `main.image.pullPolicy`       | The image pull policy.                                                            | `Always`                                  |
+| `main.service.type`           | The type of Kubernetes service to create.                                         | `ClusterIP`                               |
+| `main.service.port`           | The port exposed by the service and container.                                    | `8080`                                    |
+| `main.ingress.enabled`        | If true, create an Ingress resource.                                              | `false`                                   |
+| `main.ingress.host`           | The hostname for the Ingress rule. Required if Ingress is enabled.                | `nil`                                     |
+| `main.ingress.path`           | The path for the Ingress rule.                                                    | `/`                                       |
+| `main.ingress.pathType`       | The path type for the Ingress rule (`Prefix`, `Exact`, `ImplementationSpecific`). | `Prefix`                                  |
+| `main.ingress.className`      | The `ingressClassName` to associate with the Ingress.                             | `""`                                      |
+| `main.ingress.tls`            | Ingress TLS configuration (list of objects with `secretName` and `hosts`).        | `[]`                                      |
+| `main.persistence.enabled`    | If true, create a `PersistentVolumeClaim`.                                        | `true`                                    |
+| `main.persistence.accessMode` | The access mode for the PVC.                                                      | `ReadWriteOnce`                           |
+| `main.persistence.size`       | The size of the persistent volume.                                                | `1Gi`                                     |
+| `main.persistence.mountPath`  | The path inside the container where the volume is mounted.                        | `/app/data`                               |
+| `main.env.*`                  | Non-sensitive environment variables. See `values.yaml` for all options.           | (various)                                 |
+| `main.credentials.*`          | Sensitive credentials stored in a Secret. **Must be provided by the user.**       | (placeholders)                            |
 
 ---
+
 For more information, see the official [Helm documentation](https://helm.sh/docs/) and [Kubernetes documentation](https://kubernetes.io/docs/home/).
-
-
 
 # 3\. Initial Setup and First Admin User
 
@@ -327,6 +328,7 @@ You can monitor the crawl progress through:
 1.  **Visit the Microsoft 365 Admin Center**: Go to [Search and Intelligence](https://admin.microsoft.com/Adminportal/Home?source=applauncher#/MicrosoftSearch/connectors)
 2.  **Enable Connector Results**: Ensure you have selected **_Include Connector Results_** for NetApp Neo
 3.  **Test in Microsoft 365 Copilot**: Try searching for content from your indexed files using natural language queries
+4.  **Control Access**: Verify that search results respect the original file permissions from your SMB shares. Item level permissions will be attempted to be preserved based on the ACLs read during the crawl, however this may not always be possible depending on your environment and configuration. It is recommended to test access with different user accounts to ensure proper security. In addition to item level permissions, you can also configure (recommended) broader access controls using Microsoft Entra groups and roles using the Microsoft 365 Admin Center -> Copilot Connectors settings -> Staging Permissions to control users and groups that can access content from the connector.
 
 ![Select Include Connector Results in the Search and Intelligence Admin Centre](./media/2025-07-15_09-47-23.png)
 
