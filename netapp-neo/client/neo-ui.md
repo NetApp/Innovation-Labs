@@ -19,7 +19,7 @@ For testing purposes, a local SAMBA service is also included.
 Create a directory called "neo-test" in your home directory or any location of your choice to host the configuration files below.
 
 ### Environment variables
-First, we need to set up the following .env file to capture the database configuration. 
+First, we need to set up the following .env file to configure the database. 
 
 ```INI
 # NetApp Settings (Required)
@@ -153,7 +153,7 @@ At this stage, the M365 Copilot Graph or other settings can be configured now or
 This will trigger a restart of Neo's container with the configured settings:
 <img width="1884" height="952" alt="image" src="https://github.com/user-attachments/assets/2711319d-f4f4-47d4-afa8-1b2e037289c6" />
 
-Once Neo has restarted, the page will reload with the status "Complete" and a button "Admin Credentials" will appear to recover the temporary credentials:
+Once Neo has restarted, the page will reload with the status "Complete", and a button "Admin Credentials" will appear to recover the temporary credentials:
 <img width="1884" height="952" alt="image" src="https://github.com/user-attachments/assets/7db70db5-77dc-4cb9-9472-9fe912c7c0f5" />
 
 ### Admin Password
@@ -173,7 +173,7 @@ Neo can also be configured via the API, available at ```http://your.ip:8081/docs
 
 ### postgres
 
-Check if the DB was created using both method to verify DB and networking at the same time:
+Check if the DB was created using both methods to verify the DB and networking at the same time:
 
 - ```sudo podman exec -it neodb psql -h localhost -U postgres -l```     
 - ```psql -U postgres -h 192.168.122.245 -p 5432 postgres -l``` 
@@ -194,24 +194,24 @@ Expected output:
 
 ### Neo
 
-Check the logs to and share these with the team for any potential issues you might encounter:
+Check the logs and share these with the team for any potential issues you might encounter:
 ```bash
 sudo podman logs -f neo
 ```
 
 ### Neo UI 
 
-Check the logs to and share these with the team for any potential issues you might encounter:
+Check the logs and share these with the team for any potential issues you might encounter:
 ```bash
 sudo podman logs -f neo
 ```
 
-Check the web console in Browser for additional error messages.
+Check the web console in the Browser for additional error messages.
 
 
 ### Samba (optional)
 
-Check the logs to and share these with the team for any potential issues you might encounter:
+Check the logs and share these with the team for any potential issues you might encounter:
 ```bash
 sudo podman logs -f neo
 ```
