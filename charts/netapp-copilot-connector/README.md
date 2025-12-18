@@ -2,6 +2,19 @@
 
 This Helm chart deploys NetApp Neo for Microsoft 365 Copilot on a Kubernetes cluster using `Deployment` resources for scalable application management.
 
+> [!NOTE]
+> **📖 Comprehensive Documentation Available**: This README provides a quick start guide. For detailed documentation including cloud-specific configurations, best practices, and troubleshooting, see the **[Full Documentation](docs/)**.
+
+## Quick Links
+
+- 📖 **[Complete Documentation](docs/)** - Full documentation with detailed guides
+- 🚀 **[Quick Start Guide](docs/getting-started/quick-start.md)** - Get up and running in minutes
+- 🏗️ **[Architecture Overview](docs/getting-started/overview.md)** - Understand the components
+- ☁️ **Cloud Provider Guides**: [Azure](docs/cloud-providers/azure/deployment.md) | [AWS](docs/cloud-providers/aws/deployment.md) | [GCP](docs/cloud-providers/gcp/deployment.md)
+- 🔧 **[Configuration Reference](docs/configuration/values-reference.md)** - All configuration options
+- 📈 **[Scaling Guide](docs/operations/scaling.md)** - Production deployment patterns
+- 🔍 **[Troubleshooting](docs/operations/troubleshooting.md)** - Common issues and solutions
+
 ## Overview
 
 The chart bootstraps a deployment of NetApp Neo, which includes the following Kubernetes resources:
@@ -29,14 +42,19 @@ The chart deploys up to three main components:
 - **Self-contained UI nginx config**: UI image 3.1.0 embeds the nginx template; ConfigMap/volume mounts are no longer needed.
 - **Post-install configuration and credential management**: For appVersion ≥3.1.0, Microsoft Graph credentials and licenses are configured through the product UI/API after deployment.
 
+📖 **[Read more about the architecture →](docs/getting-started/overview.md)**
+
 ## Prerequisites
 
-- Kubernetes cluster (v1.19+ recommended)
-- Helm package manager (v3+)
+- Kubernetes cluster (v1.24+ recommended)
+- Helm package manager (v3.8+)
 - Database for connector data storage:
   - **Option 1**: Enable the built-in PostgreSQL deployment (`postgresql.enabled: true`)
   - **Option 2**: Use an external database (PostgreSQL or MySQL)
 - (Optional) StorageClass for persistent volumes if using the built-in PostgreSQL
+- Microsoft Graph API credentials (configured post-installation for v3.1.0+)
+
+📖 **[Complete prerequisites guide →](docs/getting-started/prerequisites.md)**
 
 ## Installation Guide
 
@@ -330,22 +348,111 @@ Then access the UI at `http://localhost:8080`
 
 Enable Ingress in your `values.yaml` to expose the UI externally. The UI will automatically proxy API requests to the backend service.
 
-**For nginx Ingress Controller:**
+### Generic Kubernetes with nginx Ingress Controller
+
+For standard Kubernetes clusters using nginx Ingress Controller:
+
 ```yaml
+main:
+  service:
+    type: ClusterIP
+    port: 8080
+  ingress:
+    enabled: true
+    host: "api.connector.your-domain.com"
+    className: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      # Session affinity for multi-replica deployments
+      nginx.ingress.kubernetes.io/affinity: "cookie"
+      nginx.ingress.kubernetes.io/session-cookie-name: "neo-session"
+      nginx.ingress.kubernetes.io/session-cookie-max-age: "10800"  # 3 hours
+      nginx.ingress.kubernetes.io/session-cookie-change-on-failure: "true"
+    tls:
+      - secretName: connector-api-tls-secret
+        hosts:
+          - api.connector.your-domain.com
+
 ui:
+  service:
+    type: ClusterIP
+    port: 80
   ingress:
     enabled: true
     host: "connector.your-domain.com"
     className: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
     tls:
       - secretName: connector-ui-tls-secret
         hosts:
           - connector.your-domain.com
 ```
 
-**For Azure Application Gateway Ingress Controller (AGIC):**
+Additionally, configure session affinity on the Service level:
+
 ```yaml
+# Add to values.yaml
+main:
+  service:
+    type: ClusterIP
+    port: 8080
+    sessionAffinity: ClientIP
+    sessionAffinityConfig:
+      clientIP:
+        timeoutSeconds: 10800  # 3 hours
+```
+
+### Azure Kubernetes Service (AKS)
+
+**Option A: Azure Application Gateway Ingress Controller (Recommended)**
+
+For production AKS deployments, use Application Gateway with cookie-based affinity:
+
+```yaml
+main:
+  service:
+    type: ClusterIP
+    port: 8080
+    annotations:
+      # Azure Load Balancer health probe
+      service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: "/health"
+  ingress:
+    enabled: true
+    host: "api.connector.your-domain.com"
+    className: "azure-application-gateway"
+    annotations:
+      # SSL and routing
+      appgw.ingress.kubernetes.io/ssl-redirect: "true"
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      
+      # Cookie-based session affinity (survives pod scaling)
+      appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
+      appgw.ingress.kubernetes.io/affinity-cookie-name: "neo-session"
+      
+      # Timeouts for long-running operations
+      appgw.ingress.kubernetes.io/request-timeout: "1800"
+      appgw.ingress.kubernetes.io/connection-draining-timeout: "30"
+      
+      # Health probe configuration
+      appgw.ingress.kubernetes.io/health-probe-path: "/health"
+      appgw.ingress.kubernetes.io/health-probe-interval: "30"
+      appgw.ingress.kubernetes.io/health-probe-timeout: "30"
+      appgw.ingress.kubernetes.io/health-probe-unhealthy-threshold: "3"
+      
+      # Backend pool settings
+      appgw.ingress.kubernetes.io/backend-protocol: "http"
+    tls:
+      - secretName: connector-api-tls-cert
+        hosts:
+          - api.connector.your-domain.com
+
 ui:
+  service:
+    type: ClusterIP
+    port: 80
   ingress:
     enabled: true
     host: "connector.your-domain.com"
@@ -354,10 +461,317 @@ ui:
       appgw.ingress.kubernetes.io/ssl-redirect: "true"
       cert-manager.io/cluster-issuer: "letsencrypt-prod"
     tls:
-      - secretName: connector-ui-tls-secret
+      - secretName: connector-ui-tls-cert
         hosts:
           - connector.your-domain.com
 ```
+
+**Option B: nginx Ingress Controller with Service-level Session Affinity**
+
+If using nginx Ingress Controller on AKS:
+
+```yaml
+main:
+  service:
+    type: ClusterIP
+    port: 8080
+    sessionAffinity: ClientIP
+    sessionAffinityConfig:
+      clientIP:
+        timeoutSeconds: 10800  # 3 hours
+    annotations:
+      service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: "/health"
+  ingress:
+    enabled: true
+    host: "api.connector.your-domain.com"
+    className: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/affinity: "cookie"
+      nginx.ingress.kubernetes.io/session-cookie-name: "neo-session"
+      nginx.ingress.kubernetes.io/session-cookie-max-age: "10800"
+    tls:
+      - secretName: connector-api-tls-cert
+        hosts:
+          - api.connector.your-domain.com
+```
+
+### Amazon Web Services (AWS) EKS
+
+**Option A: AWS Application Load Balancer (ALB) - Recommended**
+
+For production EKS deployments, use ALB Ingress Controller with sticky sessions:
+
+```yaml
+main:
+  service:
+    type: ClusterIP
+    port: 8080
+    annotations:
+      # ALB target group attributes
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+      service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: "/health"
+      service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval: "30"
+      service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: "deregistration_delay.timeout_seconds=30"
+  ingress:
+    enabled: true
+    host: "api.connector.your-domain.com"
+    className: "alb"
+    annotations:
+      # ALB Configuration
+      alb.ingress.kubernetes.io/scheme: internal
+      alb.ingress.kubernetes.io/target-type: ip
+      
+      # Sticky sessions with application cookie (survives pod scaling)
+      alb.ingress.kubernetes.io/target-group-attributes: |
+        stickiness.enabled=true,
+        stickiness.type=app_cookie,
+        stickiness.app_cookie.cookie_name=NEO-SESSION,
+        stickiness.app_cookie.duration_seconds=10800,
+        deregistration_delay.timeout_seconds=30
+      
+      # Health checks
+      alb.ingress.kubernetes.io/healthcheck-path: /health
+      alb.ingress.kubernetes.io/healthcheck-interval-seconds: '30'
+      alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '10'
+      alb.ingress.kubernetes.io/healthy-threshold-count: '2'
+      alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
+      
+      # Timeouts for long-running operations
+      alb.ingress.kubernetes.io/load-balancer-attributes: |
+        idle_timeout.timeout_seconds=1800
+      
+      # SSL/TLS
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+      alb.ingress.kubernetes.io/ssl-redirect: '443'
+      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:region:account:certificate/cert-id
+      
+      # Optional: WAF protection
+      # alb.ingress.kubernetes.io/wafv2-acl-arn: arn:aws:wafv2:region:account:regional/webacl/name/id
+    tls:
+      - secretName: connector-api-tls-cert
+        hosts:
+          - api.connector.your-domain.com
+
+ui:
+  service:
+    type: ClusterIP
+    port: 80
+  ingress:
+    enabled: true
+    host: "connector.your-domain.com"
+    className: "alb"
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/healthcheck-path: /
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+      alb.ingress.kubernetes.io/ssl-redirect: '443'
+      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:region:account:certificate/cert-id
+    tls:
+      - secretName: connector-ui-tls-cert
+        hosts:
+          - connector.your-domain.com
+```
+
+**Option B: nginx Ingress Controller with Service-level Session Affinity**
+
+If using nginx Ingress Controller on EKS:
+
+```yaml
+main:
+  service:
+    type: ClusterIP
+    port: 8080
+    sessionAffinity: ClientIP
+    sessionAffinityConfig:
+      clientIP:
+        timeoutSeconds: 10800  # 3 hours
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+      service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: "/health"
+  ingress:
+    enabled: true
+    host: "api.connector.your-domain.com"
+    className: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/affinity: "cookie"
+      nginx.ingress.kubernetes.io/session-cookie-name: "neo-session"
+      nginx.ingress.kubernetes.io/session-cookie-max-age: "10800"
+    tls:
+      - secretName: connector-api-tls-cert
+        hosts:
+          - api.connector.your-domain.com
+```
+
+### Google Cloud Platform (GCP) GKE
+
+**Option A: GCP Load Balancer with BackendConfig (Recommended)**
+
+For production GKE deployments, use BackendConfig for advanced session affinity:
+
+First, create a BackendConfig resource (this will be added to your Helm templates):
+
+```yaml
+# This should be added to templates/neo-backendconfig.yaml
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: {{ .Values.main.name }}-backend-config
+  namespace: {{ .Release.Namespace }}
+spec:
+  # Session affinity configuration
+  sessionAffinity:
+    affinityType: "CLIENT_IP_PORT_PROTO"
+    affinityCookieTtlSec: 10800  # 3 hours
+  
+  # Connection draining for graceful pod termination
+  connectionDraining:
+    drainingTimeoutSec: 30
+  
+  # Timeout for long-running operations
+  timeoutSec: 1800  # 30 minutes
+  
+  # Health check configuration
+  healthCheck:
+    checkIntervalSec: 30
+    timeoutSec: 10
+    healthyThreshold: 2
+    unhealthyThreshold: 2
+    type: HTTP
+    requestPath: /health
+    port: {{ .Values.main.env.PORT }}
+```
+
+Then configure your values.yaml:
+
+```yaml
+main:
+  service:
+    type: ClusterIP
+    port: 8080
+    annotations:
+      cloud.google.com/neg: '{"ingress": true}'
+      cloud.google.com/backend-config: '{"default": "netapp-connector-main-backend-config"}'
+  ingress:
+    enabled: true
+    host: "api.connector.your-domain.com"
+    className: "gce"
+    annotations:
+      # GCP-specific annotations
+      kubernetes.io/ingress.class: "gce"
+      kubernetes.io/ingress.global-static-ip-name: "neo-api-static-ip"
+      
+      # Managed SSL certificates
+      networking.gke.io/managed-certificates: "neo-api-managed-cert"
+      
+      # Backend configuration with session affinity
+      cloud.google.com/backend-config: '{"default": "netapp-connector-main-backend-config"}'
+      
+      # Optional: Cloud Armor for WAF protection
+      # cloud.google.com/armor-config: '{"default": "neo-security-policy"}'
+      
+      # Network Endpoint Groups for better performance
+      cloud.google.com/neg: '{"ingress": true}'
+    tls:
+      - secretName: connector-api-tls-cert
+        hosts:
+          - api.connector.your-domain.com
+
+ui:
+  service:
+    type: ClusterIP
+    port: 80
+    annotations:
+      cloud.google.com/neg: '{"ingress": true}'
+  ingress:
+    enabled: true
+    host: "connector.your-domain.com"
+    className: "gce"
+    annotations:
+      kubernetes.io/ingress.class: "gce"
+      kubernetes.io/ingress.global-static-ip-name: "neo-ui-static-ip"
+      networking.gke.io/managed-certificates: "neo-ui-managed-cert"
+      cloud.google.com/neg: '{"ingress": true}'
+    tls:
+      - secretName: connector-ui-tls-cert
+        hosts:
+          - connector.your-domain.com
+```
+
+Create a ManagedCertificate resource (add to templates/neo-managed-cert.yaml):
+
+```yaml
+{{- if and .Values.main.ingress.enabled (eq .Values.main.ingress.className "gce") }}
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: neo-api-managed-cert
+  namespace: {{ .Release.Namespace }}
+spec:
+  domains:
+    - {{ .Values.main.ingress.host }}
+{{- end }}
+```
+
+**Option B: nginx Ingress Controller with Service-level Session Affinity**
+
+If using nginx Ingress Controller on GKE:
+
+```yaml
+main:
+  service:
+    type: ClusterIP
+    port: 8080
+    sessionAffinity: ClientIP
+    sessionAffinityConfig:
+      clientIP:
+        timeoutSeconds: 10800  # 3 hours
+    annotations:
+      cloud.google.com/neg: '{"ingress": true}'
+  ingress:
+    enabled: true
+    host: "api.connector.your-domain.com"
+    className: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/affinity: "cookie"
+      nginx.ingress.kubernetes.io/session-cookie-name: "neo-session"
+      nginx.ingress.kubernetes.io/session-cookie-max-age: "10800"
+    tls:
+      - secretName: connector-api-tls-cert
+        hosts:
+          - api.connector.your-domain.com
+```
+
+### Session Affinity Comparison
+
+| Platform | Recommended Approach | Timeout | Survives Pod Scaling | Best For |
+|----------|---------------------|---------|---------------------|----------|
+| **Azure AKS** | Application Gateway cookie affinity | 3 hours | ✅ Yes | Production deployments with WAF |
+| **AWS EKS** | ALB sticky sessions (app_cookie) | 3 hours | ✅ Yes | Production deployments with AWS integration |
+| **GCP GKE** | BackendConfig CLIENT_IP_PORT_PROTO | 3 hours | ✅ Yes | Production deployments with GCP services |
+| **Generic K8s** | nginx cookie affinity + Service ClientIP | 3 hours | ⚠️ Partial | Development and multi-cloud |
+
+### Important Notes
+
+> [!IMPORTANT]
+> **Session Affinity Requirements:**
+> - **Minimum timeout**: 1800 seconds (30 minutes) for file operations
+> - **Recommended timeout**: 10800 seconds (3 hours) for long-running Microsoft Graph operations
+> - **Never use**: 60 seconds or less - this will break active sessions
+> 
+> When scaling backend replicas (`.Values.main.replicaCount > 1`):
+> - Use cloud-native load balancers with cookie-based affinity when possible
+> - Cookie-based affinity survives pod restarts and scaling operations
+> - ClientIP affinity is simpler but breaks during pod scaling
+> - Always enable connection draining to handle graceful shutdowns
+
 </details>
 
 <details>
@@ -1025,36 +1439,3 @@ aws rds create-db-instance \
   --engine aurora-postgresql \
   --region us-east-1
 ```
-
----
-
-## Version History
-
-| Chart Version | App Version | Changes |
-|---------------|-------------|---------|
-| 25.12.1 | 3.1.0 | Default Neo Core and Console images updated to 3.1.0; PostgreSQL images bumped to 16.10-alpine3.21; Microsoft Graph credentials now configured post-install; documentation refreshed |
-| 25.11.7 | 3.0.4 | Bumping version of Neo UI Framework version to 3.0.4-2 for both the helm chart and docker file deployment |
-| 25.11.6 | 3.0.4 | netapp-copilot-connector minor fix: renaming resources, bumping neo-ui tag to 3.0.4-1 |
-| 25.11.5 | 3.0.4 | netapp-copilot-connector minor fix: removing unused configmap, removing serviceName from deployment templates, fixing value assignment from values file for namespace, and reshaping documentation |
-| 25.11.4 | 3.0.4 | Initial release with Deployment-based architecture |
-
-## Support and Contributing
-
-For issues, questions, or contributions:
-- GitHub Issues: [https://github.com/NetApp/Innovation-Labs/issues](https://github.com/NetApp/Innovation-Labs/issues)
-- Documentation: [https://netapp.github.io/Innovation-Labs/](https://netapp.github.io/Innovation-Labs/)
-
-## License
-
-See the [LICENSE](../../LICENSE) file for details.
-
----
-
-For more information, see the official:
-- [Helm documentation](https://helm.sh/docs/)
-- [Kubernetes documentation](https://kubernetes.io/docs/home/)
-- [Azure Kubernetes Service (AKS) documentation](https://learn.microsoft.com/azure/aks/)
-- [Azure Database for PostgreSQL documentation](https://learn.microsoft.com/azure/postgresql/)
-- [Amazon Elastic Kubernetes Service (EKS) documentation](https://docs.aws.amazon.com/eks/)
-- [Amazon RDS for PostgreSQL documentation](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_PostgreSQL.html)
-- [Amazon Aurora PostgreSQL documentation](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.AuroraPostgreSQL.html)

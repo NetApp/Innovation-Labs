@@ -15,3 +15,7 @@ spec:
       port: {{ .Values.main.service.port }}
       targetPort: {{ .Values.main.env.PORT }}
   type: {{ .Values.main.service.type }}
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 3600
