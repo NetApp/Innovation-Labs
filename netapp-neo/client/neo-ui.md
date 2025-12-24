@@ -22,10 +22,25 @@ Create a directory called "neo-test" in your home directory or any location of y
 First, we need to set up the following .env file to configure the database. 
 
 ```INI
-# NetApp Settings (Required)
-DATABASE_URL=postgresql://postgres:neodbsecret@neodb:5432/neoconnectortest      # <== Needs to be changed! 
+## NetApp Neo Settings (Required)
+
+## NetApp Neo Database Settings (required)
+DBT=postgres                    ## Database type: postgres or mysql
+DBB=5432                        ## Database binding port: postgres is 5432 and mysql is 3306
+DBU=postgres                    ## Database username
+DBP=neodbsecret                 ## Database password
+DBH=neodb                       ## Dababase host: if using included postgres then value is neodb
+DBN=neoconnectortest            ## Database name
+
+##
+DATABASE_URL=${DBT}://${DBU}:${DBP}@${DBH}:${DBB}/${DBN}      # <== Needs to be changed! 
 ## or for MySQL:
 #DATABASE_URL=mysql://user:password@localhost:3306/neoconnectortest
+
+## (Un)comment if using or not the included postgres database
+POSTGRES_USER=${DBU}
+POSTGRES_PASSWORD=${DBP}
+POSTGRES_DB=${DBN}
 ```
 
 ### Deploy
@@ -33,13 +48,12 @@ DATABASE_URL=postgresql://postgres:neodbsecret@neodb:5432/neoconnectortest      
 ```YAML
 services:
 
+  ## (Un)comment if using or not the included postgres database
   neodb:
     image: docker.io/library/postgres:16.10-alpine3.21
     container_name: neodb
-    environment:      
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: neodbsecret
-      POSTGRES_DB: neoconnectortest
+    env_file:
+      - .env
     ports:
       - 5432:5432
     networks:
@@ -73,6 +87,7 @@ services:
     environment:
       - PORT=8080
       - PYTHONUNBUFFERED=1
+    restart: unless-stopped
 
   neoui:
     image: ghcr.io/beezy-dev/neo-ui-framework:3.1.0
@@ -85,6 +100,7 @@ services:
       - netapp-neo
     restart: unless-stopped
 
+  ## (Un)comment if using or not the included SMB/CIFS service
   neosmb:
     image: docker.io/dockurr/samba
     container_name: neosmb
@@ -106,6 +122,7 @@ networks:
   netapp-neo:
     driver: bridge
 
+## (Un)comment if using or not the included postgres database or/and SMB/CIFS service
 volumes:
   neodb:
     driver: local
