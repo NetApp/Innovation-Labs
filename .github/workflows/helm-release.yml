@@ -2,8 +2,9 @@ name: Release Charts
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+    paths:
+      - 'charts/**'   # Only run if charts change
 
 jobs:
   release:
