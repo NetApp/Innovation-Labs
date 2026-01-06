@@ -1,0 +1,30 @@
+{
+  "name": "innovation-labs",
+  "version": "1.0.0",
+  "description": "Welcome to **NetApp Innovation Labs**!",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NetApp/Innovation-Labs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/NetApp/Innovation-Labs/issues"
+  },
+  "homepage": "https://github.com/NetApp/Innovation-Labs#readme",
+  "devDependencies": {
+    "vitepress": "^1.6.4"
+  }
+}

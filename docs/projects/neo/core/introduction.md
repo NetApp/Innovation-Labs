@@ -1,0 +1,15 @@
+# Introduction
+
+Welcome to the NetApp Connector (Neo) documentation. This guide will help you understand, deploy, and manage the NetApp Connector (Neo).
+
+## What is NetApp Neo
+
+NetApp Neo represents an enterprise-grade solution for transforming unstructured data into AI-ready knowledge at scale. The connector addresses a fundamental challenge facing organizations: vast amounts of valuable business information remains trapped in complex file formats, legacy storage systems, and distributed repositories, making it inaccessible for AI applications. By providing GPU-accelerated OCR processing, intelligent metadata extraction, and support for unlimited file sizes, Neo prepares enterprise data for AI consumption while maintaining existing security controls and permission structures. Organizations can leverage their existing NetApp storage infrastructure without data migration, enabling rapid deployment of AI initiatives that require access to institutional knowledge across diverse file types including PDFs, office documents, images, and audio files.​
+
+## Microsoft 365 Copilot Integration
+
+Within the Microsoft 365 ecosystem, NetApp Neo functions as a sophisticated Copilot Connector that extends Microsoft 365 Copilot's capabilities beyond native Microsoft 365 documents. The connector automatically resolves on-premises Active Directory ACLs to corresponding Microsoft Entra objects, ensuring users only receive Copilot responses from data they have permission to access. Deployed as a containerized application via Helm charts or Docker Compose, the second-generation connector delivers 40 times faster extraction performance than previous VM-based implementations through parallelization and distributed architecture. This integration enables Copilot to ground responses in comprehensive organizational knowledge, transforming generic AI outputs into contextually relevant answers that reflect your business data, customer information, and institutional expertise stored on NetApp file shares.​
+
+## Cross-Platform AI Extensibility
+
+NetApp's adoption of the Model Context Protocol (MCP) positions the Neo connector as a universal bridge between enterprise data and the broader AI ecosystem. Through MCP server capabilities, organizations can expose NetApp-managed knowledge bases to MCP-compatible platforms including Azure Foundry IQ (which supports agentic RAG with built-in user permissions), Google Agent Workspace, ChatGPT Enterprise, Claude Desktop, and custom AI applications. The MCP standard enables dynamic tool and data provisioning to AI agents while reducing maintenance costs through standardized integration patterns. For sovereign AI deployments and private cloud environments, MCP provides a secure, protocol-based approach to connecting enterprise knowledge bases without exposing proprietary data to external services, allowing organizations to build on-premises or air-gapped AI solutions that leverage the same structured knowledge extraction capabilities.
