@@ -2,9 +2,6 @@
 
 This Helm chart deploys NetApp Neo for Microsoft 365 Copilot on a Kubernetes cluster using `Deployment` resources for scalable application management.
 
-> [!NOTE]
-> **📖 Comprehensive Documentation Available**: This README provides a quick start guide. For detailed documentation including cloud-specific configurations, best practices, and troubleshooting, see the **[Full Documentation](docs/)**.
-
 ## Overview
 
 The chart bootstraps a deployment of NetApp Neo, which includes the following Kubernetes resources:
