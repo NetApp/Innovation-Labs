@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -37,6 +37,11 @@ jobs:
       - name: Build VitePress Docs
         run: npm run docs:build
 
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+                  
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
