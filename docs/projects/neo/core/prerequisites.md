@@ -16,6 +16,7 @@
 - Database:
   - PostgreSQL Database (v16+) - can be self-hosted or managed (e.g. AWS RDS, Azure Database for PostgreSQL, etc)
   - MySQL Database (v8+) - can be self-hosted or managed (e.g. AWS RDS, Azure Database for MySQL, etc)
+- ```cifs-utils``` should be install on your Linux host
 
 ## Database Options
 

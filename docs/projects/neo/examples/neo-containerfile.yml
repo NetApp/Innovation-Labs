@@ -1,0 +1,82 @@
+services:
+
+  ## (Un)comment if using or not the included postgres database
+  neodb:
+    image: docker.io/library/postgres:16.10-alpine3.21
+    container_name: neodb
+    env_file:
+      - .env
+    ports:
+      - 5432:5432
+    networks:
+      - netapp-neo
+    volumes:
+      - neodb:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  neo:
+    image: ghcr.io/netapp/netapp-copilot-connector:3.1.0 
+    container_name: neo
+    # deploy: # Uncomment this section to enable GPU support
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1 # Adjust count based on your GPU availability
+    #           capabilities: [gpu]
+    cap_add:
+      - SYS_ADMIN
+      - DAC_READ_SEARCH
+      - DAC_OVERRIDE
+    security_opt:
+      - apparmor:unconfined
+    ports:
+      - "8081:8080"
+    networks:
+      - netapp-neo      
+    env_file:
+      - .env
+    environment:
+      - PORT=8080
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+
+  neoui:
+    image: ghcr.io/beezy-dev/neo-ui-framework:3.1.0
+    container_name: neoui
+    ports:
+      - "8080:80"
+    environment:
+      - NEO_API=http://neo:8080   # ← add this
+    networks:
+      - netapp-neo
+    restart: unless-stopped
+
+  ## (Un)comment if using or not the included SMB/CIFS service
+  neosmb:
+    image: docker.io/dockurr/samba
+    container_name: neosmb
+    environment:
+      NAME: "data"
+      USER: "smb"
+      PASS: "smb"
+      UID: 1000
+      GID: 1000
+    ports:
+      - 445:445
+    networks:
+      - netapp-neo      
+    volumes:
+      - neosmb:/storage
+    restart: unless-stopped
+
+networks:
+  netapp-neo:
+    driver: bridge
+
+## (Un)comment if using or not the included postgres database or/and SMB/CIFS service
+volumes:
+  neodb:
+    driver: local
+  neosmb:
+    driver: local

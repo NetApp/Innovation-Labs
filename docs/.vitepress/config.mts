@@ -56,8 +56,7 @@ export default defineConfig({
             { text: 'Quick Start', link: '/projects/neo/core/quick-start', 
               items: [
                 { text: 'Kubernetes', link: '/projects/neo/core/qs-kubernetes' },
-                { text: 'Docker', link: '/projects/neo/core/qs-docker' },
-                { text: 'Podman', link: '/projects/neo/core/qs-podman' },
+                { text: 'Docker/Podman', link: '/projects/neo/core/qs-docker' },
               ],
             },
             { text: 'Deployment', link: '/projects/neo/core/deployment',

@@ -1,22 +1,19 @@
-# Quick Start
-
-This guide will help you get started with deploying the NetApp Connector using your preferred container platform.
-
-# Deploy using K8s using Helm (Recommended)
+# Deploy using Helm Charts
 
 This Helm chart deploys NetApp Neo for Microsoft 365 Copilot on a Kubernetes cluster using `Deployment` resources for scalable application management.
+
+> [!NOTE]
+> **📖 Comprehensive Documentation Available**: This README provides a quick start guide. For detailed documentation including cloud-specific configurations, best practices, and troubleshooting, see the **[Full Documentation](docs/)**.
 
 ## Overview
 
 The chart bootstraps a deployment of NetApp Neo, which includes the following Kubernetes resources:
-
 - **Deployments**: Manages both the backend connector and UI pods with configurable replicas and rolling updates.
 - **Services**: Exposes the connector and UI within the cluster on stable endpoints.
 - **Secrets**: Securely stores sensitive credentials like Microsoft Graph API keys, NetApp license, and database connection details.
-- **ConfigMaps**: Manages non-sensitive environment variables, configuration, and nginx proxy settings for the UI.
+- **ConfigMaps**: Provide non-sensitive backend environment variables. The UI now bundles its nginx config, so no ConfigMap mount is required.
 - **StatefulSet**: (Optional) Manages PostgreSQL database with persistent storage when enabled.
 - **Ingress**: (Optional) Manages external access to both the connector and UI services.
-
 
 ## Architecture
 
@@ -32,15 +29,18 @@ The chart deploys up to three main components:
 - **InitContainer Health Check**: Ensures PostgreSQL is ready before starting the backend connector
 - **Nginx Reverse Proxy**: UI automatically proxies API requests from `/api/*` to the backend service
 - **Separation of Concerns**: Non-sensitive configuration in ConfigMaps, sensitive data in Secrets
+- **Self-contained UI nginx config**: UI image 3.1.0 embeds the nginx template; ConfigMap/volume mounts are no longer needed.
+- **Post-install configuration and credential management**: For appVersion ≥3.1.0, Microsoft Graph credentials and licenses are configured through the product UI/API after deployment.
 
 ## Prerequisites
 
-- Kubernetes cluster (v1.19+ recommended)
-- Helm package manager (v3+)
+- Kubernetes cluster (v1.24+ recommended)
+- Helm package manager (v3.8+)
 - Database for connector data storage:
   - **Option 1**: Enable the built-in PostgreSQL deployment (`postgresql.enabled: true`)
   - **Option 2**: Use an external database (PostgreSQL or MySQL)
 - (Optional) StorageClass for persistent volumes if using the built-in PostgreSQL
+- Microsoft Graph API credentials (configured post-installation for v3.1.0+)
 
 ## Installation Guide
 
@@ -48,62 +48,57 @@ The chart deploys up to three main components:
 
 First, add the NetApp Innovation Labs repository to your Helm client.
 
-```bash
+```sh
 helm repo add innovation-labs https://netapp.github.io/Innovation-Labs/
 helm repo update
 ```
+
 ### 2. Install the Chart
 
 There are two primary methods for installing the chart: using command-line flags (ideal for testing) or a custom values file (recommended for production).
 
+> [!TIP]
+> Deploying an older appVersion (<3.1.0)? Then use version 25.11.7 of the chart to continue using `--set main.credentials.*` flags to pre-seed Microsoft Graph values.
+
 #### Method 1: Using Command-Line Flags (for Development)
 
-##### Option A: With Built-in PostgreSQL (Auto-configured)
+<details>
+  <summary> Option A: With Built-in PostgreSQL (Auto-configured)</summary>
 
-```bash
-helm install netapp-connector innovation-labs/netapp-connector --version 25.11.4 \
+```sh
+helm install netapp-connector innovation-labs/netapp-connector --version 25.12.1 \
   --namespace netapp-connector \
   --create-namespace \
   --set postgresql.enabled=true \
   --set postgresql.auth.password="your-secure-password" \
-  --set postgresql.auth.database="netappconnector" \
-  --set main.credentials.MS_GRAPH_CONNECTOR_ID="netappconnector" \
-  --set main.credentials.MS_GRAPH_CLIENT_ID="<your-graph-client-id>" \
-  --set main.credentials.MS_GRAPH_CLIENT_SECRET="<your-graph-client-secret>" \
-  --set main.credentials.MS_GRAPH_TENANT_ID="<your-graph-tenant-id>" \
-  --set main.credentials.NETAPP_CONNECTOR_LICENSE="<your-license-key>"
+  --set postgresql.auth.database="netappconnector"
 ```
 
-<blockquote style="background-color: #e7f3ff; border-left: 4px solid #2196F3; padding: 10px; margin: 10px 0;">
-<strong>📘 Note:</strong> When <code>postgresql.enabled=true</code>, the <code>DATABASE_URL</code> is automatically generated as:
-<code>postgresql://postgres:your-secure-password@neodb:5432/netappconnector</code>
-</blockquote>
+</details>  
 
-##### Option B: With External Database
+<details>
+<summary> Option B: With External Database </summary>
 
-```bash
-helm install netapp-connector innovation-labs/netapp-connector --version 25.11.4 \
+```sh
+helm install netapp-connector innovation-labs/netapp-connector --version 25.12.1 \
   --namespace netapp-connector \
   --create-namespace \
   --set postgresql.enabled=false \
-  --set main.credentials.MS_GRAPH_CONNECTOR_ID="netappconnector" \
-  --set main.credentials.MS_GRAPH_CLIENT_ID="<your-graph-client-id>" \
-  --set main.credentials.MS_GRAPH_CLIENT_SECRET="<your-graph-client-secret>" \
-  --set main.credentials.MS_GRAPH_TENANT_ID="<your-graph-tenant-id>" \
-  --set main.credentials.NETAPP_CONNECTOR_LICENSE="<your-license-key>" \
   --set main.env.DB_TYPE="postgres" \
   --set main.env.DATABASE_URL="postgresql://user:password@external-host:5432/database"
 ```
 
- 
+</details>
+
 
 #### Method 2: Using a Custom Values File (Recommended for Production)
 
 For production environments, it is highly recommended to use a custom `values.yaml` file to manage your configuration. This makes your deployment more readable, repeatable, and easier to manage in version control.
 
-##### Option A: With Built-in PostgreSQL
+##### Create a file named `my-values.yaml` with your configuration:
 
-Create a file named `my-values.yaml` with your configuration:
+<details>
+<summary>Option A: With Built-in PostgreSQL</summary>
 
 ```yaml
 # my-values.yaml
@@ -116,7 +111,7 @@ postgresql:
     database: netappconnector
   persistence:
     enabled: true
-    storageClass: "" # Use default StorageClass, or specify "managed-premium" for AKS
+    storageClass: ""  # Use default StorageClass, or specify "managed-premium" for AKS
     size: 10Gi
   resources:
     requests:
@@ -126,24 +121,14 @@ postgresql:
       cpu: 1000m
       memory: 1Gi
 main:
-  # --- Required Credentials ---
-  credentials:
-    MS_GRAPH_CONNECTOR_ID: "netappconnector"
-    MS_GRAPH_CLIENT_ID: "<your-graph-client-id>"
-    MS_GRAPH_CLIENT_SECRET: "<your-graph-client-secret>"
-    MS_GRAPH_TENANT_ID: "<your-graph-tenant-id>"
-    NETAPP_CONNECTOR_LICENSE: "<your-license-key>"
-  # --- Database Configuration ---
-  # DATABASE_URL is auto-generated when postgresql.enabled=true
+  # --- Internal Database Configuration ---
   env:
-    DB_TYPE: "postgres"
-    # Leave DATABASE_URL empty to auto-generate from postgresql settings
     DATABASE_URL: ""
   # --- Optional Backend Ingress Configuration ---
   ingress:
     enabled: true
     host: "api.connector.your-domain.com"
-    className: "nginx" # or any relevant value to your environment
+    className: "nginx"  # or any relevant value to your environment
     tls:
       - secretName: connector-api-tls-secret
         hosts:
@@ -158,11 +143,11 @@ ui:
       - secretName: connector-ui-tls-secret
         hosts:
           - connector.your-domain.com
-``` 
+```
+</details>
 
-##### Option B: With External Database
-
-Create a file named `my-values.yaml` with your configuration:
+<details>
+<summary>Option B: With External Database</summary>
 
 ```yaml
 # my-values.yaml
@@ -170,16 +155,8 @@ Create a file named `my-values.yaml` with your configuration:
 postgresql:
   enabled: false
 main:
-  # --- Required Credentials ---
-  credentials:
-    MS_GRAPH_CONNECTOR_ID: "netappconnector"
-    MS_GRAPH_CLIENT_ID: "<your-graph-client-id>"
-    MS_GRAPH_CLIENT_SECRET: "<your-graph-client-secret>"
-    MS_GRAPH_TENANT_ID: "<your-graph-tenant-id>"
-    NETAPP_CONNECTOR_LICENSE: "<your-license-key>"
   # --- External Database Configuration ---
   env:
-    DB_TYPE: "postgres" # or "mysql"
     # For PostgreSQL
     DATABASE_URL: "postgresql://username@servername:password@servername.postgres.database.mydomain.com:5432/database_name" # parameter like ?sslmode=require could be added
     # For MySQL
@@ -188,7 +165,7 @@ main:
   ingress:
     enabled: true
     host: "api.connector.your-domain.com"
-    className: "nginx" # or any relevant value to your environment
+    className: "nginx"  # or any relevant value to your environment
     annotations:
       cert-manager.io/cluster-issuer: "letsencrypt-prod"
     tls:
@@ -200,7 +177,7 @@ ui:
   ingress:
     enabled: true
     host: "connector.your-domain.com"
-    className: "nginx" # or any relevant value to your environment
+    className: "nginx"  # or any relevant value to your environment
     annotations:
       cert-manager.io/cluster-issuer: "letsencrypt-prod"
     tls:
@@ -208,60 +185,46 @@ ui:
         hosts:
           - connector.your-domain.com
 ```
+> [!WARNING]
+> **Security Best Practices:**
+> - Do not commit `my-values.yaml` with plain-textsecrets to version control
+> - Use a Key Vault with the CSI Secret Store Driver for production
+> - Consider a KMS with Managed Identity for database authentication   
 
+</details>   
 
-<blockquote style="background-color: #fff3cd; border-left: 4px solid #ff9800; padding: 10px; margin: 10px 0;">
-<strong>⚠️ Security Best Practices:</strong>
-<ul>
-<li>Do not commit <code>my-values.yaml</code> with plain-text secrets to version control</li>
-<li>Use a Key Vault with the CSI Secret Store Driver for production</li>
-<li>Consider a KMS with Managed Identity for database authentication</li>
-</ul>
-</blockquote>
-
-##### Install the chart using your custom values file
-
-```bash
-helm install netapp-connector innovation-labs/netapp-connector --version 25.11.4 \
+##### Install the chart using your custom values file:
+```sh
+helm install netapp-connector innovation-labsnetapp-connector --version 25.12.1 \
   --namespace netapp-connector \
   --create-namespace \
   -f my-values.yaml
 ```
 
-<blockquote style="background-color: #ffe6e6; border-left: 4px solid #f44336; padding: 10px; margin: 10px 0;">
-<strong>❗ Important:</strong> The connector requires the following mandatory values to start correctly:
-<ul>
-<li><code>main.credentials.MS_GRAPH_CONNECTOR_ID</code> - Unique identifier for your connector instance</li>
-<li><code>main.credentials.MS_GRAPH_CLIENT_ID</code> - M365 Copilot Application (Client) ID</li>
-<li><code>main.credentials.MS_GRAPH_CLIENT_SECRET</code> - M365 Copilot Application Client Secret</li>
-<li><code>main.credentials.MS_GRAPH_TENANT_ID</code> - M365 Copilot Tenant ID</li>
-<li><code>main.credentials.NETAPP_CONNECTOR_LICENSE</code> - NetApp Neo license key</li>
-<li><code>main.env.DATABASE_URL</code> - Connection string (auto-generated if <code>postgresql.enabled=true</code>)</li>
-</ul>
-<p><strong>Database Options:</strong></p>
-<ul>
-<li>Set <code>postgresql.enabled: true</code> to deploy PostgreSQL within the cluster (auto-configures <code>DATABASE_URL</code>)</li>
-<li>Set <code>postgresql.enabled: false</code> and provide an external database URL explicitly</li>
-</ul>
-</blockquote>
+> [!IMPORTANT]
+> The connector requires the following mandatory values to start correctly:
+> - `main.env.DATABASE_URL` - Connection string (auto-generated if `postgresql.enabled=true`)
+> 
+> **Database Options:**
+> - Set `postgresql.enabled: true` to deploy PostgreSQL within the cluster (auto-configures `DATABASE_URL`)
+> - Set `postgresql.enabled: false` and provide an external database URL explicitly
 
 ## Database Setup
 
 The connector requires a database (PostgreSQL or MySQL) for storing connector data. You have two options:
 
-### Option 1: Built-in PostgreSQL (Recommended for Development/Testing)
+<details>
+<summary> Option 1: Built-in PostgreSQL (Recommended for Development/Testing)</summary>
 
 Enable the integrated PostgreSQL deployment by setting `postgresql.enabled: true`. This will deploy a PostgreSQL StatefulSet with persistent storage.
 
 **Advantages:**
-
 - Simple setup with no external dependencies
 - Automatic configuration (DATABASE_URL is auto-generated)
 - Persistent storage with PersistentVolumeClaims
 - InitContainer ensures database readiness before backend starts
 
 **Configuration Example:**
-
 ```yaml
 postgresql:
   enabled: true
@@ -276,17 +239,17 @@ postgresql:
 ```
 
 **Auto-generated Connection String:**
-
 ```
 postgresql://postgres:secure-password@neodb:5432/netappconnector
 ```
+</details>
 
-### Option 2: External Database (Recommended for Production)
+<details>
+<summary> Option 2: External Database (Recommended for Production)</summary>
 
 Use an external PostgreSQL or MySQL database by setting `postgresql.enabled: false` and providing the connection details.
 
 **PostgreSQL Example:**
-
 ```yaml
 postgresql:
   enabled: false
@@ -298,7 +261,6 @@ main:
 ```
 
 **MySQL Example:**
-
 ```yaml
 postgresql:
   enabled: false
@@ -310,7 +272,6 @@ main:
 ```
 
 **AWS RDS for PostgreSQL:**
-
 ```yaml
 main:
   env:
@@ -319,7 +280,6 @@ main:
 ```
 
 **AWS RDS for MySQL:**
-
 ```yaml
 main:
   env:
@@ -328,7 +288,6 @@ main:
 ```
 
 **Azure Database for PostgreSQL Flexible Server:**
-
 ```yaml
 main:
   env:
@@ -337,7 +296,6 @@ main:
 ```
 
 **Azure Database for MySQL Flexible Server:**
-
 ```yaml
 main:
   env:
@@ -345,53 +303,142 @@ main:
     DATABASE_URL: "mysql://username:password@servername.mysql.database.azure.com:3306/database_name?ssl-mode=REQUIRED"
 ```
 
-<blockquote style="background-color: #e8f5e9; border-left: 4px solid #4caf50; padding: 10px; margin: 10px 0;">
-<strong>💡 Security Best Practices:</strong>
-<ul>
-<li><strong>Azure</strong>: Use <strong>Azure Managed Identity</strong> instead of passwords for database authentication</li>
-<li><strong>AWS</strong>: Use <strong>IAM Database Authentication</strong> for password-less connections</li>
-<li>Store connection strings in <strong>Azure Key Vault</strong> or <strong>AWS Secrets Manager</strong></li>
-<li>Enable <strong>Microsoft Defender for Cloud</strong> or <strong>Amazon GuardDuty</strong> for threat protection</li>
-<li>Use <strong>Azure Private Endpoint</strong> or <strong>AWS PrivateLink</strong> to keep database traffic within your VNet/VPC</li>
-</ul>
-</blockquote> 
+> [!TIP]
+> **Security Best Practices:**
+> - **Azure**: Use **Azure Managed Identity** instead of passwords for database authentication
+> - **AWS**: Use **IAM Database Authentication** for password-less connections
+> - Store connection strings in **Azure Key Vault** or **AWS Secrets Manager**
+> - Enable **Microsoft Defender for Cloud** or **Amazon GuardDuty** for threat protection
+> - Use **Azure Private Endpoint** or **AWS PrivateLink** to keep database traffic within your VNet/VPC
+</details>
+
 
 ## Accessing the Application
 
 After installation, you can access the application in several ways:
 
-### Option 1: Port Forwarding (Development)
+<details>
+<summary> Option 1: Port Forwarding (Development)</summary>
 
 Forward the UI service port to your local machine:
 
-```bash
+```sh
 kubectl port-forward -n netapp-connector svc/netapp-connector-ui 8080:80
-``` 
+```
 
 Then access the UI at `http://localhost:8080`
+</details>
 
-### Option 2: Ingress (Production)
+<details>
+<summary> Option 2: Ingress (Production)</summary>
 
 Enable Ingress in your `values.yaml` to expose the UI externally. The UI will automatically proxy API requests to the backend service.
 
-**For nginx Ingress Controller:**
+### Generic Kubernetes with nginx Ingress Controller
+
+For standard Kubernetes clusters using nginx Ingress Controller:
 
 ```yaml
+main:
+  service:
+    type: ClusterIP
+    port: 8080
+  ingress:
+    enabled: true
+    host: "api.connector.your-domain.com"
+    className: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      # Session affinity for multi-replica deployments
+      nginx.ingress.kubernetes.io/affinity: "cookie"
+      nginx.ingress.kubernetes.io/session-cookie-name: "neo-session"
+      nginx.ingress.kubernetes.io/session-cookie-max-age: "10800"  # 3 hours
+      nginx.ingress.kubernetes.io/session-cookie-change-on-failure: "true"
+    tls:
+      - secretName: connector-api-tls-secret
+        hosts:
+          - api.connector.your-domain.com
+
 ui:
+  service:
+    type: ClusterIP
+    port: 80
   ingress:
     enabled: true
     host: "connector.your-domain.com"
     className: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
     tls:
       - secretName: connector-ui-tls-secret
         hosts:
           - connector.your-domain.com
 ```
 
-**For Azure Application Gateway Ingress Controller (AGIC):**
+Additionally, configure session affinity on the Service level:
 
 ```yaml
+# Add to values.yaml
+main:
+  service:
+    type: ClusterIP
+    port: 8080
+    sessionAffinity: ClientIP
+    sessionAffinityConfig:
+      clientIP:
+        timeoutSeconds: 10800  # 3 hours
+```
+
+### Azure Kubernetes Service (AKS)
+
+**Option A: Azure Application Gateway Ingress Controller (Recommended)**
+
+For production AKS deployments, use Application Gateway with cookie-based affinity:
+
+```yaml
+main:
+  service:
+    type: ClusterIP
+    port: 8080
+    annotations:
+      # Azure Load Balancer health probe
+      service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: "/health"
+  ingress:
+    enabled: true
+    host: "api.connector.your-domain.com"
+    className: "azure-application-gateway"
+    annotations:
+      # SSL and routing
+      appgw.ingress.kubernetes.io/ssl-redirect: "true"
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      
+      # Cookie-based session affinity (survives pod scaling)
+      appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
+      appgw.ingress.kubernetes.io/affinity-cookie-name: "neo-session"
+      
+      # Timeouts for long-running operations
+      appgw.ingress.kubernetes.io/request-timeout: "1800"
+      appgw.ingress.kubernetes.io/connection-draining-timeout: "30"
+      
+      # Health probe configuration
+      appgw.ingress.kubernetes.io/health-probe-path: "/health"
+      appgw.ingress.kubernetes.io/health-probe-interval: "30"
+      appgw.ingress.kubernetes.io/health-probe-timeout: "30"
+      appgw.ingress.kubernetes.io/health-probe-unhealthy-threshold: "3"
+      
+      # Backend pool settings
+      appgw.ingress.kubernetes.io/backend-protocol: "http"
+    tls:
+      - secretName: connector-api-tls-cert
+        hosts:
+          - api.connector.your-domain.com
+
 ui:
+  service:
+    type: ClusterIP
+    port: 80
   ingress:
     enabled: true
     host: "connector.your-domain.com"
@@ -400,17 +447,325 @@ ui:
       appgw.ingress.kubernetes.io/ssl-redirect: "true"
       cert-manager.io/cluster-issuer: "letsencrypt-prod"
     tls:
-      - secretName: connector-ui-tls-secret
+      - secretName: connector-ui-tls-cert
         hosts:
           - connector.your-domain.com
 ```
 
-### Option 3: Load Balancer (Public IP)
+**Option B: nginx Ingress Controller with Service-level Session Affinity**
+
+If using nginx Ingress Controller on AKS:
+
+```yaml
+main:
+  service:
+    type: ClusterIP
+    port: 8080
+    sessionAffinity: ClientIP
+    sessionAffinityConfig:
+      clientIP:
+        timeoutSeconds: 10800  # 3 hours
+    annotations:
+      service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: "/health"
+  ingress:
+    enabled: true
+    host: "api.connector.your-domain.com"
+    className: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/affinity: "cookie"
+      nginx.ingress.kubernetes.io/session-cookie-name: "neo-session"
+      nginx.ingress.kubernetes.io/session-cookie-max-age: "10800"
+    tls:
+      - secretName: connector-api-tls-cert
+        hosts:
+          - api.connector.your-domain.com
+```
+
+### Amazon Web Services (AWS) EKS
+
+**Option A: AWS Application Load Balancer (ALB) - Recommended**
+
+For production EKS deployments, use ALB Ingress Controller with sticky sessions:
+
+```yaml
+main:
+  service:
+    type: ClusterIP
+    port: 8080
+    annotations:
+      # ALB target group attributes
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+      service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: "/health"
+      service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval: "30"
+      service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: "deregistration_delay.timeout_seconds=30"
+  ingress:
+    enabled: true
+    host: "api.connector.your-domain.com"
+    className: "alb"
+    annotations:
+      # ALB Configuration
+      alb.ingress.kubernetes.io/scheme: internal
+      alb.ingress.kubernetes.io/target-type: ip
+      
+      # Sticky sessions with application cookie (survives pod scaling)
+      alb.ingress.kubernetes.io/target-group-attributes: |
+        stickiness.enabled=true,
+        stickiness.type=app_cookie,
+        stickiness.app_cookie.cookie_name=NEO-SESSION,
+        stickiness.app_cookie.duration_seconds=10800,
+        deregistration_delay.timeout_seconds=30
+      
+      # Health checks
+      alb.ingress.kubernetes.io/healthcheck-path: /health
+      alb.ingress.kubernetes.io/healthcheck-interval-seconds: '30'
+      alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '10'
+      alb.ingress.kubernetes.io/healthy-threshold-count: '2'
+      alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
+      
+      # Timeouts for long-running operations
+      alb.ingress.kubernetes.io/load-balancer-attributes: |
+        idle_timeout.timeout_seconds=1800
+      
+      # SSL/TLS
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+      alb.ingress.kubernetes.io/ssl-redirect: '443'
+      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:region:account:certificate/cert-id
+      
+      # Optional: WAF protection
+      # alb.ingress.kubernetes.io/wafv2-acl-arn: arn:aws:wafv2:region:account:regional/webacl/name/id
+    tls:
+      - secretName: connector-api-tls-cert
+        hosts:
+          - api.connector.your-domain.com
+
+ui:
+  service:
+    type: ClusterIP
+    port: 80
+  ingress:
+    enabled: true
+    host: "connector.your-domain.com"
+    className: "alb"
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/healthcheck-path: /
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+      alb.ingress.kubernetes.io/ssl-redirect: '443'
+      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:region:account:certificate/cert-id
+    tls:
+      - secretName: connector-ui-tls-cert
+        hosts:
+          - connector.your-domain.com
+```
+
+**Option B: nginx Ingress Controller with Service-level Session Affinity**
+
+If using nginx Ingress Controller on EKS:
+
+```yaml
+main:
+  service:
+    type: ClusterIP
+    port: 8080
+    sessionAffinity: ClientIP
+    sessionAffinityConfig:
+      clientIP:
+        timeoutSeconds: 10800  # 3 hours
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+      service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: "/health"
+  ingress:
+    enabled: true
+    host: "api.connector.your-domain.com"
+    className: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/affinity: "cookie"
+      nginx.ingress.kubernetes.io/session-cookie-name: "neo-session"
+      nginx.ingress.kubernetes.io/session-cookie-max-age: "10800"
+    tls:
+      - secretName: connector-api-tls-cert
+        hosts:
+          - api.connector.your-domain.com
+```
+
+### Google Cloud Platform (GCP) GKE
+
+**Option A: GCP Load Balancer with BackendConfig (Recommended)**
+
+For production GKE deployments, use BackendConfig for advanced session affinity:
+
+First, create a BackendConfig resource (this will be added to your Helm templates):
+
+```yaml
+# This should be added to templates/neo-backendconfig.yaml
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: {{ .Values.main.name }}-backend-config
+  namespace: {{ .Release.Namespace }}
+spec:
+  # Session affinity configuration
+  sessionAffinity:
+    affinityType: "CLIENT_IP_PORT_PROTO"
+    affinityCookieTtlSec: 10800  # 3 hours
+  
+  # Connection draining for graceful pod termination
+  connectionDraining:
+    drainingTimeoutSec: 30
+  
+  # Timeout for long-running operations
+  timeoutSec: 1800  # 30 minutes
+  
+  # Health check configuration
+  healthCheck:
+    checkIntervalSec: 30
+    timeoutSec: 10
+    healthyThreshold: 2
+    unhealthyThreshold: 2
+    type: HTTP
+    requestPath: /health
+    port: {{ .Values.main.env.PORT }}
+```
+
+Then configure your values.yaml:
+
+```yaml
+main:
+  service:
+    type: ClusterIP
+    port: 8080
+    annotations:
+      cloud.google.com/neg: '{"ingress": true}'
+      cloud.google.com/backend-config: '{"default": "netapp-connector-main-backend-config"}'
+  ingress:
+    enabled: true
+    host: "api.connector.your-domain.com"
+    className: "gce"
+    annotations:
+      # GCP-specific annotations
+      kubernetes.io/ingress.class: "gce"
+      kubernetes.io/ingress.global-static-ip-name: "neo-api-static-ip"
+      
+      # Managed SSL certificates
+      networking.gke.io/managed-certificates: "neo-api-managed-cert"
+      
+      # Backend configuration with session affinity
+      cloud.google.com/backend-config: '{"default": "netapp-connector-main-backend-config"}'
+      
+      # Optional: Cloud Armor for WAF protection
+      # cloud.google.com/armor-config: '{"default": "neo-security-policy"}'
+      
+      # Network Endpoint Groups for better performance
+      cloud.google.com/neg: '{"ingress": true}'
+    tls:
+      - secretName: connector-api-tls-cert
+        hosts:
+          - api.connector.your-domain.com
+
+ui:
+  service:
+    type: ClusterIP
+    port: 80
+    annotations:
+      cloud.google.com/neg: '{"ingress": true}'
+  ingress:
+    enabled: true
+    host: "connector.your-domain.com"
+    className: "gce"
+    annotations:
+      kubernetes.io/ingress.class: "gce"
+      kubernetes.io/ingress.global-static-ip-name: "neo-ui-static-ip"
+      networking.gke.io/managed-certificates: "neo-ui-managed-cert"
+      cloud.google.com/neg: '{"ingress": true}'
+    tls:
+      - secretName: connector-ui-tls-cert
+        hosts:
+          - connector.your-domain.com
+```
+
+Create a ManagedCertificate resource (add to templates/neo-managed-cert.yaml):
+
+```yaml
+{{- if and .Values.main.ingress.enabled (eq .Values.main.ingress.className "gce") }}
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: neo-api-managed-cert
+  namespace: {{ .Release.Namespace }}
+spec:
+  domains:
+    - {{ .Values.main.ingress.host }}
+{{- end }}
+```
+
+**Option B: nginx Ingress Controller with Service-level Session Affinity**
+
+If using nginx Ingress Controller on GKE:
+
+```yaml
+main:
+  service:
+    type: ClusterIP
+    port: 8080
+    sessionAffinity: ClientIP
+    sessionAffinityConfig:
+      clientIP:
+        timeoutSeconds: 10800  # 3 hours
+    annotations:
+      cloud.google.com/neg: '{"ingress": true}'
+  ingress:
+    enabled: true
+    host: "api.connector.your-domain.com"
+    className: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/affinity: "cookie"
+      nginx.ingress.kubernetes.io/session-cookie-name: "neo-session"
+      nginx.ingress.kubernetes.io/session-cookie-max-age: "10800"
+    tls:
+      - secretName: connector-api-tls-cert
+        hosts:
+          - api.connector.your-domain.com
+```
+
+### Session Affinity Comparison
+
+| Platform | Recommended Approach | Timeout | Survives Pod Scaling | Best For |
+|----------|---------------------|---------|---------------------|----------|
+| **Azure AKS** | Application Gateway cookie affinity | 3 hours | ✅ Yes | Production deployments with WAF |
+| **AWS EKS** | ALB sticky sessions (app_cookie) | 3 hours | ✅ Yes | Production deployments with AWS integration |
+| **GCP GKE** | BackendConfig CLIENT_IP_PORT_PROTO | 3 hours | ✅ Yes | Production deployments with GCP services |
+| **Generic K8s** | nginx cookie affinity + Service ClientIP | 3 hours | ⚠️ Partial | Development and multi-cloud |
+
+### Important Notes
+
+> [!IMPORTANT]
+> **Session Affinity Requirements:**
+> - **Minimum timeout**: 1800 seconds (30 minutes) for file operations
+> - **Recommended timeout**: 10800 seconds (3 hours) for long-running Microsoft Graph operations
+> - **Never use**: 60 seconds or less - this will break active sessions
+> 
+> When scaling backend replicas (`.Values.main.replicaCount > 1`):
+> - Use cloud-native load balancers with cookie-based affinity when possible
+> - Cookie-based affinity survives pod restarts and scaling operations
+> - ClientIP affinity is simpler but breaks during pod scaling
+> - Always enable connection draining to handle graceful shutdowns
+
+</details>
+
+<details>
+<summary> Option 3: Load Balancer (Public IP)</summary>
 
 For direct access without Ingress:
 
 **Azure Load Balancer:**
-
 ```yaml
 ui:
   service:
@@ -420,7 +775,6 @@ ui:
 ```
 
 **AWS Network Load Balancer:**
-
 ```yaml
 ui:
   service:
@@ -429,19 +783,18 @@ ui:
       service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
       service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
 ```
+</details>
 
 ## Component Communication
 
 The chart implements a three-tier architecture with automatic service discovery:
 
 ### UI to Backend Communication
-
 - UI nginx proxies `/api/*` requests to `http://netapp-connector-main:8080`
 - Configured via `NEO_API` environment variable in the UI deployment
 - No manual configuration required
 
 ### Backend to Database Communication
-
 - **Built-in PostgreSQL**: `DATABASE_URL` is auto-generated as `postgresql://postgres:password@neodb:5432/database`
 - **External Database**: Manually specify `DATABASE_URL` in values.yaml
 - InitContainer ensures PostgreSQL is ready before backend starts
@@ -450,7 +803,7 @@ The chart implements a three-tier architecture with automatic service discovery:
 
 To upgrade an existing release, use `helm upgrade`. The `--reuse-values` flag is recommended to preserve your existing configuration, including secrets.
 
-```bash
+```sh
 # 1. Update your local chart repository
 helm repo update
 
@@ -458,13 +811,12 @@ helm repo update
 helm upgrade netapp-connector innovation-labs/netapp-connector \
   --namespace netapp-connector \
   --reuse-values \
-  --set main.image.tag="3.0.5" \
-  --set ui.image.tag="3.0.5"
+  --set main.image.tag="3.1.0" \
+  --set ui.image.tag="3.1.0"
 ```
 
 **Upgrading with a values file:**
-
-```bash
+```sh
 helm upgrade netapp-connector innovation-labs/netapp-connector \
   --namespace netapp-connector \
   -f my-values.yaml
@@ -474,106 +826,89 @@ helm upgrade netapp-connector innovation-labs/netapp-connector \
 
 To uninstall and delete the `netapp-connector` release:
 
-```bash
+```sh
 helm uninstall netapp-connector --namespace netapp-connector
 ```
 
-<!-- <blockquote style="background-color: #fff3cd; border-left: 4px solid #ff9800; padding: 10px; margin: 10px 0;">
-    <strong>⚠️ Data Persistence Note:</strong> If you enabled the built-in PostgreSQL (<code>postgresql.enabled: true</code>), the PersistentVolumeClaim (PVC) will remain after uninstallation to prevent accidental data loss.
-    <p>To completely remove all data:</p>
-    <pre>
-        <code class="language-bash">
-            # List PVCs
-            kubectl get pvc -n netapp-connector
+> [!WARNING]
+> **Data Persistence Note:**
+> If you enabled the built-in PostgreSQL (`postgresql.enabled: true`), the PersistentVolumeClaim (PVC) will remain after uninstallation to prevent accidental data loss. 
+> 
+> To completely remove all data:
+> ```sh
+> # List PVCs
+> kubectl get pvc -n netapp-connector
+> 
+> # Delete PostgreSQL PVC (this will delete all database data)
+> kubectl delete pvc data-neodb-0 -n netapp-connector
+> ```
 
-            # Delete PostgreSQL PVC (this will delete all database data)
-            kubectl delete pvc data-neodb-0 -n netapp-connector
-        </code>
-    </pre>
-</blockquote> -->
-
-<blockquote style="background-color: #e7f3ff; border-left: 4px solid #2196F3; padding: 10px; margin: 10px 0;">
-<strong>📘 Note:</strong> If using an external database, your data will remain intact as it's managed separately from the Helm chart.
-</blockquote>
+> [!NOTE]
+> If using an external database, your data will remain intact as it's managed separately from the Helm chart.
 
 ## Configuration Parameters
 
 ### Backend (Main) Configuration
 
-| Parameter                                         | Description                                                                  | Default                                   |
-| ------------------------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------- |
-| `main.name`                                       | The base name for backend resources.                                         | `netapp-connector-main`                   |
-| `main.replicaCount`                               | Number of backend connector pods to run.                                     | `1`                                       |
-| `main.image.repository`                           | The backend container image repository.                                      | `ghcr.io/netapp/netapp-copilot-connector` |
-| `main.image.tag`                                  | The backend container image tag. If empty, defaults to chart's `appVersion`. | `""`                                      |
-| `main.image.pullPolicy`                           | The image pull policy.                                                       | `Always`                                  |
-| `main.service.type`                               | The type of Kubernetes service to create for backend.                        | `ClusterIP`                               |
-| `main.service.port`                               | The port exposed by the backend service and container.                       | `8080`                                    |
-| `main.ingress.enabled`                            | If true, create an Ingress resource for the backend API.                     | `false`                                   |
-| `main.ingress.host`                               | The hostname for the backend Ingress rule.                                   | `nil`                                     |
-| `main.ingress.path`                               | The path for the backend Ingress rule.                                       | `/`                                       |
-| `main.ingress.pathType`                           | The path type for the Ingress rule.                                          | `Prefix`                                  |
-| `main.ingress.className`                          | The `ingressClassName` to associate with the Ingress.                        | `""`                                      |
-| `main.ingress.annotations`                        | Annotations for the Ingress resource.                                        | `{}`                                      |
-| `main.ingress.tls`                                | Ingress TLS configuration.                                                   | `[]`                                      |
-| `main.env.PORT`                                   | The port the backend application runs on.                                    | `8080`                                    |
-| `main.env.PYTHONUNBUFFERED`                       | Python unbuffered output.                                                    | `1`                                       |
-| `main.env.DB_TYPE`                                | Database type (`postgres` or `mysql`).                                       | `postgres`                                |
-| `main.env.DATABASE_URL`                           | Database connection URL. Auto-generated if `postgresql.enabled=true`.        | `""`                                      |
-| `main.env.HTTPS_PROXY`                            | HTTPS proxy configuration.                                                   | `""`                                      |
-| `main.env.PROXY_USERNAME`                         | Proxy username if authentication is required.                                | `""`                                      |
-| `main.env.PROXY_PASSWORD`                         | Proxy password if authentication is required.                                | `""`                                      |
-| `main.env.GRAPH_VERIFY_SSL`                       | Whether to verify SSL certificates for Microsoft Graph calls.                | `""`                                      |
-| `main.env.SSL_CERT_FILE`                          | Custom SSL certificate file content.                                         | `""`                                      |
-| `main.env.SSL_CERT_FILE_PATH`                     | Path to SSL certificate file.                                                | `""`                                      |
-| `main.env.GRAPH_TIMEOUT`                          | Timeout for Microsoft Graph API calls.                                       | `""`                                      |
-| `main.credentials.MS_GRAPH_CONNECTOR_ID`          | Microsoft Graph connector ID. **Required.**                                  | `netappconnector`                         |
-| `main.credentials.MS_GRAPH_CONNECTOR_DESCRIPTION` | Description of the connector.                                                | `(default description)`                   |
-| `main.credentials.MS_GRAPH_CLIENT_ID`             | Microsoft Graph client ID. **Required.**                                     | `tobeset`                                 |
-| `main.credentials.MS_GRAPH_CLIENT_SECRET`         | Microsoft Graph client secret. **Required.**                                 | `tobeset`                                 |
-| `main.credentials.MS_GRAPH_TENANT_ID`             | Microsoft Graph tenant ID. **Required.**                                     | `tobeset`                                 |
-| `main.credentials.NETAPP_CONNECTOR_LICENSE`       | NetApp connector license key. **Required.**                                  | `tobeset`                                 |
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `main.name` | The base name for backend resources. | `netapp-connector-main` |
+| `main.replicaCount` | Number of backend connector pods to run. | `1` |
+| `main.image.repository` | The backend container image repository. | `ghcr.io/netapp/netapp-copilot-connector` |
+| `main.image.tag` | The backend container image tag. If empty, defaults to chart's `appVersion`. | `""` |
+| `main.image.pullPolicy` | The image pull policy. | `Always` |
+| `main.service.type` | The type of Kubernetes service to create for backend. | `ClusterIP` |
+| `main.service.port` | The port exposed by the backend service and container. | `8080` |
+| `main.ingress.enabled` | If true, create an Ingress resource for the backend API. | `false` |
+| `main.ingress.host` | The hostname for the backend Ingress rule. | `nil` |
+| `main.ingress.path` | The path for the backend Ingress rule. | `/` |
+| `main.ingress.pathType` | The path type for the Ingress rule. | `Prefix` |
+| `main.ingress.className` | The `ingressClassName` to associate with the Ingress. | `""` |
+| `main.ingress.annotations` | Annotations for the Ingress resource. | `{}` |
+| `main.ingress.tls` | Ingress TLS configuration. | `[]` |
+| `main.env.PORT` | The port the backend application runs on. | `8080` |
+| `main.env.PYTHONUNBUFFERED` | Python unbuffered output. | `1` |
+| `main.env.DATABASE_URL` | Database connection URL. Auto-generated if `postgresql.enabled=true`. | `""` |
 
 ### UI Configuration
 
-| Parameter                | Description                                           | Default                              |
-| ------------------------ | ----------------------------------------------------- | ------------------------------------ |
-| `ui.name`                | The base name for UI resources.                       | `netapp-connector-ui`                |
-| `ui.replicaCount`        | Number of UI pods to run.                             | `1`                                  |
-| `ui.image.repository`    | The UI container image repository.                    | `ghcr.io/beezy-dev/neo-ui-framework` |
-| `ui.image.tag`           | The UI container image tag.                           | `3.0.4-2`                            |
-| `ui.image.pullPolicy`    | The image pull policy.                                | `Always`                             |
-| `ui.service.type`        | The type of Kubernetes service to create for UI.      | `ClusterIP`                          |
-| `ui.service.port`        | The port exposed by the UI service.                   | `80`                                 |
-| `ui.ingress.enabled`     | If true, create an Ingress resource for the UI.       | `false`                              |
-| `ui.ingress.host`        | The hostname for the UI Ingress rule.                 | `nil`                                |
-| `ui.ingress.path`        | The path for the UI Ingress rule.                     | `/`                                  |
-| `ui.ingress.pathType`    | The path type for the Ingress rule.                   | `Prefix`                             |
-| `ui.ingress.className`   | The `ingressClassName` to associate with the Ingress. | `""`                                 |
-| `ui.ingress.annotations` | Annotations for the Ingress resource.                 | `{}`                                 |
-| `ui.ingress.tls`         | Ingress TLS configuration.                            | `[]`                                 |
-| `ui.env.PORT`            | The port the UI nginx server runs on.                 | `80`                                 |
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `ui.name` | The base name for UI resources. | `netapp-connector-ui` |
+| `ui.replicaCount` | Number of UI pods to run. | `1` |
+| `ui.image.repository` | The UI container image repository. | `ghcr.io/beezy-dev/neo-ui-framework` |
+| `ui.image.tag` | UI image tag. | `3.1.0` |
+| `ui.image.pullPolicy` | The image pull policy. | `Always` |
+| `ui.service.type` | The type of Kubernetes service to create for UI. | `ClusterIP` |
+| `ui.service.port` | The port exposed by the UI service. | `80` |
+| `ui.ingress.enabled` | If true, create an Ingress resource for the UI. | `false` |
+| `ui.ingress.host` | The hostname for the UI Ingress rule. | `nil` |
+| `ui.ingress.path` | The path for the UI Ingress rule. | `/` |
+| `ui.ingress.pathType` | The path type for the Ingress rule. | `Prefix` |
+| `ui.ingress.className` | The `ingressClassName` to associate with the Ingress. | `""` |
+| `ui.ingress.annotations` | Annotations for the Ingress resource. | `{}` |
+| `ui.ingress.tls` | Ingress TLS configuration. | `[]` |
+| `ui.env.PORT` | The port the UI nginx server runs on. | `80` |
 
 ### PostgreSQL Configuration
 
-| Parameter                             | Description                                                | Default                      |
-| ------------------------------------- | ---------------------------------------------------------- | ---------------------------- |
-| `postgresql.enabled`                  | Enable or disable PostgreSQL deployment.                   | `false`                      |
-| `postgresql.name`                     | The name for PostgreSQL resources.                         | `neodb`                      |
-| `postgresql.image.repository`         | PostgreSQL container image repository.                     | `docker.io/library/postgres` |
-| `postgresql.image.tag`                | PostgreSQL container image tag.                            | `16.10-alpine3.21`           |
-| `postgresql.image.pullPolicy`         | PostgreSQL image pull policy.                              | `IfNotPresent`               |
-| `postgresql.auth.username`            | PostgreSQL username.                                       | `postgres`                   |
-| `postgresql.auth.password`            | PostgreSQL password. **Should be changed for production.** | `neodbsecret`                |
-| `postgresql.auth.database`            | PostgreSQL database name.                                  | `netappconnector`            |
-| `postgresql.service.type`             | PostgreSQL service type.                                   | `ClusterIP`                  |
-| `postgresql.service.port`             | PostgreSQL service port.                                   | `5432`                       |
-| `postgresql.persistence.enabled`      | Enable persistent storage for PostgreSQL.                  | `true`                       |
-| `postgresql.persistence.storageClass` | StorageClass for PostgreSQL PVC. Empty uses default.       | `""`                         |
-| `postgresql.persistence.accessMode`   | Access mode for PostgreSQL PVC.                            | `ReadWriteOnce`              |
-| `postgresql.persistence.size`         | Size of PostgreSQL persistent volume.                      | `8Gi`                        |
-| `postgresql.persistence.annotations`  | Annotations for PostgreSQL PVC.                            | `{}`                         |
-| `postgresql.resources`                | Resource requests and limits for PostgreSQL pod.           | `{}`                         |
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `postgresql.enabled` | Enable or disable PostgreSQL deployment. | `false` |
+| `postgresql.name` | The name for PostgreSQL resources. | `neodb` |
+| `postgresql.image.repository` | PostgreSQL container image repository. | `docker.io/library/postgres` |
+| `postgresql.image.tag` | PostgreSQL image tag. | `16.10-alpine3.21` |
+| `postgresql.image.pullPolicy` | PostgreSQL image pull policy. | `IfNotPresent` |
+| `postgresql.auth.username` | PostgreSQL username. | `postgres` |
+| `postgresql.auth.password` | PostgreSQL password. **Should be changed for production.** | `neodbsecret` |
+| `postgresql.auth.database` | PostgreSQL database name. | `netappconnector` |
+| `postgresql.service.type` | PostgreSQL service type. | `ClusterIP` |
+| `postgresql.service.port` | PostgreSQL service port. | `5432` |
+| `postgresql.persistence.enabled` | Enable persistent storage for PostgreSQL. | `true` |
+| `postgresql.persistence.storageClass` | StorageClass for PostgreSQL PVC. Empty uses default. | `""` |
+| `postgresql.persistence.accessMode` | PVC access mode. | `ReadWriteOnce` |
+| `postgresql.persistence.annotations` | PVC annotations. | `{}` |
+| `postgresql.resources` | Resource requests and limits for PostgreSQL pod. | `{}` |
 
 ## Networking Architecture
 
@@ -636,12 +971,11 @@ The chart creates the following networking topology:
 
 ### Check Pod Status
 
-```bash
+```sh
 kubectl get pods -n netapp-connector
 ```
 
 Expected output:
-
 ```
 NAME                                     READY   STATUS    RESTARTS   AGE
 netapp-connector-main-xxxx               1/1     Running   0          5m
@@ -651,7 +985,7 @@ neodb-0                                  1/1     Running   0          5m
 
 ### View Backend Logs
 
-```bash
+```sh
 # View main container logs
 kubectl logs -n netapp-connector -l component=netapp-connector-main -f
 
@@ -661,25 +995,25 @@ kubectl logs -n netapp-connector -l component=netapp-connector-main -c wait-for-
 
 ### View UI Logs
 
-```bash
+```sh
 kubectl logs -n netapp-connector -l component=netapp-connector-ui -f
 ```
 
 ### View PostgreSQL Logs (if enabled)
 
-```bash
+```sh
 kubectl logs -n netapp-connector -l component=neodb -f
 ```
 
 ### Test Backend Connectivity from UI Pod
 
-```bash
+```sh
 kubectl exec -n netapp-connector -it deployment/netapp-connector-ui -- curl http://netapp-connector-main:8080/health
 ```
 
 ### Verify Database Connection
 
-```bash
+```sh
 # Check DATABASE_URL (sensitive - be careful in production)
 kubectl exec -n netapp-connector -it deployment/netapp-connector-main -- env | grep DATABASE_URL
 
@@ -689,7 +1023,7 @@ kubectl exec -n netapp-connector -it statefulset/neodb -- pg_isready -U postgres
 
 ### Test PostgreSQL Connection (if built-in PostgreSQL is enabled)
 
-```bash
+```sh
 # Get PostgreSQL password
 PGPASSWORD=$(kubectl get secret neodb-secret -n netapp-connector -o jsonpath='{.data.password}' | base64 -d)
 
@@ -703,14 +1037,14 @@ kubectl exec -it -n netapp-connector statefulset/neodb -- psql -U postgres -d ne
 
 ### Check PostgreSQL PVC Status
 
-```bash
+```sh
 kubectl get pvc -n netapp-connector
 kubectl describe pvc data-neodb-0 -n netapp-connector
 ```
 
 ### Verify ConfigMaps and Secrets
 
-```bash
+```sh
 # Check ConfigMap
 kubectl get configmap netapp-connector-main -n netapp-connector -o yaml
 
@@ -729,7 +1063,7 @@ kubectl get secret netapp-connector-main -n netapp-connector -o jsonpath='{.data
 
 **Solutions**:
 
-```bash
+```sh
 # Check PVC status
 kubectl get pvc -n netapp-connector
 kubectl describe pvc data-neodb-0 -n netapp-connector
@@ -742,13 +1076,12 @@ kubectl get storageclass
 ```
 
 **Fix for missing StorageClass**:
-
 ```yaml
 postgresql:
   persistence:
     # For Azure AKS
     storageClass: "managed-premium"  # or "default"
-
+    
     # For AWS EKS
     storageClass: "gp3"  # or "gp2" for General Purpose SSD
 ```
@@ -759,7 +1092,7 @@ postgresql:
 
 **Solutions**:
 
-```bash
+```sh
 # 1. Verify PostgreSQL service exists
 kubectl get svc neodb -n netapp-connector
 
@@ -779,7 +1112,7 @@ kubectl exec -n netapp-connector -it statefulset/neodb -- pg_isready -U postgres
 
 **Solutions**:
 
-```bash
+```sh
 # Check initContainer logs
 kubectl logs -n netapp-connector -l component=netapp-connector-main -c wait-for-db
 
@@ -797,7 +1130,7 @@ kubectl get secret netapp-connector-main -n netapp-connector -o jsonpath='{.data
 
 **Solutions**:
 
-```bash
+```sh
 # 1. Verify backend service
 kubectl get svc netapp-connector-main -n netapp-connector
 
@@ -817,7 +1150,7 @@ kubectl exec -n netapp-connector -it deployment/netapp-connector-ui -- env | gre
 
 **Solution**: Ensure ConfigMap has `DB_TYPE` defined:
 
-```bash
+```sh
 # Verify ConfigMap contains DB_TYPE
 kubectl get configmap netapp-connector-main -n netapp-connector -o jsonpath='{.data.DB_TYPE}'
 
@@ -829,7 +1162,7 @@ helm upgrade netapp-connector . --reuse-values --set main.env.DB_TYPE=postgres
 
 **Azure Application Gateway Ingress Controller (AGIC) not working**:
 
-```bash
+```sh
 # Check AGIC pod status
 kubectl get pods -n kube-system | grep ingress-azure
 
@@ -844,7 +1177,7 @@ az network application-gateway show-backend-health \
 
 **AWS Load Balancer Controller issues**:
 
-```bash
+```sh
 # Check AWS Load Balancer Controller pod status
 kubectl get pods -n kube-system | grep aws-load-balancer-controller
 
@@ -860,7 +1193,7 @@ aws elbv2 describe-load-balancers \
 
 **Azure Database for PostgreSQL connection issues**:
 
-```bash
+```sh
 # Ensure SSL is required in connection string
 DATABASE_URL: "postgresql://user@server:pass@server.postgres.database.azure.com:5432/db?sslmode=require"
 
@@ -877,7 +1210,7 @@ az network vnet peering list \
 
 **AWS RDS for PostgreSQL connection issues**:
 
-```bash
+```sh
 # Ensure SSL is enabled in connection string
 DATABASE_URL: "postgresql://user:pass@instance.xxxxx.us-east-1.rds.amazonaws.com:5432/db?sslmode=require"
 
@@ -905,12 +1238,11 @@ Enable verbose logging for troubleshooting:
 ```yaml
 main:
   env:
-    PYTHONUNBUFFERED: "1" # Enable immediate log output
+    PYTHONUNBUFFERED: "1"  # Enable immediate log output
 ```
 
 View real-time logs:
-
-```bash
+```sh
 # Backend
 kubectl logs -n netapp-connector -l component=netapp-connector-main -f --tail=100
 
@@ -929,7 +1261,7 @@ kubectl logs -n netapp-connector -l component=neodb -f --tail=100
 
 Instead of storing secrets in Helm values:
 
-```bash
+```yaml
 # Install Azure Key Vault Provider for Secrets Store CSI Driver
 helm repo add csi-secrets-store-provider-azure https://azure.github.io/secrets-store-csi-driver-provider-azure/charts
 helm install csi-secrets-store-provider-azure/csi-secrets-store-provider-azure --generate-name
@@ -939,7 +1271,7 @@ helm install csi-secrets-store-provider-azure/csi-secrets-store-provider-azure -
 
 Configure workload identity for database access:
 
-```bash
+```sh
 # Enable workload identity on AKS
 az aks update \
   --resource-group myResourceGroup \
@@ -950,7 +1282,7 @@ az aks update \
 
 #### 3. Enable Azure Monitor
 
-```bash
+```sh
 # Enable Container Insights
 az aks enable-addons \
   --resource-group myResourceGroup \
@@ -962,7 +1294,7 @@ az aks enable-addons \
 
 For production, use managed database:
 
-```bash
+```sh
 # Create Azure Database for PostgreSQL Flexible Server
 az postgres flexible-server create \
   --resource-group myResourceGroup \
@@ -984,7 +1316,7 @@ az postgres flexible-server create \
 
 Instead of storing secrets in Helm values:
 
-```bash
+```sh
 # Install AWS Secrets and Configuration Provider (ASCP)
 helm repo add secrets-store-csi-driver https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts
 helm install csi-secrets-store secrets-store-csi-driver/secrets-store-csi-driver \
@@ -998,7 +1330,7 @@ kubectl apply -f https://raw.githubusercontent.com/aws/secrets-store-csi-driver-
 
 Configure IAM authentication for database access:
 
-```bash
+```sh
 # Create IAM policy for RDS access
 aws iam create-policy \
   --policy-name NetAppConnectorRDSPolicy \
@@ -1022,7 +1354,7 @@ eksctl create iamserviceaccount \
 
 #### 3. Enable Amazon CloudWatch Container Insights
 
-```bash
+```sh
 # Enable Container Insights for EKS
 aws eks update-cluster-config \
   --region us-east-1 \
@@ -1039,7 +1371,7 @@ eksctl utils install-cloudwatch-observability \
 
 For production, use managed database:
 
-```bash
+```sh
 # Create RDS PostgreSQL instance with Multi-AZ
 aws rds create-db-instance \
   --db-instance-identifier netapp-connector-db \
@@ -1069,7 +1401,7 @@ aws rds modify-db-instance \
 
 **Using Amazon Aurora PostgreSQL (recommended for high availability):**
 
-```bash
+```sh
 # Create Aurora PostgreSQL cluster
 aws rds create-db-cluster \
   --db-cluster-identifier netapp-connector-cluster \
@@ -1093,35 +1425,3 @@ aws rds create-db-instance \
   --engine aurora-postgresql \
   --region us-east-1
 ```
-
----
-
-## Version History
-
-| Chart Version | App Version | Changes                                                                                                                                                                                                                                                             |
-| ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 25.11.4       | 3.0.4       | - Added PostgreSQL StatefulSet with auto-configured DATABASE_URL<br>- Added initContainer for database readiness check<br>- Separated ConfigMap and Secret for security<br>- Added nginx reverse proxy configuration for UI<br>- Azure best practices documentation |
-| 25.11.2       | 3.0.4       | Initial release with Deployment-based architecture                                                                                                                                                                                                                  |
-
-## Support and Contributing
-
-For issues, questions, or contributions:
-
-- GitHub Issues: [https://github.com/NetApp/Innovation-Labs/issues](https://github.com/NetApp/Innovation-Labs/issues)
-- Documentation: [https://netapp.github.io/Innovation-Labs/](https://netapp.github.io/Innovation-Labs/)
-
-## License
-
-See the [LICENSE](../../LICENSE) file for details.
-
----
-
-For more information, see the official:
-
-- [Helm documentation](https://helm.sh/docs/)
-- [Kubernetes documentation](https://kubernetes.io/docs/home/)
-- [Azure Kubernetes Service (AKS) documentation](https://learn.microsoft.com/azure/aks/)
-- [Azure Database for PostgreSQL documentation](https://learn.microsoft.com/azure/postgresql/)
-- [Amazon Elastic Kubernetes Service (EKS) documentation](https://docs.aws.amazon.com/eks/)
-- [Amazon RDS for PostgreSQL documentation](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_PostgreSQL.html)
-- [Amazon Aurora PostgreSQL documentation](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.AuroraPostgreSQL.html) -->

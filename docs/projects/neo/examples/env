@@ -1,0 +1,19 @@
+## NetApp Neo Settings (Required)
+
+## NetApp Neo Database Settings (required)
+DBT=postgres                    ## Database type: postgres or mysql
+DBB=5432                        ## Database binding port: postgres is 5432 and mysql is 3306
+DBU=postgres                    ## Database username
+DBP=neodbsecret                 ## Database password
+DBH=neodb                       ## Dababase host: if using included postgres then value is neodb
+DBN=neoconnectortest            ## Database name
+
+##
+DATABASE_URL=${DBT}://${DBU}:${DBP}@${DBH}:${DBB}/${DBN}      # <== Needs to be changed! 
+## or for MySQL:
+#DATABASE_URL=mysql://user:password@localhost:3306/neoconnectortest
+
+## (Un)comment if using or not the included postgres database
+POSTGRES_USER=${DBU}
+POSTGRES_PASSWORD=${DBP}
+POSTGRES_DB=${DBN}
