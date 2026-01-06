@@ -2,6 +2,7 @@ import { defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
+  base: '/Innovation-Labs/',
   lastUpdated: true,
   ignoreDeadLinks: true,
   title: "NetApp Innovation Labs",
