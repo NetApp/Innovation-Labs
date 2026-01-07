@@ -4,7 +4,7 @@ services:
     restart: always
     shm_size: 128mb # Adjust shared memory size if needed, this is important for database performance and 128mb is a good starting point for POC setups.
     environment:
-      POSTGRES_PASSWORD: yourStrongPasswordHere! # use a strong password
+      POSTGRES_PASSWORD: password # use a strong password
       POSTGRES_DB: neo
       PGDATA: /var/lib/postgresql/18/docker # PostgreSQL 18+ uses version-specific PGDATA path
     volumes:
@@ -30,7 +30,7 @@ services:
       - "8081:8080"
     environment:
       - PORT=8080
-      - DATABASE_URL=postgresql://postgres:yourStrongPasswordHere!@db:5432/neo # Update with your DB credentials if needed. For mySQL use: mysql://user:password@tcp(db:3306)/neo
+      - DATABASE_URL=postgresql://postgres:password@db:5432/neo # Update with your DB credentials if needed. For mySQL use: mysql://user:password@tcp(db:3306)/neo
     restart: unless-stopped
     networks:
       - netapp-neo
@@ -56,3 +56,4 @@ networks:
 
 volumes: # Remove this section if you're using an external database
   postgres_data:
+    driver: local
