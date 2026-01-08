@@ -4,6 +4,20 @@ Neo Core is the container service responsible for the extraction and API operati
 
 ## Current Version
 
+### 3.2.0: (Released 8th January 2026)
+
+- **New:** OIDC + oAuth 2.0 provider support for users and groups - You can now add enterprise users to manage Neo. Local users must be created first, then the OAuth account linked to it. Future versions of Neo will focus on streamlining this process.
+  - Microsoft
+  - Google
+  - SSO
+- **New:** MCP Service - easily and securely all MCP compatible AI services and Agents to your enterprise data. All ACLs are strictly enforced by default, preserving item level permissions.
+- **Enhancement:** NER service has been extended.
+- **Fix:** Removed erroneous Postgres transaction statement on worker polling which resulted in several "transaction is in progress" log entries on Postgres servers.
+- **Fix:** Application could become unresponsive if a work item failed due to a transaction remaining uncommitted in the SQL database.
+- Other maintenance and house keeping.
+
+## Version History
+
 ### 3.1.0 (Released 9th December 2025)
 
 - **New**: FTE Search capabilities (new /search endpoint for agentic AI).
@@ -30,8 +44,6 @@ Neo Core is the container service responsible for the extraction and API operati
   - Remove connector from M365 Connectors (this automatically removes all items from M365 Graph)
 - **Enhancement:** Neo no longer automatically attempts to continue an interrupted crawl upon reboot. Instead it will await the next scheduled crawl.
 - **Fix:** Build date was not reflected correctly.
-
-## Version History
 
 ### 3.0.4 (Released 22nd October 2025)
 
