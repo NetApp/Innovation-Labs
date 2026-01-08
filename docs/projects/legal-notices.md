@@ -19,4 +19,4 @@ A current list of NetApp owned patents can be found at:
 [https://www.netapp.com/company/legal/privacy-policy/](https://www.netapp.com/company/legal/privacy-policy/)
 
 ## Open source
-You can review third-party copyright and licenses used in NetApp Innovation Labs software in the **Notice** seaction of each project.
+You can review third-party copyright and licenses used in NetApp Innovation Labs software in the **Notice** section of each project.
