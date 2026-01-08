@@ -1,6 +1,6 @@
 # Content Posts
 
-## Video
+## Videos
 
 | Title | Published on | Author | Date |
 |-------|--------------|--------|------|
@@ -8,7 +8,7 @@
 | Quick Bytes: NetApp Connector for M365 Copilot | [Azure NetApp Files](https://www.youtube.com/watch?v=6pm59GR-7LA) | Kyle Radder, Kirk Ryan | 20250303 |
 | Video NetApp Connector for Copilot - Overview and Introduction | [NetApp](https://community.netapp.com/t5/video/gallerypage/video-id/6367555437112) | Kirk Ryan | 20250123 |
 
-## Blog
+## Blogs
 
 | Title | Published on | Author | Date |
 |-------|--------------|--------|------|
