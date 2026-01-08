@@ -20,12 +20,14 @@ export default defineConfig({
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Content Posts', link: '/content/posts' },
-      { text: 'Projects', link: '/projects' }
+      { text: 'Projects', link: '/projects' },
+      { text: 'Legal Notice', link: '/projects/legal-notices' },
     ],
 
     sidebar: [
-      { text: 'Blog Posts', link: '/blog/posts' },
+      { text: 'Content Posts', link: '/content/posts' },
       { text: 'Projects', link: '/projects', },
+      { text: 'Legal Notice', link: '/projects/legal-notices' },
       {
         text: 'Cloud',
         items: [
@@ -35,7 +37,12 @@ export default defineConfig({
       {
         text: 'Containers',
         items: [
-          { text: 'Consoles for OpenShift', link: '/projects/containers/openshift-consoles'},
+          { text: 'Consoles for OpenShift', link: '/projects/containers/openshift-consoles', 
+            items: [
+              { text: 'License', link: '/projects/containers/LICENSE' },
+              { text: 'Notice', link: '/projects/containers/NOTICE.md'}
+            ]
+          },
         ]
       },
       {
@@ -82,6 +89,7 @@ export default defineConfig({
             },
             { text: 'Security', link: '/projects/neo/core/security' },
             { text: 'Troubleshooting', link: '/projects/neo/core/troubleshooting'},
+            { text: 'Notice', link: '/projects/neo/core/NOTICE.md' },
           ],
         },
         { text: 'Neo UI Framework', link: '/projects/neo/uif/ui-framework' },

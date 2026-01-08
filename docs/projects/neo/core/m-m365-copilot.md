@@ -4,7 +4,7 @@
 
 In order for Neo to be able to securely communicate with M365 Copilot.
 
-![Select App Registration in the Add menu in Microsoft Azure Entra](/2025-03-10_20-17-27.png)
+![Select App Registration in the Add menu in Microsoft Azure Entra](/neocore/2025-03-10_20-17-27.png)
 
 1. Navigate to the Azure Entra portal and select "Add" and select the "App Registration" option.
 2. Fill in the required fields and click "Register". (No Redirect URI is required)
@@ -39,16 +39,16 @@ Connectors can be managed via the M365 Admin Centre. This includes viewing conne
 
 You can validate the item level permissions that the connector has in M365 via the Index Browser within the M365 Admin Centre as shown below:
 
-![M365 Admin Centre Index Browser showing item level permissions for the NetApp Neo connector](/2025-12-04_13-12-25.gif)
+![M365 Admin Centre Index Browser showing item level permissions for the NetApp Neo connector](/neocore/2025-12-04_13-12-25.gif)
 
 ## Securing access to results
 
 You can control access to the ingested data via Microsoft 365 Copilot by configuring the appropriate permissions in M365. This includes setting up role-based access control (RBAC) and ensuring that only authorized users can access the data ingested by the connector.
 
-![M365 Admin Centre showing how to manage access to connector results](/2025-12-04_14-24-13.gif)
+![M365 Admin Centre showing how to manage access to connector results](/neocore/2025-12-04_14-24-13.gif)
 
 ## Removing a connector
 
 You can easily remove a connector and all of its indexed content from Microsoft 365 Copilot via the M365 Admin Centre as shown below:
 
-![M365 Admin Centre showing how to remove a connector and all indexed content](/NetApp%20Neo%20-%20How%20to%20delete%20a%20connector.gif)
+![M365 Admin Centre showing how to remove a connector and all indexed content](/neocore/NetApp%20Neo%20-%20How%20to%20delete%20a%20connector.gif)

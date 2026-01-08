@@ -15,7 +15,7 @@ services:
     restart: unless-stopped
 
   neo:
-    image: ghcr.io/netapp/netapp-copilot-connector:3.1.0 
+    image: ghcr.io/netapp/netapp-copilot-connector:3.2.0 
     container_name: neo
     # deploy: # Uncomment this section to enable GPU support
     #   resources:
@@ -53,22 +53,22 @@ services:
     restart: unless-stopped
 
   ## (Un)comment if using or not the included SMB/CIFS service
-  neosmb:
-    image: docker.io/dockurr/samba
-    container_name: neosmb
-    environment:
-      NAME: "data"
-      USER: "smb"
-      PASS: "smb"
-      UID: 1000
-      GID: 1000
-    ports:
-      - 445:445
-    networks:
-      - netapp-neo      
-    volumes:
-      - neosmb:/storage
-    restart: unless-stopped
+  # neosmb:
+  #   image: docker.io/dockurr/samba
+  #   container_name: neosmb
+  #   environment:
+  #     NAME: "data"
+  #     USER: "smb"
+  #     PASS: "smb"
+  #     UID: 1000
+  #     GID: 1000
+  #   ports:
+  #     - 445:445
+  #   networks:
+  #     - netapp-neo      
+  #   volumes:
+  #     - neosmb:/storage
+  #   restart: unless-stopped
 
 networks:
   netapp-neo:
