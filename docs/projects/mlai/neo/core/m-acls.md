@@ -151,11 +151,10 @@ PATCH /shares/{share_id}
 }
 ```
 
-<blockquote style="background-color: #e7f3ff; border-left: 4px solid #2196F3; padding: 10px; margin: 10px 0;">
-<strong>📘 Note:</strong> After changing ACL settings, you may want to trigger a re-crawl to update permissions on existing files:
-<pre><code>POST /shares/{share_id}/crawl
-</code></pre>
-</blockquote>
+> [!NOTE]
+> After changing ACL settings, you may want to trigger a re-crawl to update permissions on existing files:
+> ```POST /shares/{share_id}/crawl```
+
 
 ## Combining with Other Rules
 
@@ -211,15 +210,11 @@ Check application logs for ACL override activity:
 
 ## Security Considerations
 
-<blockquote style="background-color: #ffe6e6; border-left: 4px solid #f44336; padding: 10px; margin: 10px 0;">
-<strong>❗ Important:</strong> ACL overrides bypass the original file permissions. Consider the following:
-<ol>
-<li><strong>Data Exposure Risk</strong>: Using <code>acl_override_mode: "everyone"</code> makes all files in the share accessible to everyone in your Entra tenant. Only use this for truly public content.</li>
-<li><strong>Audit Trail</strong>: The original file ACLs are still extracted and stored in the database for auditing purposes, even when overrides are applied.</li>
-<li><strong>Principle of Least Privilege</strong>: When using <code>specified</code> mode, grant access only to the users and groups that genuinely need it.</li>
-<li><strong>Regular Review</strong>: Periodically review shares with ACL overrides to ensure the permissions are still appropriate.</li>
-</ol>
-</blockquote>
+> [!WARNING]
+> - **Data Exposure Risk**: Using ```acl_override_mode: "everyone"``` makes all files in the share accessible to everyone in your Entra tenant. Only use this for truly public content.
+> - **Audit Trail**: The original file ACLs are still extracted and stored in the database for auditing purposes, even when overrides are applied.
+> - **Principle of Least Privilege**: When using ```specified``` mode, grant access only to the users and groups that genuinely need it.
+> - **Regular Review**: Periodically review shares with ACL overrides to ensure the permissions are still appropriate.
 
 ## Comparison: ACL Override vs ACL_STRICT_MODE
 

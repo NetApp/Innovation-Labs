@@ -4,9 +4,8 @@ This guide assumes you have already reviewed the [Prerequisites](../prerequisite
 
 When the connector is deployed it will deploy in SETUP mode by default. This allows you to complete the initial configuration of the connector via the API or web console. Once the connector is configured it can be switched to PRODUCTION mode.
 
-<blockquote style="background-color: #e7f3ff; border-left: 4px solid #2196F3; padding: 10px; margin: 10px 0;">
-<strong>📘 Note:</strong> The following guidance is temporary and will be native in Neo Console in a future release. During this time please follow the steps below to switch between modes and configure your license.
-</blockquote>
+> [!NOTE]
+> The following guidance is temporary and will be native in Neo Console in a future release. During this time please follow the steps below to switch between modes and configure your license.
 
 ## How to check which mode the connector is in
 

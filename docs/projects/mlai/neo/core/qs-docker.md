@@ -38,16 +38,16 @@ Create a directory called "neo-test" in a directory of your choice to host the c
 ### Environment variables
 First, we need to set up the following .env file to configure the database. 
 
-<<< @/projects/neo/examples/env 
+<<< @/projects/mlai/neo/examples/env 
 
 
 > [!TIP]
 > The usage of [Docker/Podman Secrets](https://docs.docker.com/compose/how-tos/use-secrets/) is another path to explore addressing the challenge of credentials stored locally on a hard drive.
 
 ### Compose Container file
-Download the latest [```neo-containerfile.yml```](/projects/neo/examples/neo-containerfile.yml) or copy its content from:
+Download the latest [```neo-containerfile.yml```](/projects/mlai/neo/examples/neo-containerfile.yml) or copy its content from:
 
-<<< @/projects/neo/examples/neo-containerfile.yml
+<<< @/projects/mlai/neo/examples/neo-containerfile.yml
 
 ### Start the containers
 

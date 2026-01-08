@@ -11,10 +11,8 @@ On first access, you will be prompted to log in. Use the default credentials pro
 ```bash
 curl --location '192.168.1.89:8081/api/v1/setup/initial-credentials'
 ```
-
-<blockquote style="background-color: #e7f3ff; border-left: 4px solid #2196F3; padding: 10px; margin: 10px 0;">
-<strong>📘 Note:</strong> The above command will only work if the admin user has never logged in before. If the admin user has logged in previously, you will need to reset the password via the API or database.
-</blockquote>
+> [!NOTE]
+> The above command will only work if the admin user has never logged in before. If the admin user has logged in previously, you will need to reset the password via the API or database.
 
 ## Search
 

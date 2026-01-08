@@ -154,9 +154,8 @@ Use `exclude_patterns` to specify which files **should be ignored**. All other f
 
 ### Important: Mutual Exclusivity
 
-<blockquote style="background-color: #fff3cd; border-left: 4px solid #ff9800; padding: 10px; margin: 10px 0;">
-<strong>⚠️ Warning:</strong> You cannot use both <code>include_patterns</code> and <code>exclude_patterns</code> in the same share.
-</blockquote>
+> [!WARNING]
+> You cannot use both ```include_patterns``` and ```exclude_patterns``` in the same share.
 
 Choose one approach:
 
@@ -332,9 +331,8 @@ This processes only files modified in the last 30 days. The window moves forward
 
 ### Important: Static vs Rolling
 
-<blockquote style="background-color: #fff3cd; border-left: 4px solid #ff9800; padding: 10px; margin: 10px 0;">
-<strong>⚠️ Warning:</strong> You cannot combine static dates and rolling windows for the same timestamp type.
-</blockquote>
+> [!WARNING]
+> You cannot combine static dates and rolling windows for the same timestamp type.
 
 ```json
 // ❌ INVALID - mixing static and rolling for modified_time
@@ -381,11 +379,9 @@ Control whether extracted file content is retained in the database after success
 - Comply with data retention policies
 - Minimize data exposure risk
 
-<blockquote style="background-color: #e7f3ff; border-left: 4px solid #2196F3; padding: 10px; margin: 10px 0;">
-<strong>📘 Note:</strong> The <code>PERSIST_FILE_CONTENT_OVERRIDE</code> environment variable can override this setting at the deployment level for security purposes.
-</blockquote>
+> [!NOTE]
+> The ```PERSIST_FILE_CONTENT_OVERRIDE``` environment variable can override this setting at the deployment level for security purposes.
 
----
 
 ## Upload Control
 
