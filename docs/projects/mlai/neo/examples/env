@@ -1,7 +1,7 @@
 ## NetApp Neo Settings (Required)
 
 ## NetApp Neo Database Settings (required)
-DBT=postgres                    ## Database type: postgres or mysql
+DBT=postgresql                  ## Database type: postgresql or mysql
 DBB=5432                        ## Database binding port: postgres is 5432 and mysql is 3306
 DBU=postgres                    ## Database username
 DBP=neodbsecret                 ## Database password
