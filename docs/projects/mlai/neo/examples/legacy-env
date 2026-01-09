@@ -1,0 +1,23 @@
+# Database configuration
+DB_PATH=app/data/database.db # Optional: Default is data/database.db
+
+# Application Settings
+PORT=8080 # Optional: Default is 8080
+
+# JWT configuration for authentication
+JWT_SECRET_KEY=your-secret-key-here # Optional: Default is a 32-byte random key
+JWT_ALGORITHM=HS256 # Optional: Default is HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30 # Optional: Default is 30 minutes
+
+# NetApp Settings
+NETAPP_CONNECTOR_LICENSE=your-licence-key-here # Mandatory
+
+# Microsoft Graph configuration
+MS_GRAPH_CLIENT_ID=your-client-id-here # Mandatory
+MS_GRAPH_CLIENT_SECRET=your-client-secret-here # Mandatory
+MS_GRAPH_TENANT_ID=your-tenant-id-here # Mandatory
+
+# Optional: Override default connector configuration
+MS_GRAPH_CONNECTOR_ID=netappcopilot # Optional: Default is netappcopilot
+MS_GRAPH_CONNECTOR_NAME="NetApp Connector" # Optional: Default is "NetApp Connector"
+MS_GRAPH_CONNECTOR_DESCRIPTION="NetApp Connector for Microsoft 365 Copilot" # Optional: Default is "NetApp Connector for Microsoft 365 Copilot"

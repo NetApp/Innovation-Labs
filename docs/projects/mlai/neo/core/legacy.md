@@ -1,12 +1,14 @@
+# Neo Core v2.x
+
 # NetApp Neo deployment User Quick Start Guide (v2.x)
 
-> \[!IMPORTANT\]  
+> [!IMPORTANT]
 > NetApp Neo for M365 Copilot is currently in **Private Preview**. This means that the connector is not yet fully supported and may have some limitations. The connector requires a license to activate. You can request access to the connector by joining the Early Access Program (EAP). Please book a meeting with the following link to join the EAP: [Book a meeting with NetApp](https://outlook.office.com/bookwithme/user/d636d7a02ad8477c9af9a0cbb029af4d@netapp.com/meetingtype/nm-mXkp-TUO1CdzOmFfIBw2?anonymous&ismsaljsauthenabled&ep=mlink).
 
-> \[!IMPORTANT\]  
+> [!IMPORTANT]  
 > AWS ECS (Fargate) is NOT supported. This is due to the containers being unable to mount shares to the container(s) - a critical requirement of NetApp Neo.
 
-## 1\. Prerequisites
+## Prerequisites
 
 ### Network Requirements
 
@@ -27,7 +29,7 @@
 
 In order for the connector to be able to securely communicate with M365 Copilot.
 
-![Select App Registration in the Add menu in Microsoft Azure Entra](./media/2025-03-10_20-17-27.png)
+![Select App Registration in the Add menu in Microsoft Azure Entra](/neocore/2025-03-10_20-17-27.png)
 
 1. Navigate to the Azure Entra portal and select "Add" and select the "App Registration" option.
 2. Fill in the required fields and click "Register". (No Redirect URI is required)
@@ -47,7 +49,7 @@ In order for the connector to be able to securely communicate with M365 Copilot.
 
 You have successfully registered the connector in Azure ENTRA. You will need the Application ID, Directory ID, and Client Secret for the next steps.
 
-## 2\. Getting Started
+## Getting Started
 
 The easiest way to get started is by using the pre-built container image. You can run the connector using Docker/Podman or deploy it to a Kubernetes cluster using Helm.
 
@@ -59,27 +61,22 @@ The easiest way to get started is by using the pre-built container image. You ca
 docker pull ghcr.io/netapp/netapp-copilot-connector:2.2.5
 ```
 
-> \[!TIP\]
+> [!TIP]
 > Neo v2.x latest and last GA version is 2.2.5.
 
 #### Configure and Run
 
-1.  **Download the sample configuration files:**
+1.  **Download the compose file sample:**
 
-    - Download the [Sample .env file](./dist/.env.example ".env.example") and rename it to `.env`
-    - Download the [docker-compose.yml](./dist/docker-compose.yml "docker-compose.yml") file
+    - Download the [docker-compose.yml](/projects/mlai/neo/examples/legacy-neo.yml) file and rename it to your liking
 
 2.  **Configure the `.env` file with the required environment variables:**
 
-```bash
-# Required environment variables
-MS_GRAPH_CLIENT_ID=<Application ID from Azure ENTRA>
-MS_GRAPH_CLIENT_SECRET=<Client Secret from Azure ENTRA>
-MS_GRAPH_TENANT_ID=<Directory ID from Azure ENTRA>
-NETAPP_CONNECTOR_LICENSE=<License key for the connector> # Please see License section for more information
-```
+<<< @/projects/mlai/neo/examples/legacy-env  
 
-3.  **Run the connector using Docker Compose:**
+3.  **Review the compose file and run the connector using Docker Compose:**
+
+<<< @/projects/mlai/neo/examples/legacy-neo.yml 
 
 ```bash
 docker-compose up -d
@@ -89,7 +86,7 @@ docker-compose up -d
 
 The connector will be deployed and will be accessible on port 8080. You can access the API documentation at `http://localhost:8080/docs`.
 
-Trouble deploying the connector? Check the [Troubleshooting](#troubleshooting) section for common issues.
+Trouble deploying the connector? Check the [Troubleshooting](#troubleshooting-common-issues) section for common issues.
 
 ### Deploy using Kubernetes and Helm Chart
 
@@ -114,7 +111,7 @@ The chart bootstraps a deployment of NetApp Neo, which includes the following Ku
 
 ## Installation Guide
 
-### 1. Add Helm Repository
+### Add Helm Repository
 
 First, add the NetApp Innovation Labs repository to your Helm client.
 
@@ -122,7 +119,7 @@ First, add the NetApp Innovation Labs repository to your Helm client.
 helm repo add innovation-labs https://netapp.github.io/Innovation-Labs/
 ```
 
-### 2. Install the Chart
+### Install the Chart
 
 There are two primary methods for installing the chart: using command-line flags (ideal for testing) or a custom values file (recommended for production).
 
@@ -238,9 +235,9 @@ The following table lists the configurable parameters of NetApp Neo chart and th
 
 For more information, see the official [Helm documentation](https://helm.sh/docs/) and [Kubernetes documentation](https://kubernetes.io/docs/home/).
 
-# 3\. Initial Setup and First Admin User
+# Initial Setup and First Admin User
 
-> \[!IMPORTANT\]  
+> [!IMPORTANT]  
 > A dedicated stand-alone desktop UI is available for Windows, MacOS and Linux: [Download the Desktop App](./client "./client").
 
 The easiest way to set up the connector and create your first admin user is through the desktop application. The desktop app provides a user-friendly interface for:
@@ -252,7 +249,7 @@ The easiest way to set up the connector and create your first admin user is thro
 
 Alternatively, you can use the API directly by accessing the interactive documentation at `http://localhost:8080/docs`
 
-## 4\. Adding Your First Share
+## Adding Your First Share
 
 When configuring your first SMB share (either through the desktop app or API), you'll need to provide the following information:
 
@@ -295,7 +292,7 @@ Configure how the connector should process files in your share:
 - Exclude temporary files, system folders, and backups
 - Process all other content types
 
-## 5\. Triggering Your First Crawl
+## Triggering Your First Crawl
 
 After adding a share, you can trigger an immediate crawl to test the configuration and start indexing files:
 
@@ -320,9 +317,9 @@ You can monitor the crawl progress through:
 4.  **Upload**: Files are uploaded to Microsoft Graph (if enabled) for Copilot integration
 5.  **Database Storage**: File metadata and content are stored in the local database
 
-## 6\. Viewing Results in Microsoft 365 Copilot
+## Viewing Results in Microsoft 365 Copilot
 
-> \[!WARNING\]  
+> [!WARNING]  
 > You must perform this step after you have added your first share and completed at least one successful crawl to see results in Microsoft 365 Copilot.
 
 1.  **Visit the Microsoft 365 Admin Center**: Go to [Search and Intelligence](https://admin.microsoft.com/Adminportal/Home?source=applauncher#/MicrosoftSearch/connectors)
@@ -330,9 +327,9 @@ You can monitor the crawl progress through:
 3.  **Test in Microsoft 365 Copilot**: Try searching for content from your indexed files using natural language queries
 4.  **Control Access**: Verify that search results respect the original file permissions from your SMB shares. Item level permissions will be attempted to be preserved based on the ACLs read during the crawl, however this may not always be possible depending on your environment and configuration. It is recommended to test access with different user accounts to ensure proper security. In addition to item level permissions, you can also configure (recommended) broader access controls using Microsoft Entra groups and roles using the Microsoft 365 Admin Center -> Copilot Connectors settings -> Staging Permissions to control users and groups that can access content from the connector.
 
-![Select Include Connector Results in the Search and Intelligence Admin Centre](./media/2025-07-15_09-47-23.png)
+![Select Include Connector Results in the Search and Intelligence Admin Centre](/neocore/2025-07-15_09-47-23.png)
 
-## 7\. Troubleshooting Common Issues
+## Troubleshooting Common Issues
 
 ### Authentication Issues
 
@@ -358,7 +355,7 @@ You can monitor the crawl progress through:
 - Check proxy configuration if behind corporate firewall
 - Ensure connector is enabled in Microsoft 365 Admin Center
 
-## 8\. Advanced Configuration
+## Advanced Configuration
 
 ### Proxy Configuration
 
@@ -390,13 +387,13 @@ GRAPH_VERIFY_SSL=false
 SSL_CERT_FILE=/app/data/custom_ca_bundle.pem
 ```
 
-## 9\. API Access
+## API Access
 
 NetApp Neo provides a comprehensive REST API for programmatic access. The interactive API documentation is available at `http://localhost:8080/docs` after starting the connector.
 
 For detailed API usage examples and advanced operations, please refer to our [API User Guide](./USER_API_GUIDE.md).
 
-## 10\. Firewall Permissions
+## Firewall Permissions
 
 If your organization's proxy or firewalls block communication to unknown domains, add the following rules to the 'allow' list:
 
@@ -407,7 +404,7 @@ If your organization's proxy or firewalls block communication to unknown domains
 | https://graph.microsoft.com/                 | https://graph.microsoft.com/                 | https://graph.microsoft.com/, https://graph.microsoft.us/           |
 | https://huggingface.co/ds4sd/docling-models/ | https://huggingface.co/ds4sd/docling-models/ | https://huggingface.co/ds4sd/docling-models/                        |
 
-## 11\. Support
+## Support
 
 If you have any feedback or questions regarding NetApp Neo or its Documentation, please reach out to us by opening a GitHub issue at [NetApp Innovation Labs](https://github.com/NetApp/Innovation-Labs/issues).
 

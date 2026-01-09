@@ -19,15 +19,14 @@ export default defineConfig({
     },
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Content Posts', link: '/content/posts' },
       { text: 'Projects', link: '/projects' },
-      { text: 'Legal Notice', link: '/projects/legal-notices' },
+      { text: 'Posts', link: '/content/posts' },
+      { text: 'Legal Notices', link: '/projects/legal-notices' },
     ],
 
     sidebar: [
-      { text: 'Content Posts', link: '/content/posts' },
       { text: 'Projects', link: '/projects', },
-      { text: 'Legal Notice', link: '/projects/legal-notices' },
+      { text: 'Content Posts', link: '/content/posts' },
       { text: 'Doc Contribution Guide', link: '/CONTRIBUTING' },
       {
         text: 'Cloud',
@@ -90,13 +89,15 @@ export default defineConfig({
             },
             { text: 'Security', link: '/projects/mlai/neo/core/security' },
             { text: 'Troubleshooting', link: '/projects/mlai/neo/core/troubleshooting'},
+            { text: 'Legacy', link: '/projects/mlai/neo/core/legacy' },
             { text: 'Notice', link: '/projects/mlai/neo/core/NOTICE.md' },
           ],
         },
         { text: 'Neo UI Framework', link: '/projects/mlai/neo/uif/ui-framework' },
         { text: 'Neo Fuse Client', link: '/projects/mlai/neo/nfc/fuse-client' },
           ]
-      },        
+      },
+      { text: 'Legal Notices', link: '/projects/legal-notices' },   
     ],
 
     socialLinks: [

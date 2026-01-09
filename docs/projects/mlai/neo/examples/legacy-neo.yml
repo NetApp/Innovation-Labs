@@ -1,0 +1,59 @@
+services:
+  db: # PostgreSQL database service - Optional - only needed if you don't have an existing PostgreSQL database and want to quickly get started. If you have an existing PostgreSQL database, you can skip this service and configure the NEO service to connect to your existing database. Simply remove the 'db' service and update the NEO service's environment variables to point to your existing database.
+    image: postgres
+    restart: always
+    shm_size: 128mb # Adjust shared memory size if needed, this is important for database performance and 128mb is a good starting point for POC setups.
+    environment:
+      POSTGRES_PASSWORD: password # use a strong password
+      POSTGRES_DB: neo
+      PGDATA: /var/lib/postgresql/18/docker # PostgreSQL 18+ uses version-specific PGDATA path
+    volumes:
+      - postgres_data:/var/lib/postgresql # PostgreSQL 18+ mounts at /var/lib/postgresql (not /data subdirectory)
+    networks:
+      - netapp-neo
+  neo:
+    image: ghcr.io/netapp/netapp-copilot-connector:latest # Alternatively, you can specify a specific version tag i.e. 2.1.7
+    # deploy: # Uncomment this section to enable GPU support
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1 # Adjust count based on your GPU availability
+    #           capabilities: [gpu]
+    cap_add:
+      - SYS_ADMIN
+      - DAC_READ_SEARCH
+      - DAC_OVERRIDE
+    security_opt:
+      - apparmor:unconfined
+    ports:
+      - "8081:8080"
+    environment:
+      - PORT=8080
+      - DATABASE_URL=postgresql://postgres:password@db:5432/neo # Update with your DB credentials if needed. For mySQL use: mysql://user:password@tcp(db:3306)/neo
+    restart: unless-stopped
+    networks:
+      - netapp-neo
+    depends_on: # Ensure the database starts before NEO - Remove this section if you're using an existing database externally
+      - db
+
+  neoui:
+    image: ghcr.io/beezy-dev/neo-ui-framework:3.1.0
+    container_name: neoui
+    ports:
+      - "8080:80"
+    environment:
+      - NEO_API=http://neo:8080
+    networks:
+      - netapp-neo
+    restart: unless-stopped
+    depends_on:
+      - neo
+
+networks:
+  netapp-neo:
+    driver: bridge
+
+volumes: # Remove this section if you're using an external database
+  postgres_data:
+    driver: local
