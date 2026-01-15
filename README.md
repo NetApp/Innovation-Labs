@@ -1,6 +1,6 @@
 # Innovation-Labs
 
-Welcome to **NetApp Innovation Labs**!  
+Welcome to **NetApp Innovation Labs**!
 
 This is your gateway to explore and experiment with our Early Access Software. By participating, you can help shape the future development and direction of these cutting-edge solutions.
 
@@ -9,7 +9,7 @@ This is your gateway to explore and experiment with our Early Access Software. B
 
 ## Lab Directory
 
-- [NetApp Neo: Connector for M365 Copilot](./netapp-neo/README.md)
+- [NetApp Neo: Connector for M365 Copilot](https://netapp.github.io/Innovation-Labs/projects/neo/core/overview.html)
 - [NetApp Console Plugins for Red Hat OpenShift](./netapp-openshift-consoles/README.md)
 
 ## Getting Started
