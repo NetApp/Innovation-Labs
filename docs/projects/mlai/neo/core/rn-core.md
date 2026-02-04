@@ -4,6 +4,17 @@ Neo Core is the container service responsible for the extraction and API operati
 
 ## Current Version
 
+## 3.2.2: (Released 3rd February 2026)
+
+- Fix: Application could hang if certain operations took place during database migrations.
+- Fix: Database migrations were being triggered (through creation of a new Database instance) erroneously for certain API endpoints instead of using the existing database instances.
+- Hotfix: NER has temporarily been disabled in this release, it will be re-introduced in 3.3.0.
+- Fix: ACL operations failing with "No file_id in work item metadata".
+- Fix: MySQL database connection handling and thread-safety
+- Enhancement: MySQL Full-text Search results now return focused snippets to emulate how PostgreSQL results are displayed.
+
+## Previoud Version History
+
 ### 3.2.0: (Released 8th January 2026)
 
 - **New:** OIDC + oAuth 2.0 provider support for users and groups - You can now add enterprise users to manage Neo. Local users must be created first, then the OAuth account linked to it. Future versions of Neo will focus on streamlining this process.
@@ -15,8 +26,6 @@ Neo Core is the container service responsible for the extraction and API operati
 - **Fix:** Removed erroneous Postgres transaction statement on worker polling which resulted in several "transaction is in progress" log entries on Postgres servers.
 - **Fix:** Application could become unresponsive if a work item failed due to a transaction remaining uncommitted in the SQL database.
 - Other maintenance and house keeping.
-
-## Version History
 
 ### 3.1.0 (Released 9th December 2025)
 
