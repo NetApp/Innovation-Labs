@@ -28,7 +28,7 @@ ui:
   replicaCount: 1
   image:
     repository: ghcr.io/beezy-dev/neo-ui-framework
-    tag: "3.1.0"
+    tag: "3.2.1"
     pullPolicy: Always
   service:
     type: ClusterIP             
