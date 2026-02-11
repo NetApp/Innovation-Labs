@@ -11,6 +11,9 @@ This is your gateway to explore and experiment with our Early Access Software. B
 
 - [NetApp Neo: Connector for M365 Copilot](https://netapp.github.io/Innovation-Labs/projects/neo/core/overview.html)
 - [NetApp Console Plugins for Red Hat OpenShift](./netapp-openshift-consoles/README.md)
+- [NetApp Hybrid RAG (BM25-based) Deployment Guide](./docs/projects/hybrid-rag-bm25/README.md)
+- [NetApp Graph RAG Deployment Guide](./docs/projects/graph-rag/README.md)
+- [NetApp BM25-based/Document RAG Deployment Guide](./docs/projects/document-rag/README.md)
 
 ## Getting Started
 
