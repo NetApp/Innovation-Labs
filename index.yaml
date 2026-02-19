@@ -2,6 +2,16 @@ apiVersion: v1
 entries:
   netapp-connector:
   - apiVersion: v2
+    appVersion: 3.2.4
+    created: "2026-02-19T13:12:00.324691304Z"
+    description: NetApp Neo v3.x for Microsoft 365 Copilot Connector Helm Chart
+    digest: c61d95b584d516e6205a0457018928a76123b5f3b9da940d9fc0e00765b6ad62
+    name: netapp-connector
+    type: application
+    urls:
+    - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-connector-26.2.2/netapp-connector-26.2.2.tgz
+    version: 26.2.2
+  - apiVersion: v2
     appVersion: 3.2.2
     created: "2026-02-05T09:40:31.240662306Z"
     description: NetApp Neo v3.x for Microsoft 365 Copilot Connector Helm Chart
@@ -113,6 +123,18 @@ entries:
     version: 25.11.1
   netapp-openshift-console-protect:
   - apiVersion: v2
+    appVersion: 26.2.1
+    created: "2026-02-19T13:12:00.570520108Z"
+    description: NetApp Protect Console Plug-in for Red Hat OpenShift ecosystem provides
+      a single pane integration with NetApp Intelligent Data Management solutions
+      for containers and virtual machines
+    digest: 1fc64713b18c12bb07b058dbfe5ca4e6c42bba8e4395edd6d3d24a5ade809fed
+    name: netapp-openshift-console-protect
+    type: application
+    urls:
+    - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-openshift-console-protect-26.2.1/netapp-openshift-console-protect-26.2.1.tgz
+    version: 26.2.1
+  - apiVersion: v2
     appVersion: 25.7.30
     created: "2025-09-17T10:20:02.559380368Z"
     description: NetApp Protect Console Plug-in for Red Hat OpenShift ecosystem provides
@@ -138,6 +160,18 @@ entries:
     version: 25.9.19
   netapp-openshift-console-trident:
   - apiVersion: v2
+    appVersion: 26.2.1
+    created: "2026-02-19T13:12:00.792731528Z"
+    description: NetApp Trident Console Plugin for Red Hat OpenShift ecosystem provides
+      a single pane integration with NetApp Intelligent Data Management solutions
+      for containers and virtual machines
+    digest: 0e5a7a4f2bab7e3692064a6793985b36a4cf70dc77e28dd4d5c2ca588154046b
+    name: netapp-openshift-console-trident
+    type: application
+    urls:
+    - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-openshift-console-trident-26.2.1/netapp-openshift-console-trident-26.2.1.tgz
+    version: 26.2.1
+  - apiVersion: v2
     appVersion: 25.7.29
     created: "2025-09-17T10:20:02.723521091Z"
     description: NetApp Trident Console Plugin for Red Hat OpenShift ecosystem provides
@@ -161,4 +195,4 @@ entries:
     urls:
     - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-openshift-console-trident-25.9.19/netapp-openshift-console-trident-25.9.19.tgz
     version: 25.9.19
-generated: "2026-02-05T09:40:31.240708882Z"
+generated: "2026-02-19T13:12:00.792800335Z"
