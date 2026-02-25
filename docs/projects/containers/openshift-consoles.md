@@ -30,18 +30,14 @@ This is your plugin for workload protection with Trident Protect. It provides a 
 * Manage restore as a new workload
 
 ### Getting Started
-Both projects are currently in a pre-release phase and require an Early Access Program agreement. This agreement will grant you the necessary access token to deploy the consoles on your OpenShift cluster.
+Both projects are currently in a pre-release phase.
 
 Prerequisites
-* Red Hat OpenShift Container Platform 4.14, 4.15, 4.16, or 4.17.
-* An access token from the Early Access Program.
-
-## Documentation
+* Red Hat OpenShift Container Platform from 4.14 to 4.21.
 
 ### Prerequisites
 
-* Get an Early Access Program token by reaching our to the NetApp Innovation Labs team at ng-innovation-labs-git[@]netapp.com
-* Red Hat OpenShift 4.[15,16,17,18] on any footprint
+* Red Hat OpenShift 4.[15,16,17,18,19,20.21] on any footprint
 * NetApp storage solutions
   * on-prem NetApp appliances with ONTAP
   * Any CVO flavors from AWS, Azure, Google
@@ -69,15 +65,15 @@ helm search repo innovation-labs
 Expected output:
 ```
 NAME                                                    CHART VERSION   APP VERSION     DESCRIPTION
-innovation-labs/netapp-connector                        2.1.13          2.1.4           A Helm chart for deploying netapp-connector as ...
-innovation-labs/netapp-openshift-console-protect        25.7.1          25.6.25         NetApp Console Plug-in for Red Hat OpenShift pr...
-innovation-labs/netapp-openshift-console-trident        25.7.1          25.6.25         NetApp Console Plugin for Red Hat OpenShift pro...
+innovation-labs/netapp-connector                        26.2.2          3.2.4           NetApp Neo v3.x for Microsoft 365 Copilot Conne...
+innovation-labs/netapp-openshift-console-protect        26.2.1          26.2.1          NetApp Protect Console Plug-in for Red Hat Open...
+innovation-labs/netapp-openshift-console-trident        26.2.1          26.2.1          NetApp Trident Console Plugin for Red Hat OpenS...
 ```
 
 #### Install the NetApp Trident Console Plugin for Red Hat OpenShift
 Run the Helm install command:
 ```sh
-helm install netapp-openshift-console-trident innovation-labs/netapp-openshift-console-trident --namespace netapp-openshift-console-trident --create-namespace --set plugin.imageCredentials.registry=ghcr.io --set plugin.imageCredentials.username=<github_handle> --set plugin.imageCredentials.token=<token> 
+helm install netapp-openshift-console-trident innovation-labs/netapp-openshift-console-trident --namespace netapp-openshift-console-trident --create-namespace
 ``` 
 
 > [!IMPORTANT]
@@ -87,12 +83,8 @@ helm install netapp-openshift-console-trident innovation-labs/netapp-openshift-c
 #### Install the NetApp Protect Console Plugin for Red Hat OpenShift
 Run the Helm install command:
 ```sh
-helm install netapp-openshift-console-protect innovation-labs/netapp-openshift-console-protect --namespace netapp-openshift-console-protect --create-namespace --set plugin.imageCredentials.registry=ghcr.io --set plugin.imageCredentials.username=<github_handle> --set plugin.imageCredentials.token=<token> 
+helm install netapp-openshift-console-protect innovation-labs/netapp-openshift-console-protect --namespace netapp-openshift-console-protect --create-namespace 
 ``` 
-
-> [!NOTE]
-> The ```plugin.imageCredentials.registry``` allows you to select a container registry the image is available.   
-> The ```plugin.image.tag``` allows you to select a specific version to deploy.   
 
 > [!IMPORTANT]
 > The namespace should not be change as it is linked to the Red Hat OpenShift Console manifest.
