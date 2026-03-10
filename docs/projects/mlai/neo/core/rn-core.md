@@ -4,7 +4,11 @@ Neo Core is the container service responsible for the extraction and API operati
 
 ## Current Version
 
-## 3.2.2: (Released 3rd February 2026)
+All release notes are now available here: [NetApp Innovation Labs](https://github.com/NetApp/Innovation-Labs.git)
+
+## Previous Versions
+
+### 3.2.2: (Released 3rd February 2026)
 
 - Fix: Application could hang if certain operations took place during database migrations.
 - Fix: Database migrations were being triggered (through creation of a new Database instance) erroneously for certain API endpoints instead of using the existing database instances.
@@ -12,8 +16,6 @@ Neo Core is the container service responsible for the extraction and API operati
 - Fix: ACL operations failing with "No file_id in work item metadata".
 - Fix: MySQL database connection handling and thread-safety
 - Enhancement: MySQL Full-text Search results now return focused snippets to emulate how PostgreSQL results are displayed.
-
-## Previoud Version History
 
 ### 3.2.0: (Released 8th January 2026)
 
