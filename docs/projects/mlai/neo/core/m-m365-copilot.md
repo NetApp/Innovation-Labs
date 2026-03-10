@@ -1,5 +1,21 @@
 # Microsoft 365 Copilot
 
+## Architecture
+
+In Neo v4, Microsoft Graph integration is handled by the **Worker service**, which manages Graph connection creation, item uploads, ACL synchronization, and cleanup. The API service provides endpoints for configuring Graph credentials and monitoring sync status.
+
+### Configuring Graph Credentials
+
+Graph credentials can be configured in two ways:
+
+1. **Environment variables**: Set `MS_GRAPH_CLIENT_ID`, `MS_GRAPH_CLIENT_SECRET`, and `MS_GRAPH_TENANT_ID` in the Worker and API service environment.
+
+2. **Setup API**: Configure credentials at runtime via:
+   ```
+   POST /api/v1/setup/graph
+   ```
+   This is useful for initial setup or rotating credentials without restarting services.
+
 ### Register Neo as a connector in Azure Entra
 
 In order for Neo to be able to securely communicate with M365 Copilot.
@@ -23,6 +39,42 @@ In order for Neo to be able to securely communicate with M365 Copilot.
 15. Copy the value of the client secret.
 
 You have successfully registered Neo as a connector in Azure ENTRA. You will need the **Application ID**, **Directory ID**, and **Client Secret** for the next steps.
+
+## Graph Sync Monitoring
+
+Neo provides API endpoints for monitoring and managing the Graph sync lifecycle for each share.
+
+### Check sync status
+
+```
+GET /shares/{share_id}/graph/status
+```
+
+Returns the current Graph sync state for a share, including connection status, items uploaded, items pending, and any errors.
+
+### Backfill items to Graph
+
+```
+POST /shares/{share_id}/graph/backfill
+```
+
+Triggers a backfill operation to upload any items that have been extracted but not yet synced to Microsoft Graph. Useful after initial setup or after resolving Graph connectivity issues.
+
+### Clean up Graph items
+
+```
+POST /shares/{share_id}/graph/cleanup
+```
+
+Removes items from the Microsoft Graph connection that no longer exist in the source share. This is automatically performed during crawl operations but can be triggered manually.
+
+### Retry failed uploads
+
+```
+POST /shares/{share_id}/graph/retry-failed
+```
+
+Retries all items that previously failed to upload to Microsoft Graph. Failed items are tracked in the database with error details for diagnostics.
 
 ## Managing the connector in M365 Admin Centre
 

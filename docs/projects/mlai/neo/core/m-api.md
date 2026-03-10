@@ -4,6 +4,7 @@ The API documentation is available at ```http://localhost:8000/docs``` after sta
 
 > ![NOTE]
 > The connector will generate a secure random admin password for you by default, be sure to retrieve this from the logs.
+> You can also retrieve the initial credentials programmatically via `GET /api/v1/setup/initial-credentials`.
 
 Learn how to create a new administrator user for accessing and managing your NetApp shares.
  
@@ -139,14 +140,18 @@ The connector supports filtering files based on size:
 
 Understand how to monitor the connector's operations and troubleshoot any issues.
 
-#### GET /operations
+#### GET /api/v1/monitoring/operations
 
 Get operation logs with optional filtering.
 
 Query Parameters:
 
 - ```limit``` (optional): Maximum number of logs to return (default: 100)
-- ```operation_type``` (optional): Filter by operation type (e.g., "LIST_FILES", "GET_SHARE")
+- ```type``` (optional): Filter by operation type (e.g., "LIST_FILES", "GET_SHARE")
+- ```action``` (optional): Filter by action (metadata)
+- ```status``` (optional): Filter by status (e.g., "SUCCESS", "ERROR")
+- ```share_id``` (optional): Filter by share ID (metadata)
+- ```since``` (optional): Limit to operations since this ISO timestamp
 
 Response:
 
@@ -176,9 +181,29 @@ Response:
 ```json
 {
   "status": "healthy",
-  "version": "1.0.0",
-  "database": "connected",
-  "uptime": "1d 2h 34m"
+  "service": "api",
+  "version": "4.0.2",
+  "timestamp": "2026-03-10T12:00:00+00:00"
+}
+```
+
+#### GET /health/detailed
+
+Detailed health check with component status.
+
+Response:
+
+```json
+{
+  "status": "healthy",
+  "service": "api",
+  "version": "4.0.2",
+  "components": {
+    "database": "ok",
+    "oauth": "configured"
+  },
+  "worker_url": "http://worker-service:8001",
+  "timestamp": "2026-03-10T12:00:00+00:00"
 }
 ```
 
@@ -218,4 +243,157 @@ Response:
 }
 ```
 
-Go ahead and start exploring the API to see what else you can do! 
+Go ahead and start exploring the API to see what else you can do!
+
+---
+
+## API Endpoint Reference
+
+This section provides a complete overview of all endpoint groups available in the NetApp Project Neo v4 API.
+
+### Auth
+
+| Method | Endpoint | Description |
+| ------ | -------- | ----------- |
+| POST | `/token` | Authenticate and obtain a JWT access token |
+| POST | `/logout` | Invalidate the current session |
+
+### Setup (29 endpoints)
+
+Configuration and initial setup wizard. See the [Configuration Guide](./d-configuration.md) for full details.
+
+| Method | Endpoint | Description |
+| ------ | -------- | ----------- |
+| GET | `/api/v1/setup/status` | Get current setup status |
+| POST | `/api/v1/setup/complete` | Mark setup as complete |
+| POST | `/api/v1/setup/license` | Configure license |
+| GET | `/api/v1/setup/license/status` | Get license status |
+| POST | `/api/v1/setup/graph` | Configure Microsoft Graph |
+| GET | `/api/v1/setup/graph` | Get Graph settings |
+| GET | `/api/v1/setup/graph/connections` | List Graph connections |
+| GET | `/api/v1/setup/graph/connections/{id}` | Get a specific Graph connection |
+| POST | `/api/v1/setup/mcp` | Configure MCP OAuth |
+| GET | `/api/v1/setup/mcp` | Get MCP OAuth settings |
+| POST | `/api/v1/setup/mcp/api-key` | Create or regenerate MCP API key |
+| GET | `/api/v1/setup/mcp/api-key` | Get MCP API key status |
+| DELETE | `/api/v1/setup/mcp/api-key` | Revoke MCP API key |
+| POST | `/api/v1/setup/ssl` | Configure SSL/TLS |
+| GET | `/api/v1/setup/ssl` | Get SSL settings |
+| POST | `/api/v1/setup/proxy` | Configure HTTP proxy |
+| GET | `/api/v1/setup/proxy` | Get proxy settings |
+| POST | `/api/v1/setup/reload` | Reload configuration |
+| POST | `/api/v1/setup/reset` | Reset setup state |
+| GET | `/api/v1/setup/extractors` | List extractor configurations |
+| POST | `/api/v1/setup/extractors` | Configure extractors |
+| DELETE | `/api/v1/setup/extractors` | Remove extractor configuration |
+| POST | `/api/v1/setup/factory-reset` | Factory reset the connector |
+| GET | `/api/v1/setup/initial-credentials` | Retrieve initial admin credentials |
+
+### Shares
+
+CRUD operations, crawl control, and Microsoft Graph sync. See the [Shares Guide](./m-shares.md) for full details.
+
+| Method | Endpoint | Description |
+| ------ | -------- | ----------- |
+| GET | `/api/v1/shares` | List all shares |
+| POST | `/api/v1/shares` | Create a new share |
+| GET | `/api/v1/shares/{share_id}` | Get share details |
+| PATCH | `/api/v1/shares/{share_id}` | Update share settings |
+| DELETE | `/api/v1/shares/{share_id}` | Delete a share |
+| POST | `/api/v1/shares/{share_id}/crawl` | Trigger a crawl |
+| POST | `/api/v1/shares/{share_id}/graph-sync` | Trigger Graph sync |
+
+### Files
+
+File listing, retrieval, and search. See the [Files Guide](./m-files.md) for full details.
+
+| Method | Endpoint | Description |
+| ------ | -------- | ----------- |
+| GET | `/api/v1/shares/{share_id}/files` | List files in a share |
+| GET | `/api/v1/files/{file_id}` | Get file metadata |
+| POST | `/api/v1/files/search` | Search files by content or metadata |
+
+### Users
+
+User management (CRUD). See the [Users Guide](./m-users.md) for full details.
+
+| Method | Endpoint | Description |
+| ------ | -------- | ----------- |
+| GET | `/api/v1/users` | List users |
+| POST | `/api/v1/users` | Create a user |
+| GET | `/api/v1/users/{user_id}` | Get user details |
+| PATCH | `/api/v1/users/{user_id}` | Update a user |
+| DELETE | `/api/v1/users/{user_id}` | Delete a user |
+
+### NER (Named Entity Recognition)
+
+Entity results, statistics, schemas, and settings. See the [NER Guide](./m-ner.md) when available.
+
+| Method | Endpoint | Description |
+| ------ | -------- | ----------- |
+| GET | `/api/v1/ner/entities` | Get NER results |
+| GET | `/api/v1/ner/stats` | Get NER statistics |
+| GET | `/api/v1/ner/schemas` | List NER schemas |
+| GET | `/api/v1/ner/settings` | Get NER settings |
+| PATCH | `/api/v1/ner/settings` | Update NER settings |
+
+### Monitoring
+
+System monitoring, work queue, worker status, benchmarking, and tuning.
+
+| Method | Endpoint | Description |
+| ------ | -------- | ----------- |
+| GET | `/api/v1/monitoring/overview` | Comprehensive monitoring overview |
+| GET | `/api/v1/monitoring/work-queue` | Work queue statistics |
+| GET | `/api/v1/monitoring/work-queue/by-share/{share_id}` | Work queue stats for a share |
+| GET | `/api/v1/monitoring/workers` | Active worker statistics |
+| GET | `/api/v1/monitoring/services` | Service health status |
+| GET | `/api/v1/monitoring/failed-items` | Failed work items |
+| POST | `/api/v1/monitoring/retry-failed` | Retry failed items |
+| GET | `/api/v1/monitoring/operations` | Operation logs |
+| GET | `/api/v1/monitoring/database/size` | Database size and statistics |
+| GET | `/api/v1/monitoring/enumeration` | Enumeration stats (proxied to worker) |
+| GET | `/api/v1/monitoring/graph-rate-limit` | Graph API rate limit stats |
+| GET | `/api/v1/monitoring/sizing/profiles` | Sizing profiles |
+| GET | `/api/v1/monitoring/sizing/current` | Current sizing vs. recommended |
+| GET | `/api/v1/monitoring/sizing/parameters` | Tunable parameters |
+| POST | `/api/v1/monitoring/benchmark/run` | Start a benchmark run |
+| GET | `/api/v1/monitoring/benchmark/status` | Benchmark progress |
+| GET | `/api/v1/monitoring/benchmark/results` | Latest benchmark results |
+| GET | `/api/v1/monitoring/benchmark/history` | Historical benchmark results |
+| GET | `/api/v1/monitoring/tuning/recommendations` | Auto-tuner recommendations |
+| GET | `/api/v1/monitoring/tuning/history` | Tuning change history |
+| POST | `/api/v1/monitoring/tuning/apply` | Apply a tuning recommendation |
+| POST | `/api/v1/monitoring/tuning/rollback` | Revert last tuning change |
+| GET | `/api/v1/monitoring/tuning/status` | Auto-tuner status |
+| POST | `/api/v1/monitoring/work-items/retry` | Retry specific work items |
+
+### Tasks
+
+Background task management.
+
+| Method | Endpoint | Description |
+| ------ | -------- | ----------- |
+| GET | `/api/v1/tasks` | List background tasks |
+| GET | `/api/v1/tasks/{task_id}` | Get task status |
+| GET | `/api/v1/tasks/{task_id}/detailed` | Get detailed task info |
+| DELETE | `/api/v1/tasks/{task_id}` | Cancel a running task |
+| GET | `/api/v1/tasks/statistics/summary` | Task statistics summary |
+| GET | `/api/v1/tasks/statistics/acl-cache` | ACL cache statistics |
+
+### Health
+
+| Method | Endpoint | Description |
+| ------ | -------- | ----------- |
+| GET | `/health` | Basic health check |
+| GET | `/health/detailed` | Detailed health with component status |
+| GET | `/ready` | Kubernetes readiness probe |
+| GET | `/version` | Version information |
+
+### MCP (Model Context Protocol)
+
+AI agent integration endpoint. See the [MCP Guide](./m-mcp.md) for full details.
+
+| Method | Endpoint | Description |
+| ------ | -------- | ----------- |
+| POST | `/mcp` | MCP Streamable HTTP transport |

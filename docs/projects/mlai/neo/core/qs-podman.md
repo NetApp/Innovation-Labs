@@ -1,14 +1,27 @@
 # Deploy using Podman
 
-It is recommended to use Podman Compose for deploying the NetApp Connector (Neo) using Podman. Podman Compose simplifies the deployment process by allowing you to define and manage multi-container Podman applications with a single configuration file, similar to Docker Compose.
+It is recommended to use Podman Compose for deploying NetApp Project Neo using Podman. Podman Compose simplifies the deployment process by allowing you to define and manage multi-container Podman applications with a single configuration file, similar to Docker Compose.
+
+## Architecture
+
+Neo v4 consists of four microservices plus a PostgreSQL database:
+
+- **API** (port 8000) -- REST API and authentication
+- **Worker** -- File discovery, SMB crawling, Graph uploads
+- **Extractor** -- Document content extraction (PDF, Office, images)
+- **NER** -- Named Entity Recognition
+- **Console UI** (port 8081) -- Web management interface
 
 ## Prerequisites
 
-Before deploying the NetApp Connector (Neo) using Podman Compose, ensure that you have the following prerequisites in place:
+Before deploying Neo using Podman Compose, ensure that you have the following prerequisites in place:
 
 - Podman installed on your system. You can download Podman from the [official Podman website](https://podman.io/getting-started/installation).
 - Podman Compose installed. You can install it using pip: `pip3 install podman-compose` or refer to the [Podman Compose installation instructions](https://github.com/containers/podman-compose).
-- Sufficient system resources to run the NetApp Connector (Neo). Refer to the [Sizing Guide](deployment#sizing-guide) in the Deployment section for recommended specifications.
+- Sufficient system resources to run Neo. Refer to the [Sizing Guide](./d-sizing.md) for recommended specifications.
+
+> [!IMPORTANT]
+> The Extractor and Worker services may require privileged container access for SMB share mounting. When running with Podman, you may need to use `sudo podman-compose` or configure rootful Podman for these services.
 
 ## Deployment Steps
 
@@ -35,7 +48,7 @@ Before deploying the NetApp Connector (Neo) using Podman Compose, ensure that yo
    ```bash
    podman-compose up -d
    ```
-   This command will download the necessary container images and start the NetApp Connector (Neo) along with its dependencies in detached mode.
+   This command will download the necessary container images and start all four Neo microservices along with the PostgreSQL database in detached mode.
 
 4. **Verify the Deployment**:
    After the containers are up and running, you can verify the deployment by checking the logs:
@@ -44,22 +57,21 @@ Before deploying the NetApp Connector (Neo) using Podman Compose, ensure that yo
    podman-compose logs -f
    ```
 
-   You should see logs indicating that the NetApp Connector (Neo) has started successfully as follows:
+   You should see logs indicating that the services have started successfully. The API service will log:
 
    ```
-   neo-1  | 2025-12-03 19:46:43.882 | INFO     | app.main:lifespan:146 - Starting up application...
-   neo-1  | 2025-12-03 19:46:43.882 | INFO     | app.main:lifespan:150 - 🔧 Setup mode: Skipping license validation and Graph initialization
-   neo-1  | 2025-12-03 19:46:43.882 | INFO     | app.main:lifespan:151 - 📋 Complete setup via /api/v1/setup endpoints to enable full functionality
-   neo-1  | INFO:     Application startup complete.
-   neo-1  | INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+   api-1  | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
    ```
 
-5. **Access the Web Interface**:
-   Open your web browser and navigate to `http://<your-server-ip>:8080` to access the NetApp Connector (Neo) web interface. Replace `<your-server-ip>` with the actual IP address of your server. For further information on using the web interface, refer to the [Management](management) section of the documentation.
+5. **Access the Services**:
+   - **Console UI**: Open your web browser and navigate to `http://<your-server-ip>:8081` to access the Neo web management console.
+   - **API**: The REST API is available at `http://<your-server-ip>:8000`. API documentation is at `http://<your-server-ip>:8000/docs`.
+
+   For further information on using the web interface, refer to the [Management](management) section of the documentation.
 
 ## Stopping the Deployment
 
-To stop the NetApp Connector (Neo) deployment, run the following command in the terminal where the `docker-compose.yml` file is located:
+To stop the Neo deployment, run the following command in the terminal where the `docker-compose.yml` file is located:
 
 ```bash
 podman-compose down
@@ -71,6 +83,7 @@ This command will stop and remove the containers and networks created by Podman 
 
 - Podman runs containers rootless by default, providing enhanced security compared to Docker.
 - Podman does not require a daemon to be running, unlike Docker.
+- The Extractor and Worker services may need privileged access for SMB mounts. Use `sudo podman-compose up -d` if you encounter mount permission errors.
 - If you encounter permission issues with volumes, you may need to adjust SELinux contexts or volume mount options. Refer to the [Podman documentation](https://docs.podman.io/en/latest/) for troubleshooting.
 
-This concludes the steps to deploy the NetApp Connector (Neo) using Podman Compose. For more advanced configurations and management options, please refer to the [Management](management) section of the documentation.
+This concludes the steps to deploy NetApp Project Neo using Podman Compose. For more advanced configurations and management options, please refer to the [Management](management) section of the documentation.

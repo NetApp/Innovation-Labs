@@ -14,8 +14,8 @@ Share rules allow you to customize file processing behavior on a per-share basis
 - **Rolling date windows** - Dynamic date filters that update automatically
 - **Content persistence** - Control whether file content is retained after upload
 - **Upload control** - Enable or disable Microsoft Graph/Copilot integration
-- **ACL overrides** - Bypass file-level permissions (see [ACL Override Guide](./management-acls.md)
-- **NER analysis** - Enable entity extraction (see [NER Feature Guide - COMING SOON](./management-rules-filters.md))
+- **ACL overrides** - Bypass file-level permissions (see [ACL Override Guide](./m-acls.md))
+- **NER analysis** - Enable entity extraction (see [NER Feature Guide](./m-ner.md))
 
 ## Quick Start
 

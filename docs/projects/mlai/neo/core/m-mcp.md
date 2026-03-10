@@ -12,10 +12,11 @@ This guide explains how to configure and use the Model Context Protocol (MCP) in
 4.  [Configuration](#configuration)
 5.  [Claude Desktop Setup](#claude-desktop-setup)
 6.  [Available Tools](#available-tools)
-7.  [Security & Access Control](#security--access-control)
-8.  [Rate Limiting](#rate-limiting)
-9.  [Troubleshooting](#troubleshooting)
-10. [Environment Variables Reference](#environment-variables-reference)
+7.  [MCP API Key Authentication](#mcp-api-key-authentication)
+8.  [Security & Access Control](#security--access-control)
+9.  [Rate Limiting](#rate-limiting)
+10. [Troubleshooting](#troubleshooting)
+11. [Environment Variables Reference](#environment-variables-reference)
 
 ---
 
@@ -23,11 +24,12 @@ This guide explains how to configure and use the Model Context Protocol (MCP) in
 
 The MCP integration allows AI assistants to securely search and retrieve content from your NetApp file shares. Key features include:
 
-- **🔐 ACL-Based Access Control**: Users can only access files they have permission to view based on SMB ACLs resolved to Microsoft Entra IDs
-- **🔍 Full-Text Search**: Search file content using natural language queries
-- **📄 Content Windowing**: Navigate large documents in chunks that fit AI context windows
-- **⚡ Rate Limiting**: Per-user rate limits prevent abuse and ensure fair usage
-- **🔒 OAuth 2.0 Authentication**: Secure authentication via Microsoft Entra ID
+- **ACL-Based Access Control**: Users can only access files they have permission to view based on SMB ACLs resolved to Microsoft Entra IDs
+- **Full-Text Search**: Search file content using natural language queries
+- **Content Windowing**: Navigate large documents in chunks that fit AI context windows
+- **Rate Limiting**: Per-user rate limits prevent abuse and ensure fair usage
+- **OAuth 2.0 Authentication**: Secure authentication via Microsoft Entra ID
+- **API Key Authentication**: Simplified authentication for server-to-server and development scenarios
 
 ### How It Works
 
@@ -91,12 +93,13 @@ The MCP integration allows AI assistants to securely search and retrieve content
 │         ┌──────────────────────────┼──────────────────────────┐              │
 │         ▼                          ▼                          ▼              │
 │  ┌─────────────┐           ┌─────────────┐           ┌─────────────┐         │
-│  │   OAuth     │           │ ACL Filter  │           │    Rate     │         │
-│  │ Validation  │           │             │           │   Limiter   │         │
-│  │             │           │ - User ID   │           │             │         │
-│  │ - Entra ID  │           │ - Groups    │           │ - Per-tool  │         │
-│  │ - JWT       │           │ - Share ACL │           │ - Per-user  │         │
-│  │ - Groups    │           │   Override  │           │ - Bytes     │         │
+│  │   OAuth /   │           │ ACL Filter  │           │    Rate     │         │
+│  │  API Key    │           │             │           │   Limiter   │         │
+│  │ Validation  │           │ - User ID   │           │             │         │
+│  │             │           │ - Groups    │           │ - Per-tool  │         │
+│  │ - Entra ID  │           │ - Share ACL │           │ - Per-user  │         │
+│  │ - JWT       │           │   Override  │           │ - Bytes     │         │
+│  │ - API Key   │           │             │           │             │         │
 │  └─────────────┘           └─────────────┘           └─────────────┘         │
 │                                    │                                         │
 │                                    ▼                                         │
@@ -176,7 +179,7 @@ The MCP integration allows AI assistants to securely search and retrieve content
 Before configuring MCP, ensure you have:
 
 1.  **NetApp Connector Running**: The connector API must be accessible (default: `http://localhost:8080`)
-2.  **Microsoft Entra ID App Registration**: Required for OAuth authentication
+2.  **Microsoft Entra ID App Registration**: Required for OAuth authentication (or use API key authentication for simpler setups)
 3.  **Indexed File Shares**: At least one share must be configured and crawled
 4.  **ACL Resolution Enabled**: Files should have `resolved_principals` for proper access control
 
@@ -320,7 +323,7 @@ For development or when HTTP transport isn't available:
     "netapp-files": {
       "command": "python",
       "args": ["-m", "app.mcp"],
-      "cwd": "/path/to/netapp-copilot-connector-gen-2",
+      "cwd": "/path/to/netapp-neo",
       "env": {
         "NETAPP_API_URL": "http://localhost:8080",
         "MCP_OAUTH_ENABLED": "true",
@@ -380,7 +383,7 @@ The MCP server exposes five tools for AI agents:
 
 ### 1\. `search_files`
 
-Search for files by name, type, date, or size across all accessible shares.
+Search for files by name, type, date, or size across all accessible shares. Uses GIN-indexed `search_vector` for 20-42x faster full-text search (PostgreSQL).
 
 **Parameters:**
 
@@ -509,7 +512,7 @@ List available file shares in the system.
 
 ### 5\. `search_entities`
 
-Find files containing specific named entities (people, organizations, etc.) extracted via NER.
+Find files containing specific named entities (people, organizations, etc.) extracted via NER. Proxied to the NER microservice. Requires the NER service to be running.
 
 **Parameters:**
 
@@ -525,6 +528,74 @@ Find files containing specific named entities (people, organizations, etc.) extr
 "Find documents mentioning Acme Corporation"
 → search_entities(entity_value="Acme Corporation", entity_type="organization")
 ```
+
+---
+
+## MCP API Key Authentication
+
+For server-to-server integrations, development environments, or scenarios where OAuth is not practical, MCP supports API key authentication as an alternative to the full OAuth flow.
+
+### Setting the API Key
+
+There are two ways to configure an MCP API key:
+
+#### Option 1: Environment Variable
+
+Set the `MCP_API_KEY` environment variable in your deployment:
+
+```bash
+MCP_API_KEY=your-secret-api-key
+```
+
+This takes precedence over any key stored in the database.
+
+#### Option 2: Setup API
+
+Use the setup API to create or regenerate a key stored in the database:
+
+```bash
+# Create or regenerate an MCP API key
+curl -X POST "http://localhost:8080/api/v1/setup/mcp/api-key" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "mcp-api-key@local",
+    "name": "MCP API Key User",
+    "sub": "mcp-api-key"
+  }'
+```
+
+The response includes the generated API key. Store it securely -- it will not be shown again.
+
+### Using the API Key
+
+MCP clients send the API key as a Bearer token in the `Authorization` header:
+
+```
+Authorization: Bearer <your-mcp-api-key>
+```
+
+For Claude Desktop or other MCP clients, configure the key as you would an OAuth token.
+
+### Managing API Keys
+
+#### Check API Key Status
+
+```bash
+curl -X GET "http://localhost:8080/api/v1/setup/mcp/api-key" \
+  -H "Authorization: Bearer $ADMIN_TOKEN"
+```
+
+Returns whether an API key is configured (via database or environment variable), along with the associated identity (email, name) but not the key itself.
+
+#### Revoke an API Key
+
+```bash
+curl -X DELETE "http://localhost:8080/api/v1/setup/mcp/api-key" \
+  -H "Authorization: Bearer $ADMIN_TOKEN"
+```
+
+This deletes the database-stored key. If the `MCP_API_KEY` environment variable is also set, it will remain active until removed from the environment.
 
 ---
 
@@ -618,6 +689,7 @@ When files don't have resolved ACL principals, you can configure share-level fal
 3.  **Rotate client secrets regularly** - Update your Entra ID app registration secrets
 4.  **Monitor MCP operations** - All MCP tool calls are logged to the operations log
 5.  **Configure appropriate rate limits** - Prevent abuse with per-user limits
+6.  **Protect MCP API keys** - Treat API keys like passwords; rotate them periodically and revoke unused keys
 
 ---
 
@@ -719,6 +791,29 @@ MCP_OAUTH_CLIENT_SECRET=your-client-secret
 - Check file ACLs and your permissions
 - Broaden search parameters
 
+#### 6\. NER service not available (search_entities fails)
+
+**Cause:** The `search_entities` tool proxies requests to the NER microservice, which must be running separately.
+
+**Solutions:**
+
+- Verify the NER service container is running: check `GET /health` on the NER service (default port 8003)
+- Check the NER service URL configuration (`NER_SERVICE_URL` environment variable)
+- Ensure the NER service has network connectivity to the API service
+- Check NER service logs for startup errors
+
+#### 7\. MCP API key authentication issues
+
+**Cause:** API key is missing, invalid, or misconfigured
+
+**Solutions:**
+
+- Verify the key is set: `GET /api/v1/setup/mcp/api-key` to check status
+- If using an environment variable, confirm `MCP_API_KEY` is set in the container environment
+- If using a database-stored key, regenerate it via `POST /api/v1/setup/mcp/api-key`
+- Ensure the key is being sent as `Authorization: Bearer <key>` in the request header
+- Note that `MCP_API_KEY` env var takes precedence over the database-stored key
+
 ### Viewing MCP Logs
 
 MCP operations are logged to the connector's operations log:
@@ -726,7 +821,7 @@ MCP operations are logged to the connector's operations log:
 ```bash
 # View recent MCP operations
 curl -H "Authorization: Bearer $TOKEN" \
-  "http://localhost:8080/operations?operation_type=MCP_SEARCH_FILES&limit=10"
+  "http://localhost:8080/api/v1/monitoring/operations?type=MCP_SEARCH_FILES&limit=10"
 ```
 
 Log entries include:
@@ -749,6 +844,12 @@ Log entries include:
 | `MCP_OAUTH_CLIENT_ID`     | Yes      | \-      | App registration client ID              |
 | `MCP_OAUTH_CLIENT_SECRET` | Yes      | \-      | App registration client secret          |
 | `MCP_OAUTH_TOKEN`         | No       | \-      | Pre-configured OAuth token (stdio mode) |
+
+### API Key Authentication
+
+| Variable      | Required | Default | Description                                             |
+| ------------- | -------- | ------- | ------------------------------------------------------- |
+| `MCP_API_KEY` | No       | \-      | Static API key for MCP auth (overrides database-stored key) |
 
 ### Rate Limiting
 
@@ -794,4 +895,4 @@ Log entries include:
 
 ---
 
-_Last updated: January 2026_
+_Last updated: March 2026_

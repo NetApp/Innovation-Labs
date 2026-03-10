@@ -1,17 +1,16 @@
 
 # Deploy using Docker/Podman
 
-This guide provides the necessary steps to deploy a "battery-included" Neo instance, using Docker or Podman that includes:
+This guide walks through deploying NetApp Project Neo v4 using Docker or Podman Compose. The deployment includes six services:
 
-- an official PostgreSQL instance, version 16.10-alpine3.21 
-- version 3.1.1 of Neo 
-- version 3.1.1 of Neo UI
-
-For testing purposes, a local SAMBA service is also included. 
+- **postgres** -- PostgreSQL 17 shared database
+- **api** -- FastAPI service (HTTP API + MCP transport) on port 8000
+- **worker** -- Background processing (crawling, upload, NER orchestration)
+- **extractor** -- Content extraction (MarkItDown, Docling, VLM)
+- **ner** -- GLiNER2 Named Entity Recognition
+- **neoui** -- Web management console on port 8081
 
 ## Prerequisites
-
-Before deploying the NetApp Connector (Neo) using Podman Compose, ensure that you have the following prerequisites in place:
 
 ::: details Docker
 - Docker installed on your system. You can download Docker from the [official Docker website](https://www.docker.com/get-started/).
@@ -23,168 +22,296 @@ Before deploying the NetApp Connector (Neo) using Podman Compose, ensure that yo
 - Podman Compose installed. You can install it using the [Podman Compose installation instructions](https://github.com/containers/podman-compose).
 :::
 
-- Sufficient system resources to run the NetApp Core Connector. Refer to the [Sizing Guide](/projects/neo/core/d-sizing.md) in the Deployment section for recommended specifications.
-- ```cifs-utils``` package needs to be deployed on the Linux host.
-- ```SELinux``` contexts might require adjustements based on your specific Linux host security profile.
+- Sufficient system resources to run NetApp Neo. Refer to the [Sizing Guide](/projects/neo/core/d-sizing.md) in the Deployment section for recommended specifications.
+- ```cifs-utils``` package deployed on the Linux host (required for SMB share mounting by the extractor service).
+- ```SELinux``` contexts may require adjustments based on your specific Linux host security profile.
 
 > [!WARNING]
-> The main difference between ```docker``` and ```podman``` is linked to ```podman``` requiring a ```sudo``` prefix to start as a privileged container which is not required by ```docker``` because the daemon is already running **all** containers in a privileged mode.
-
+> The main difference between ```docker``` and ```podman``` is that ```podman``` requires a ```sudo``` prefix for privileged containers. Docker's daemon already runs containers in a privileged mode.
 
 ## Deployment Guide
 
-Create a directory called "neo-test" in a directory of your choice to host the configuration files below.
+### Download the compose file
 
-### Environment variables
-First, we need to set up the following .env file to configure the database. 
+Download ```docker-compose.yml``` from the [latest GitHub release](https://github.com/NetApp/Innovation-Labs/releases) into a directory of your choice:
 
-<<< @/projects/mlai/neo/examples/env 
+::: code-group
 
+```BASH [Docker]
+mkdir neo && cd neo
+# Download docker-compose.yml from the latest release
+curl -LO https://github.com/NetApp/Innovation-Labs/releases/latest/download/docker-compose.yml
+```
+
+```BASH [Podman]
+mkdir neo && cd neo
+# Download docker-compose.yml from the latest release
+curl -LO https://github.com/NetApp/Innovation-Labs/releases/latest/download/docker-compose.yml
+```
+:::
+
+### Environment variables (optional)
+
+Neo can be fully configured after startup via the UI or API. However, if you prefer to pre-configure settings, create a ```.env``` file in the same directory as your compose file:
+
+```bash
+# Database credentials (defaults shown)
+POSTGRES_USER=neo
+POSTGRES_PASSWORD=neo_password
+POSTGRES_DB=neo_connector
+
+# License key (can also be set via UI/API during setup)
+NETAPP_CONNECTOR_LICENSE=
+
+# Microsoft Graph integration (optional)
+MS_GRAPH_TENANT_ID=
+MS_GRAPH_CLIENT_ID=
+MS_GRAPH_CLIENT_SECRET=
+```
 
 > [!TIP]
-> The usage of [Docker/Podman Secrets](https://docs.docker.com/compose/how-tos/use-secrets/) is another path to explore addressing the challenge of credentials stored locally on a hard drive.
-
-### Compose Container file
-Download the latest [```neo-containerfile.yml```](/projects/mlai/neo/examples/neo-containerfile.yml) or copy its content from:
-
-<<< @/projects/mlai/neo/examples/neo-containerfile.yml
+> The usage of [Docker/Podman Secrets](https://docs.docker.com/compose/how-tos/use-secrets/) is recommended for production deployments to avoid storing credentials in plain text.
 
 ### Start the containers
 
-::: code-group 
+::: code-group
 
-``` [Docker]
-docker compose -f neo-all-in.yml up --build -d
-docker ps
-
-Expected output:
-CONTAINER ID  IMAGE                                          COMMAND     CREATED        STATUS        PORTS                   NAMES
-d8bbf02435fb  docker.io/library/postgres:16.10-alpine3.21    postgres    7 seconds ago  Up 8 seconds  0.0.0.0:5432->5432/tcp  neodb
-1aefb8db34e8  ghcr.io/netapp/netapp-copilot-connector:3.1.1              6 seconds ago  Up 7 seconds  0.0.0.0:8081->8080/tcp  neo
-792aa53a0689  ghcr.io/beezy-dev/neo-ui-framework:3.1.0                   5 seconds ago  Up 6 seconds  0.0.0.0:8080->80/tcp    neoui
-670ec2f91cdf  docker.io/dockurr/samba:latest                             4 seconds ago  Up 4 seconds  0.0.0.0:445->445/tcp    neosmb
-
-Recover logs:
-docker compose -f neo-all-in.yml logs
-```
-
-``` [Podman]
-sudo podman compose -f neo-all-in.yml up --build -d
-sudo podman ps
+```BASH [Docker]
+docker compose up -d
+docker compose ps
 
 Expected output:
-CONTAINER ID  IMAGE                                          COMMAND     CREATED        STATUS        PORTS                   NAMES
-d8bbf02435fb  docker.io/library/postgres:16.10-alpine3.21    postgres    7 seconds ago  Up 8 seconds  0.0.0.0:5432->5432/tcp  neodb
-1aefb8db34e8  ghcr.io/netapp/netapp-copilot-connector:3.1.1              6 seconds ago  Up 7 seconds  0.0.0.0:8081->8080/tcp  neo
-792aa53a0689  ghcr.io/beezy-dev/neo-ui-framework:3.1.0                   5 seconds ago  Up 6 seconds  0.0.0.0:8080->80/tcp    neoui
-670ec2f91cdf  docker.io/dockurr/samba:latest                             4 seconds ago  Up 4 seconds  0.0.0.0:445->445/tcp    neosmb
+NAME            IMAGE                                       STATUS                    PORTS
+neo-postgres    postgres:17                                 Up 30 seconds (healthy)
+api-1           neo-api                                     Up 25 seconds (healthy)   0.0.0.0:8000->8000/tcp
+extractor-1     neo-extractor                               Up 28 seconds (healthy)
+ner-1           neo-ner                                     Up 28 seconds (healthy)
+worker-1        neo-worker                                  Up 20 seconds (healthy)
+neoui           ghcr.io/beezy-dev/neo-ui-framework:3.2.2   Up 18 seconds             0.0.0.0:8081->80/tcp
 
-Recover logs:
-sudo podman compose -f neo-all-in.yml logs
+View logs:
+docker compose logs -f
 ```
-::: 
 
-You should see logs indicating that the NetApp Neo Core container has started successfully as follows:
+```BASH [Podman]
+sudo podman compose up -d
+sudo podman compose ps
+
+Expected output:
+NAME            IMAGE                                       STATUS                    PORTS
+neo-postgres    postgres:17                                 Up 30 seconds (healthy)
+api-1           neo-api                                     Up 25 seconds (healthy)   0.0.0.0:8000->8000/tcp
+extractor-1     neo-extractor                               Up 28 seconds (healthy)
+ner-1           neo-ner                                     Up 28 seconds (healthy)
+worker-1        neo-worker                                  Up 20 seconds (healthy)
+neoui           ghcr.io/beezy-dev/neo-ui-framework:3.2.2   Up 18 seconds             0.0.0.0:8081->80/tcp
+
+View logs:
+sudo podman compose logs -f
+```
+:::
+
+> [!TIP]
+> The NER service takes up to 2-3 minutes to start on first launch while it downloads the GLiNER2 model. The worker service waits for NER to become healthy before starting.
+
+You should see logs indicating that the API service has started in setup mode:
 
 ```log
-neo  | 2025-12-03 19:46:43.882 | INFO     | app.main:lifespan:146 - Starting up application...
-neo  | 2025-12-03 19:46:43.882 | INFO     | app.main:lifespan:150 - 🔧 Setup mode: Skipping license validation and Graph initialization
-neo  | 2025-12-03 19:46:43.882 | INFO     | app.main:lifespan:151 - 📋 Complete setup via /api/v1/setup endpoints to enable full functionality
-neo  | INFO:     Application startup complete.
-neo  | INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+api-1  | INFO     | app.main:lifespan - Starting up application...
+api-1  | INFO     | app.main:lifespan - Setup mode: Skipping license validation and Graph initialization
+api-1  | INFO     | app.main:lifespan - Complete setup via /api/v1/setup endpoints to enable full functionality
+api-1  | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 ```
 
+### Scale services independently
+
+Neo v4 supports independent scaling of worker, extractor, and NER services:
+
+::: code-group
+
+```BASH [Docker]
+# Scale workers for higher crawling throughput
+docker compose up -d --scale worker=3
+
+# Scale extractors for faster document processing
+docker compose up -d --scale extractor=5 --scale ner=2
+```
+
+```BASH [Podman]
+sudo podman compose up -d --scale worker=3
+sudo podman compose up -d --scale extractor=5 --scale ner=2
+```
+:::
 
 ### Configure
 
 #### via GUI
-Neo Console is available at ```http://your.ip:8080``` or ```http://myhost.mydomain.tld:8080``` and will welcome you with the following screen:  
 
-<img width="1891" height="962" alt="image" src="https://github.com/user-attachments/assets/87732882-7995-4266-83a2-3e31f59c57e8" />
+Neo Console is available at ```http://your-host:8081``` and will present the setup wizard on first launch.
 
-Go to Settings and select the tab Neo Core to start the configuration
-<img width="1891" height="962" alt="image" src="https://github.com/user-attachments/assets/2cfa73d9-33a1-4165-ab25-1628a579c6f6" />
+Go to **Settings** and select the **Neo Core** tab to begin configuration.
 
-Once a valid license key is entered and saved, the page will refresh to show the following status:
-<img width="1884" height="952" alt="image" src="https://github.com/user-attachments/assets/5ed90473-fb88-4cbe-971f-fe305a73b98a" />
+1. Enter a valid license key and save.
+2. Optionally configure Microsoft Graph, SSL, or proxy settings.
+3. Click **Setup Complete** to finalize. This triggers a restart of the services with the configured settings.
 
-At this stage, the M365 Copilot Graph or other settings can be configured now or later. Once the desired configuration is complete, click "Setup Complete".  
-This will trigger a restart of Neo's container with the configured settings:
-<img width="1884" height="952" alt="image" src="https://github.com/user-attachments/assets/2711319d-f4f4-47d4-afa8-1b2e037289c6" />
-
-Once Neo has restarted, the page will reload with the status "Complete", and a button "Admin Credentials" will appear to recover the temporary credentials:
-<img width="1884" height="952" alt="image" src="https://github.com/user-attachments/assets/7db70db5-77dc-4cb9-9472-9fe912c7c0f5" />
-
-Credentials
-<img width="1884" height="952" alt="image" src="https://github.com/user-attachments/assets/1e063c89-e210-4c3a-9bbf-110c070b834c" />
-Updating credentials
-<img width="1884" height="952" alt="image" src="https://github.com/user-attachments/assets/0e602ddb-5d68-49f6-a0bb-1cf82539cb27" />
+Once setup completes, the page displays a status of "Complete" and an **Admin Credentials** button appears with temporary login credentials.
 
 > [!IMPORTANT]
-> This temporary password will not be accessible again once you have logged in with the credentials.
-> Make sure to either save it in your password m(anager or change it in the Users page.
-
-<img width="1884" height="952" alt="image" src="https://github.com/user-attachments/assets/ba62c004-d7c1-498c-8082-0af298372d7f" />
+> The temporary password will not be accessible again after you log in. Save it in your password manager or change it immediately in the Users page.
 
 #### via API
-Neo can also be configured via the API, available at ```http://your.ip:8081/docs``` or ```http://myhost.mydomain.tld:8081/docs```.
+
+Neo can also be configured via the API. The interactive API documentation is available at ```http://your-host:8000/docs```.
+
+**Step 1: Set the license key**
+
+```bash
+curl -X POST http://localhost:8000/api/v1/setup/license \
+  -H "Content-Type: application/json" \
+  -d '{"license_key": "your-license-key"}'
+```
+
+**Step 2: (Optional) Configure Microsoft Graph**
+
+```bash
+curl -X POST http://localhost:8000/api/v1/setup/graph \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tenant_id": "your-tenant-id",
+    "client_id": "your-client-id",
+    "client_secret": "your-client-secret"
+  }'
+```
+
+**Step 3: Complete setup**
+
+```bash
+curl -X POST http://localhost:8000/api/v1/setup/complete
+```
+
+### GPU Acceleration (optional)
+
+The **ner** and **extractor** services support GPU acceleration for faster inference.
+
+::: details NVIDIA GPU
+Add the following to the ```ner``` and/or ```extractor``` service in your ```docker-compose.yml```:
+
+```yaml
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+```
+
+Requires [nvidia-container-toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) installed on the host.
+:::
+
+::: details AMD ROCm GPU
+Add the following to the ```ner``` and/or ```extractor``` service in your ```docker-compose.yml```:
+
+```yaml
+    devices:
+      - /dev/kfd:/dev/kfd
+      - /dev/dri:/dev/dri
+    group_add:
+      - video
+      - render
+    environment:
+      NER_DEVICE: cuda  # ROCm uses the CUDA compatibility layer
+```
+
+Requires ROCm drivers installed on the host.
+:::
 
 ## Troubleshooting
 
-### postgres
+### PostgreSQL
 
-Check if the DB was created using both methods to verify the DB and networking at the same time:
-
-::: code-group
-
-```BASH [Docker]
-docker exec -it neodb psql -h localhost -U postgres -l
-```  
-
-```BASH [Podman]
-sudo podman exec -it neodb psql -h localhost -U postgres -l
-```  
-:::
-
-or if you have ```psql``` utils deployed:  
-```BASH
-psql -U postgres -h 192.168.122.245 -p 5432 postgres -l
-``` 
-
-Expected output:
-```                                                           
-List of databases
-        Name        |  Owner   | Encoding | Locale Provider |  Collate   |   Ctype    | ICU Locale | ICU Rules |   Access privileges
---------------------+----------+----------+-----------------+------------+------------+------------+-----------+-----------------------
- netappconnectorrom | postgres | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           |
- postgres           | postgres | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           |
- template0          | postgres | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           | =c/postgres          +
-                    |          |          |                 |            |            |            |           | postgres=CTc/postgres
- template1          | postgres | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           | =c/postgres          +
-                    |          |          |                 |            |            |            |           | postgres=CTc/postgres
-(4 rows)
-
-``` 
-
-### Neo
-
-Check the logs and share these with the team for any potential issues you might encounter:
+Check if the database was created:
 
 ::: code-group
 
 ```BASH [Docker]
-docker logs -f neo
+docker exec -it neo-postgres psql -h localhost -U neo -d neo_connector -c '\l'
 ```
 
 ```BASH [Podman]
-sudo podman logs -f neo
+sudo podman exec -it neo-postgres psql -h localhost -U neo -d neo_connector -c '\l'
 ```
 :::
 
-### Neo UI 
+Expected output should include ```neo_connector``` in the database list.
 
-Check the logs and share these with the team for any potential issues you might encounter:
+### API Service
 
+::: code-group
+
+```BASH [Docker]
+docker compose logs -f api
+```
+
+```BASH [Podman]
+sudo podman compose logs -f api
+```
+:::
+
+Check the health endpoint:
+```bash
+curl http://localhost:8000/health
+```
+
+### Worker Service
+
+::: code-group
+
+```BASH [Docker]
+docker compose logs -f worker
+```
+
+```BASH [Podman]
+sudo podman compose logs -f worker
+```
+:::
+
+> [!TIP]
+> The worker requires ```SYS_ADMIN``` and ```DAC_READ_SEARCH``` capabilities and ```apparmor:unconfined``` security option. If the worker fails to start, verify that your container runtime supports these settings.
+
+### Extractor Service
+
+::: code-group
+
+```BASH [Docker]
+docker compose logs -f extractor
+```
+
+```BASH [Podman]
+sudo podman compose logs -f extractor
+```
+:::
+
+> [!TIP]
+> The extractor runs in privileged mode to support NFS/CIFS mounting inside the container. If mounting fails, verify that ```cifs-utils``` is installed on the host.
+
+### NER Service
+
+::: code-group
+
+```BASH [Docker]
+docker compose logs -f ner
+```
+
+```BASH [Podman]
+sudo podman compose logs -f ner
+```
+:::
+
+The NER service downloads the GLiNER2 model on first startup. If it fails, check network connectivity and disk space.
+
+### Neo UI
 
 ::: code-group
 
@@ -197,23 +324,8 @@ sudo podman logs -f neoui
 ```
 :::
 
-Check the web console in the Browser for additional error messages.
-
-
-### Samba (optional)
-
-Check the logs and share these with the team for any potential issues you might encounter:
-
-::: code-group
-
-```BASH [Docker]
-docker logs -f neosmb
-```
-
-```BASH [Podman]
-sudo podman logs -f neosmb
-```
-:::
+Check the browser developer console for additional error messages.
 
 ## Next steps
-This concludes the steps to deploy the NetApp Neo Core using Docker/Podman Compose. For more advanced configurations and management options, please refer to the [Management](/projects/neo/core/management.md) section of the documentation.
+
+This concludes the steps to deploy NetApp Neo using Docker/Podman Compose. For more advanced configurations and management options, refer to the [Management](/projects/neo/core/management.md) section of the documentation.

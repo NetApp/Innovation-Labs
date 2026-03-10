@@ -1,82 +1,171 @@
 services:
 
-  ## (Un)comment if using or not the included postgres database
-  neodb:
-    image: docker.io/library/postgres:16.10-alpine3.21
-    container_name: neodb
-    env_file:
-      - .env
-    ports:
-      - 5432:5432
-    networks:
-      - netapp-neo
+  # PostgreSQL Database (shared by all services)
+  postgres:
+    image: postgres:17
+    container_name: neo-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-neo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-neo_password}
+      POSTGRES_DB: ${POSTGRES_DB:-neo_connector}
     volumes:
-      - neodb:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-neo} -d ${POSTGRES_DB:-neo_connector}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - neo-network
     restart: unless-stopped
 
-  neo:
-    image: ghcr.io/netapp/netapp-copilot-connector:3.2.0 
-    container_name: neo
-    # deploy: # Uncomment this section to enable GPU support
+  # API Service (HTTP endpoints, MCP transport, OAuth)
+  api:
+    image: ghcr.io/netapp/netapp-neo-api:4.0.2
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-neo}:${POSTGRES_PASSWORD:-neo_password}@postgres:5432/${POSTGRES_DB:-neo_connector}
+      WORKER_SERVICE_URL: http://worker:8000
+      NER_SERVICE_URL: http://ner:8000
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
+      NETAPP_CONNECTOR_LICENSE: ${NETAPP_CONNECTOR_LICENSE:-}
+      CONNECTOR_ID: ${CONNECTOR_ID:-netappneo}
+      # Microsoft Graph (optional)
+      MS_GRAPH_TENANT_ID: ${MS_GRAPH_TENANT_ID:-}
+      MS_GRAPH_CLIENT_ID: ${MS_GRAPH_CLIENT_ID:-}
+      MS_GRAPH_CLIENT_SECRET: ${MS_GRAPH_CLIENT_SECRET:-}
+      MS_GRAPH_CONNECTOR_ID: ${MS_GRAPH_CONNECTOR_ID:-netappneo}
+      # MCP OAuth (optional)
+      MCP_OAUTH_ENABLED: ${MCP_OAUTH_ENABLED:-false}
+      MCP_OAUTH_TENANT_ID: ${MCP_OAUTH_TENANT_ID:-}
+      MCP_OAUTH_CLIENT_ID: ${MCP_OAUTH_CLIENT_ID:-}
+      MCP_API_KEY: ${MCP_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - neo-network
+    restart: unless-stopped
+
+  # Extractor Service (content extraction: MarkItDown, Docling, VLM)
+  extractor:
+    image: ghcr.io/netapp/netapp-neo-extractor:4.0.2
+    privileged: true
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-neo}:${POSTGRES_PASSWORD:-neo_password}@postgres:5432/${POSTGRES_DB:-neo_connector}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
+      EXTRACTOR_LOG_LEVEL: ${EXTRACTOR_LOG_LEVEL:-INFO}
+      # EXTRACTOR_DEFAULT_PIPELINE: ${EXTRACTOR_DEFAULT_PIPELINE:-markitdown}
+      # VLM_MODEL: ${VLM_MODEL:-}
+      # VLM_API_URL: ${VLM_API_URL:-}
+      # VLM_API_MODEL: ${VLM_API_MODEL:-}
+      # OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - neo-network
+    restart: unless-stopped
+
+  # NER Service (Named Entity Recognition using GLiNER2)
+  ner:
+    image: ghcr.io/netapp/netapp-neo-ner:4.0.2
+    environment:
+      NER_CONFIDENCE_THRESHOLD: ${NER_CONFIDENCE_THRESHOLD:-0.7}
+      NER_DEVICE: ${NER_DEVICE:-auto}
+      TOKENIZERS_PARALLELISM: "false"
+    # Uncomment for NVIDIA GPU support:
+    # deploy:
     #   resources:
     #     reservations:
     #       devices:
     #         - driver: nvidia
-    #           count: 1 # Adjust count based on your GPU availability
+    #           count: 1
     #           capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 180s
+    networks:
+      - neo-network
+    restart: unless-stopped
+
+  # Worker Service (background processing: crawling, upload, NER orchestration)
+  worker:
+    image: ghcr.io/netapp/netapp-neo-worker:4.0.2
     cap_add:
       - SYS_ADMIN
       - DAC_READ_SEARCH
-      - DAC_OVERRIDE
     security_opt:
       - apparmor:unconfined
-    ports:
-      - "8081:8080"
-    networks:
-      - netapp-neo      
-    env_file:
-      - .env
     environment:
-      - PORT=8080
-      - PYTHONUNBUFFERED=1
+      DATABASE_URL: postgresql://${POSTGRES_USER:-neo}:${POSTGRES_PASSWORD:-neo_password}@postgres:5432/${POSTGRES_DB:-neo_connector}
+      EXTRACTOR_SERVICE_URL: http://extractor:8000
+      NER_SERVICE_URL: http://ner:8000
+      NUM_UPLOAD_WORKERS: ${NUM_UPLOAD_WORKERS:-3}
+      NUM_EXTRACTION_WORKERS: ${NUM_EXTRACTION_WORKERS:-2}
+      NUM_ACL_RESOLUTION_WORKERS: ${NUM_ACL_RESOLUTION_WORKERS:-2}
+      NUM_NER_WORKERS: ${NUM_NER_WORKERS:-1}
+      MS_GRAPH_TENANT_ID: ${MS_GRAPH_TENANT_ID:-}
+      MS_GRAPH_CLIENT_ID: ${MS_GRAPH_CLIENT_ID:-}
+      MS_GRAPH_CLIENT_SECRET: ${MS_GRAPH_CLIENT_SECRET:-}
+      MS_GRAPH_CONNECTOR_ID: ${MS_GRAPH_CONNECTOR_ID:-netappneo}
+      NETAPP_CONNECTOR_LICENSE: ${NETAPP_CONNECTOR_LICENSE:-}
+      CONNECTOR_ID: ${CONNECTOR_ID:-netappneo}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      extractor:
+        condition: service_healthy
+      ner:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - neo-network
     restart: unless-stopped
 
+  # Neo UI (Web Management Console)
   neoui:
-    image: ghcr.io/beezy-dev/neo-ui-framework:3.1.0
+    image: ghcr.io/beezy-dev/neo-ui-framework:3.2.2
     container_name: neoui
     ports:
-      - "8080:80"
+      - "8081:80"
     environment:
-      - NEO_API=http://neo:8080   # ← add this
+      NEO_API: http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
     networks:
-      - netapp-neo
+      - neo-network
     restart: unless-stopped
 
-  ## (Un)comment if using or not the included SMB/CIFS service
-  # neosmb:
-  #   image: docker.io/dockurr/samba
-  #   container_name: neosmb
-  #   environment:
-  #     NAME: "data"
-  #     USER: "smb"
-  #     PASS: "smb"
-  #     UID: 1000
-  #     GID: 1000
-  #   ports:
-  #     - 445:445
-  #   networks:
-  #     - netapp-neo      
-  #   volumes:
-  #     - neosmb:/storage
-  #   restart: unless-stopped
+volumes:
+  postgres_data:
+    driver: local
 
 networks:
-  netapp-neo:
+  neo-network:
     driver: bridge
-
-## (Un)comment if using or not the included postgres database or/and SMB/CIFS service
-volumes:
-  neodb:
-    driver: local
-  neosmb:
-    driver: local

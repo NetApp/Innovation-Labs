@@ -1,18 +1,21 @@
 # Prerequisites
 
-> [!WARNING] Important
-> - NetApp Neo for M365 Copilot is currently in **Private Preview** . This means that the connector is not yet fully supported and may have some limitations. The connector requires a license to activate. You can request access to the connector by joining the Early Access Program (EAP). Please book a meeting with the following link to join the EAP: [Book a meeting with NetApp](https://outlook.office.com/bookwithme/user/d636d7a02ad8477c9af9a0cbb029af4d@netapp.com/meetingtype/nm-mXkp-TUO1CdzOmFfIBw2?anonymous&ismsaljsauthenabled&ep=mlink)
-> - AWS ECS (Fargate) is NOT supported. This is due to the ECS containers being unable to mount shares to the container(s). If using ECS it is recommended to us AWS EC2 Instances.
+> [!NOTE]
+> NetApp Neo requires a license key to activate. Contact your NetApp representative or visit the [Innovation Labs releases](https://github.com/NetApp/Innovation-Labs/releases) page.
+
+> [!WARNING]
+> AWS ECS (Fargate) is NOT supported. This is due to the ECS containers being unable to mount shares to the container(s). If using ECS it is recommended to us AWS EC2 Instances.
 
 ## Core Requirements
 
 - Docker / Podman / K8s: Neo is packaged as a container and must be deployed in a container environment
-- 4 vCPU / 8GB RAM
-- Port 8080 (by default) for the web management interface
+- Minimum: 4 vCPU / 8GB RAM (single instance). Recommended: 8+ vCPU / 16GB+ RAM for production with all services.
+- Port 8000 (API), Port 8081 (Web Console)
 - Database:
-  - PostgreSQL Database (v16+) - can be self-hosted or managed (e.g. AWS RDS, Azure Database for PostgreSQL, etc)
+  - PostgreSQL Database (v17+) - can be self-hosted or managed (e.g. AWS RDS, Azure Database for PostgreSQL, etc)
   - MySQL Database (v8+) - can be self-hosted or managed (e.g. AWS RDS, Azure Database for MySQL, etc)
 - ```cifs-utils``` should be install on your Linux host
+- ```nfs-common``` package (required for NFS shares)
 
 ## Database Options
 
@@ -34,11 +37,8 @@ DATABASE_URL=mysql://user:password@localhost:3306/neo
 Neo can connect to the following data sources:
 
 - SMB File Shares (CIFS / SMBv2+). This includes all NetApp ONTAP file shares and non-NetApp SMB shares (i.e. Pure Storage, Isilon, HPE, Windows File Shares, Linux Samba Shares, etc)
-
-Future support (coming soon):
-
-- NFS File Shares (v3+)
-- S3 Buckets (AWS S3, NetApp StorageGRID, etc)
+- NFS File Shares (v3 and v4). This includes NetApp ONTAP NFS exports and other NFS exports
+- S3-Compatible Object Storage (AWS S3, NetApp StorageGRID, MinIO, etc.)
 
 ## Microsoft 365 Copilot Requirements
 
@@ -51,7 +51,7 @@ If you intend to connect your data to Microsoft 365 Copilot, then the following 
 - SMB File Share(s) must be routable to the connector
 
 > [!NOTE]
-> Proxys and SSL Inspection Firewalls are not officially supported although experimental support is available in 3.0.5+
+> Proxy and SSL inspection firewalls are supported. See the [Configuration Guide](./d-configuration.md) for details.
 
 ### Software Requirements
 

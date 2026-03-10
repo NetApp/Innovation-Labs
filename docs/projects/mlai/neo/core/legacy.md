@@ -1,11 +1,14 @@
 # Neo Core v2.x
 
+> [!WARNING]
+> This page documents legacy v2.x/v3.x deployments. For v4.x, see the [Quick Start](./quick-start.md) guide.
+
 # NetApp Neo deployment User Quick Start Guide (v2.x)
 
 > [!IMPORTANT]
 > NetApp Neo for M365 Copilot is currently in **Private Preview**. This means that the connector is not yet fully supported and may have some limitations. The connector requires a license to activate. You can request access to the connector by joining the Early Access Program (EAP). Please book a meeting with the following link to join the EAP: [Book a meeting with NetApp](https://outlook.office.com/bookwithme/user/d636d7a02ad8477c9af9a0cbb029af4d@netapp.com/meetingtype/nm-mXkp-TUO1CdzOmFfIBw2?anonymous&ismsaljsauthenabled&ep=mlink).
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > AWS ECS (Fargate) is NOT supported. This is due to the containers being unable to mount shares to the container(s) - a critical requirement of NetApp Neo.
 
 ## Prerequisites
@@ -72,11 +75,11 @@ docker pull ghcr.io/netapp/netapp-copilot-connector:2.2.5
 
 2.  **Configure the `.env` file with the required environment variables:**
 
-<<< @/projects/mlai/neo/examples/legacy-env  
+<<< @/projects/mlai/neo/examples/legacy-env
 
 3.  **Review the compose file and run the connector using Docker Compose:**
 
-<<< @/projects/mlai/neo/examples/legacy-neo.yml 
+<<< @/projects/mlai/neo/examples/legacy-neo.yml
 
 ```bash
 docker-compose up -d
@@ -237,7 +240,7 @@ For more information, see the official [Helm documentation](https://helm.sh/docs
 
 # Initial Setup and First Admin User
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > A dedicated stand-alone desktop UI is available for Windows, MacOS and Linux: [Download the Desktop App](./client "./client").
 
 The easiest way to set up the connector and create your first admin user is through the desktop application. The desktop app provides a user-friendly interface for:
@@ -319,7 +322,7 @@ You can monitor the crawl progress through:
 
 ## Viewing Results in Microsoft 365 Copilot
 
-> [!WARNING]  
+> [!WARNING]
 > You must perform this step after you have added your first share and completed at least one successful crawl to see results in Microsoft 365 Copilot.
 
 1.  **Visit the Microsoft 365 Admin Center**: Go to [Search and Intelligence](https://admin.microsoft.com/Adminportal/Home?source=applauncher#/MicrosoftSearch/connectors)
@@ -410,5 +413,5 @@ If you have any feedback or questions regarding NetApp Neo or its Documentation,
 
 ---
 
-**Version**: 2.2.5  
+**Version**: 2.2.5
 **Last Updated**: 2025-10-09
