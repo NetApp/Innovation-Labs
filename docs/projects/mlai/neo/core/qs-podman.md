@@ -28,6 +28,9 @@ Before deploying Neo using Podman Compose, ensure that you have the following pr
 1. **Download the Docker Compose File**:
    Download the latest `docker-compose.yml` file from the [NetApp Neo GitHub repository](https://raw.githubusercontent.com/NetApp/Innovation-Labs/refs/heads/main/netapp-neo/dist/docker-compose.yml) to your local machine. Podman Compose uses the same YAML format as Docker Compose.
 
+> [!TIP]
+> A comprehensive [`docker-compose.example.yml`](/projects/neo/examples/docker-compose.example.yml) is also available with full inline documentation for every environment variable, GPU configuration options, and an optional nginx load balancer service. To use the load balancer profile: `podman compose --profile with-lb up -d`
+
 2. **Configure Environment Variables**:
    Open the `docker-compose.yml` file in a text editor and configure the necessary environment variables, such as database connection details, admin credentials, and any other required settings.
 

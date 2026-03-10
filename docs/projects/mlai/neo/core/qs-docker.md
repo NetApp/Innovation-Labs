@@ -50,6 +50,9 @@ curl -LO https://github.com/NetApp/Innovation-Labs/releases/latest/download/dock
 ```
 :::
 
+> [!TIP]
+> A comprehensive [`docker-compose.example.yml`](/projects/neo/examples/docker-compose.example.yml) is also available with full inline documentation for every environment variable, GPU configuration options, and an optional nginx load balancer service. To use the load balancer profile: `docker compose --profile with-lb up -d`
+
 ### Environment variables (optional)
 
 Neo can be fully configured after startup via the UI or API. However, if you prefer to pre-configure settings, create a ```.env``` file in the same directory as your compose file:
