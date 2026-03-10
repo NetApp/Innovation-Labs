@@ -13,8 +13,8 @@ export default defineConfig({
     },
     siteTitle: "Innovation Labs",
     logo: {
-      light: 'n-black.svg',
-      dark: 'n-white.svg',
+      light: '/n-black.svg',
+      dark: '/n-white.svg',
       alt: 'NetApp Logo'
     },
     nav: [
