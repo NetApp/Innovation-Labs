@@ -2,7 +2,7 @@
 
 ## Overview
 
-NetApp Project Neo is a secure enterprise application that enables Microsoft 365 Copilot to access and index content from NetApp file shares (SMB, NFS, S3). It also provides an MCP (Model Context Protocol) server for AI assistants to search and retrieve indexed content with ACL-based access control. This document provides comprehensive security information for security teams evaluating the application's architecture, implementation, and security controls.
+NetApp Project Neo is a secure enterprise application that indexes content from file shares (SMB, NFS, S3) across any storage vendor. It provides an MCP (Model Context Protocol) server for AI assistants to search and retrieve indexed content with ACL-based access control, and optionally integrates with Microsoft Graph to enable Microsoft 365 Copilot access. Neo can be deployed in MCP-only mode where all data and indexes remain entirely on-premises. This document provides comprehensive security information for security teams evaluating the application's architecture, implementation, and security controls.
 
 ## Application Architecture
 
@@ -12,45 +12,47 @@ NetApp Project Neo is a secure enterprise application that enables Microsoft 365
 ┌─────────────────┐    ┌──────────────────┐
 │   Microsoft     │    │   Microsoft      │
 │   365 Copilot   │◄──►│   Graph API      │
-│                 │    │                  │
+│                 │    │   (Optional)     │
 └─────────────────┘    └──────────────────┘
                               ▲
                               │ HTTPS
                               ▼
-┌─────────────┐  ┌────────────────────────────────────────────────────────┐
-│ MCP Clients │  │  neo-network (Docker bridge)                          │
-│ (AI tools)  │  │                                                        │
-└──────┬──────┘  │  ┌──────────┐   ┌──────────┐   ┌───────────────────┐  │
-       │         │  │   API    │   │  Worker   │   │    Extractor      │  │
-       │ HTTPS   │  │ :8000   │──►│ (internal)│──►│   (internal)      │  │
-       └────────►│  │ + UI    │   │          │   │  GPU-accelerated  │  │
-                 │  │ :8081   │   │          │   │                   │  │
-                 │  └────┬─────┘   └────┬─────┘   └───────────────────┘  │
-                 │       │              │                                  │
-                 │       │         ┌────┴─────┐                           │
-                 │       │         │   NER    │                           │
-                 │       │         │(internal)│                           │
-                 │       │         │GLiNER2   │                           │
-                 │       ▼         └──────────┘                           │
-                 │  ┌──────────┐                                          │
-                 │  │PostgreSQL│                                          │
-                 │  │  :5432   │                                          │
-                 │  └──────────┘                                          │
-                 └────────────────────────────────────────────────────────┘
-                              │
-                              │ SMB/NFS/S3
-                              ▼
-                       ┌─────────────────┐
-                       │  NetApp File    │
-                       │  Shares         │
-                       └─────────────────┘
+┌─────────────┐  ┌──────────────────────────────────────────────────────────┐
+│ MCP Clients │  │  neo-network (Docker bridge)                            │
+│ (AI tools)  │  │                                                          │
+└──────┬──────┘  │  ┌──────────┐  ┌────────┐  ┌────────┐  ┌────────────┐  │
+       │         │  │   API    │  │ Worker │  │  NER   │  │ Extractor  │  │
+       │ HTTPS   │  │  :8000   │─►│(intern)│─►│(intern)│  │  (intern)  │  │
+       └────────►│  └────┬─────┘  │        │  │GLiNER2 │  │GPU-accel.  │  │
+                 │       │        └───┬────┘  └────────┘  └────────────┘  │
+┌─────────────┐  │       │            │              ▲            ▲        │
+│  Neo UI     │  │       │            │              └────────────┘        │
+│  :8081      │──►       │            │          Worker orchestrates       │
+└─────────────┘  │       ▼            │                                    │
+                 │  ┌──────────┐      │                                    │
+                 │  │PostgreSQL│      │                                    │
+                 │  │  :5432   │      │                                    │
+                 │  └──────────┘      │                                    │
+                 └────────────────────┼────────────────────────────────────┘
+                                      │
+                                      │ SMB/NFS/S3
+                                      ▼
+                       ┌──────────────────────────────┐
+                       │  File Shares                 │
+                       │  (NetApp, third-party, any   │
+                       │   SMB/NFS/S3 storage vendor) │
+                       └──────────────────────────────┘
 ```
+
+> [!NOTE]
+> **MCP-only deployment**: Microsoft Graph integration is optional. When deployed without Graph, Neo operates as a standalone MCP server where all data, indexes, and search remain entirely on-premises. No content is uploaded to Microsoft cloud services.
 
 ### Microservices
 
 Neo v4 is composed of four microservices communicating over an internal Docker network (`neo-network`):
 
-1. **API Service** (port 8000, UI on port 8081): FastAPI application handling REST API, MCP server, authentication, share management, and the web UI. This is the only service exposed externally.
+1. **API Service** (port 8000): FastAPI application handling REST API, MCP server, authentication, and share management. Exposed externally.
+1. **Neo UI** (port 8081): Web-based management console (separate container: `ghcr.io/beezy-dev/neo-ui-framework`). Connects to the API service internally. Exposed externally.
 2. **Worker Service** (internal only): Background service that crawls file shares, enumerates directories, processes work queue items, and uploads content to Microsoft Graph.
 3. **Extractor Service** (internal only): GPU-accelerated document content extraction using Docling. Converts files (PDF, DOCX, PPTX, etc.) to markdown for indexing.
 4. **NER Service** (internal only): Named Entity Recognition using GLiNER2 for entity extraction, document classification, and structured data extraction from indexed content.
@@ -59,7 +61,7 @@ Neo v4 is composed of four microservices communicating over an internal Docker n
 
 ### Firewall Rules
 
-If your organization's proxy or firewalls block communication to unknown domains, add the following rules to the 'allow' list:
+If your organization's proxy or firewalls block communication to unknown domains, add the following rules to the 'allow' list. The Microsoft 365 domains are only required when Microsoft Graph integration is enabled; MCP-only deployments only need HuggingFace access for initial model downloads:
 
 | M365 Enterprise                              | M365 Government (GCC)                       | M365 GCCH                                                           |
 | -------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------- |
@@ -165,7 +167,9 @@ For CLI tools, automation, and environments where OAuth is not practical, Neo su
 - **Default ACL Mode**: Configurable (`MCP_DEFAULT_ACL_MODE`): `deny` (default, deny access when no principal resolved) or `allow`
 - **Share-Level Config**: Per-share ACL configuration stored in database
 
-#### Microsoft Graph Integration
+#### Microsoft Graph Integration (Optional)
+
+Microsoft Graph integration is optional. It is only required when using Neo with Microsoft 365 Copilot. MCP-only deployments do not require Graph credentials and keep all data on-premises.
 
 - **Service Principal Authentication**: Uses Azure AD application credentials
 - **Scoped Permissions**: Requires specific Graph API permissions for connector operations
@@ -198,9 +202,9 @@ Each microservice runs with the minimum privileges required for its function:
 #### Network Isolation
 
 - **Internal Network**: All services communicate over the `neo-network` Docker bridge network
-- **External Access**: Only the API service (ports 8000, 8081) is exposed outside the Docker network
+- **External Access**: Only the API service (port 8000) and Neo UI (port 8081) are exposed outside the Docker network — these are separate containers
 - **Worker, Extractor, NER**: Not directly accessible from outside `neo-network`
-- **External Dependencies**: Microsoft Graph API (HTTPS), SMB/NFS/S3 shares, Entra ID JWKS endpoints
+- **External Dependencies**: SMB/NFS/S3 file shares; optionally Microsoft Graph API (HTTPS) and Entra ID JWKS endpoints (only when Graph or MCP OAuth is enabled)
 
 ## Security Controls Implementation
 
@@ -356,9 +360,9 @@ securityContext:
 
 #### Network Policies
 
-- **Ingress Control**: Only API service should receive external traffic (ports 8000, 8081)
+- **Ingress Control**: Only the API service (port 8000) and Neo UI (port 8081) should receive external traffic
 - **Internal Traffic**: Worker, Extractor, and NER services accept traffic only from within `neo-network`
-- **Egress Control**: Allow outbound traffic to Microsoft Graph, Entra ID JWKS, SMB/NFS shares, and HuggingFace (model downloads)
+- **Egress Control**: Allow outbound traffic to SMB/NFS/S3 file shares and HuggingFace (model downloads); optionally Microsoft Graph and Entra ID JWKS when those integrations are enabled
 - **Service Mesh**: Compatible with service mesh security policies
 
 ### Secrets Management
@@ -368,6 +372,8 @@ securityContext:
 ```bash
 # Required secrets (must be provided securely)
 NETAPP_CONNECTOR_LICENSE=<license-key>
+
+# Microsoft Graph (optional — only for M365 Copilot integration)
 MS_GRAPH_CLIENT_ID=<azure-app-id>
 MS_GRAPH_CLIENT_SECRET=<azure-app-secret>
 MS_GRAPH_TENANT_ID=<azure-tenant-id>
@@ -403,7 +409,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=1440           # Default: 24 hours
 
 ### Deployment Recommendations
 
-1. **Network Segmentation**: Deploy in isolated network segments; only expose API service ports
+1. **Network Segmentation**: Deploy in isolated network segments; only expose API (port 8000) and Neo UI (port 8081)
 2. **HTTPS Termination**: Use reverse proxy/load balancer for HTTPS in front of the API service
 3. **Regular Updates**: Keep base images and dependencies updated
 4. **Monitoring**: Implement comprehensive monitoring and alerting across all four services
@@ -434,7 +440,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=1440           # Default: 24 hours
 1. **SMB Authentication**: Share passwords stored encrypted (Fernet) but accessible to the Worker service at runtime
 2. **Privileged Capabilities**: Worker requires SYS_ADMIN/DAC_READ_SEARCH for SMB/NFS mounting; Extractor requires privileged mode for GPU access
 3. **Content Processing**: Processes file content which may contain sensitive data (mitigated by ACL filtering)
-4. **Network Access**: Requires network access to file shares, Microsoft Graph, and Entra ID
+4. **Network Access**: Requires network access to file shares; Microsoft Graph and Entra ID access only required when those integrations are enabled
 5. **Internal Network Trust**: Services on `neo-network` communicate without mutual TLS (suitable for single-host Docker deployments; consider service mesh for multi-node)
 
 ### Risk Mitigation
