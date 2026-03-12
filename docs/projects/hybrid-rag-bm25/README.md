@@ -10,7 +10,7 @@ The design combines **BM25 lexical search** for deterministic, explainable groun
 
 This page provides a NetApp-focused overview of the architecture and its enterprise implications.
 The full open source reference implementation lives here:
-👉 **[https://github.com/davidvonthenen-com/hybrid-rag-bm25-with-ai-governance](https://github.com/davidvonthenen-com/hybrid-rag-bm25-with-ai-governance)**
+👉 **[https://github.com/NetApp/hybrid-rag-bm25-with-ai-governance](https://github.com/NetApp/hybrid-rag-bm25-with-ai-governance)**
 
 ## 2. Why Hybrid RAG
 
@@ -60,10 +60,11 @@ Key NetApp contributions include:
   * NetApp FlexCache keeps frequently accessed shards close to compute
   * Eviction is explicit and policy-driven, not accidental
 
-* **Enterprise resilience**
+* **Enterprise resilience and compliance**
 
-  * SnapMirror and MetroCluster support replication and disaster recovery
-  * Snapshots enable point-in-time audits of "what the AI knew"
+  * **MetroCluster** protects Long-Term graph and vector stores with synchronous replication and zero-RPO posture
+  * **SnapCenter** captures application-consistent snapshots of Neo4j and OpenSearch state
+  * **SnapLock** adds WORM protection for environments that require immutable evidence and audit trails
 
 * **Safe experimentation**
 
