@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "netapp-neo.fullname" . }}-worker
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "netapp-neo.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+data:
+  NUM_UPLOAD_WORKERS: {{ .Values.worker.env.NUM_UPLOAD_WORKERS | quote }}
+  NUM_EXTRACTION_WORKERS: {{ .Values.worker.env.NUM_EXTRACTION_WORKERS | quote }}
+  NUM_ACL_RESOLUTION_WORKERS: {{ .Values.worker.env.NUM_ACL_RESOLUTION_WORKERS | quote }}
+  NUM_NER_WORKERS: {{ .Values.worker.env.NUM_NER_WORKERS | quote }}
+  MAX_NER_CONCURRENT_WORK: {{ .Values.worker.env.MAX_NER_CONCURRENT_WORK | quote }}
+  ACL_STRICT_MODE: {{ .Values.worker.env.ACL_STRICT_MODE | quote }}
+  EXTRACTOR_SERVICE_URL: {{ include "netapp-neo.extractorUrl" . | quote }}
+  NER_SERVICE_URL: {{ include "netapp-neo.nerUrl" . | quote }}

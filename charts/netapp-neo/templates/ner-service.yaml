@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "netapp-neo.fullname" . }}-ner
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "netapp-neo.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ner
+spec:
+  type: {{ .Values.ner.service.type }}
+  ports:
+    - port: {{ .Values.ner.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "netapp-neo.selectorLabels" (dict "context" . "component" "ner") | nindent 4 }}

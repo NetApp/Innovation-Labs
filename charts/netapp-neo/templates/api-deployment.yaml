@@ -1,0 +1,138 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "netapp-neo.fullname" . }}-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "netapp-neo.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  replicas: {{ .Values.api.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "netapp-neo.selectorLabels" (dict "context" . "component" "api") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "netapp-neo.selectorLabels" (dict "context" . "component" "api") | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      {{- if .Values.postgresql.enabled }}
+      initContainers:
+        {{- include "netapp-neo.waitForDb" . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: api
+          image: "{{ .Values.api.image.repository }}:{{ include "netapp-neo.imageTag" (dict "imageTag" .Values.api.image.tag "appVersion" .Chart.AppVersion) }}"
+          imagePullPolicy: {{ .Values.api.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.api.service.port }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "netapp-neo.fullname" . }}-api
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "netapp-neo.fullname" . }}-db
+                  key: DATABASE_URL
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "netapp-neo.fullname" . }}-encryption
+                  key: ENCRYPTION_KEY
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "netapp-neo.fullname" . }}-jwt
+                  key: JWT_SECRET_KEY
+            - name: NETAPP_CONNECTOR_LICENSE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "netapp-neo.fullname" . }}-license
+                  key: NETAPP_CONNECTOR_LICENSE
+            - name: CONNECTOR_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "netapp-neo.fullname" . }}-license
+                  key: CONNECTOR_ID
+            - name: MS_GRAPH_TENANT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "netapp-neo.fullname" . }}-graph
+                  key: MS_GRAPH_TENANT_ID
+            - name: MS_GRAPH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "netapp-neo.fullname" . }}-graph
+                  key: MS_GRAPH_CLIENT_ID
+            - name: MS_GRAPH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "netapp-neo.fullname" . }}-graph
+                  key: MS_GRAPH_CLIENT_SECRET
+            - name: MS_GRAPH_CONNECTOR_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "netapp-neo.fullname" . }}-graph
+                  key: MS_GRAPH_CONNECTOR_ID
+            - name: MCP_OAUTH_ENABLED
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "netapp-neo.fullname" . }}-mcp
+                  key: MCP_OAUTH_ENABLED
+            - name: MCP_OAUTH_TENANT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "netapp-neo.fullname" . }}-mcp
+                  key: MCP_OAUTH_TENANT_ID
+            - name: MCP_OAUTH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "netapp-neo.fullname" . }}-mcp
+                  key: MCP_OAUTH_CLIENT_ID
+            - name: MCP_OAUTH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "netapp-neo.fullname" . }}-mcp
+                  key: MCP_OAUTH_CLIENT_SECRET
+            - name: MCP_OAUTH_AUDIENCE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "netapp-neo.fullname" . }}-mcp
+                  key: MCP_OAUTH_AUDIENCE
+            - name: MCP_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "netapp-neo.fullname" . }}-mcp
+                  key: MCP_API_KEY
+          {{- with .Values.api.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
+      restartPolicy: Always

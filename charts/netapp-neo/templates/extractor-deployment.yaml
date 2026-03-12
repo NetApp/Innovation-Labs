@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "netapp-neo.fullname" . }}-extractor
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "netapp-neo.labels" . | nindent 4 }}
+    app.kubernetes.io/component: extractor
+spec:
+  replicas: {{ .Values.extractor.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "netapp-neo.selectorLabels" (dict "context" . "component" "extractor") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "netapp-neo.selectorLabels" (dict "context" . "component" "extractor") | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.postgresql.enabled }}
+      initContainers:
+        {{- include "netapp-neo.waitForDb" . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: extractor
+          image: "{{ .Values.extractor.image.repository }}:{{ include "netapp-neo.imageTag" (dict "imageTag" .Values.extractor.image.tag "appVersion" .Chart.AppVersion) }}"
+          imagePullPolicy: {{ .Values.extractor.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.extractor.service.port }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "netapp-neo.fullname" . }}-extractor
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "netapp-neo.fullname" . }}-db
+                  key: DATABASE_URL
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "netapp-neo.fullname" . }}-encryption
+                  key: ENCRYPTION_KEY
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "netapp-neo.fullname" . }}-openai
+                  key: OPENAI_API_KEY
+          securityContext:
+            privileged: true
+          {{- with .Values.extractor.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
+      restartPolicy: Always

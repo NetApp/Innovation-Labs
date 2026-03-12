@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "netapp-neo.fullname" . }}-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "netapp-neo.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+data:
+  ACCESS_TOKEN_EXPIRE_MINUTES: {{ .Values.api.env.ACCESS_TOKEN_EXPIRE_MINUTES | quote }}
+  MS_GRAPH_CONNECTOR_NAME: {{ .Values.api.env.MS_GRAPH_CONNECTOR_NAME | quote }}
+  MS_GRAPH_CONNECTOR_DESCRIPTION: {{ .Values.api.env.MS_GRAPH_CONNECTOR_DESCRIPTION | quote }}
+  WORKER_SERVICE_URL: {{ include "netapp-neo.workerUrl" . | quote }}
+  NER_SERVICE_URL: {{ include "netapp-neo.nerUrl" . | quote }}
