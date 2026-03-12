@@ -1,0 +1,39 @@
+NetApp Neo {{ .Chart.AppVersion }} has been deployed!
+
+Services:
+  - API:       {{ include "netapp-neo.fullname" . }}-api:{{ .Values.api.service.port }}
+  - Worker:    {{ include "netapp-neo.fullname" . }}-worker:{{ .Values.worker.service.port }}
+  - Extractor: {{ include "netapp-neo.fullname" . }}-extractor:{{ .Values.extractor.service.port }}
+  - NER:       {{ include "netapp-neo.fullname" . }}-ner:{{ .Values.ner.service.port }}
+  - UI:        {{ include "netapp-neo.fullname" . }}-ui:{{ .Values.ui.service.port }}
+{{- if .Values.postgresql.enabled }}
+  - PostgreSQL: {{ include "netapp-neo.fullname" . }}-postgres:{{ .Values.postgresql.service.port }}
+{{- else }}
+  - PostgreSQL: external ({{ .Values.postgresql.externalDatabaseUrl }})
+{{- end }}
+
+{{- if .Values.api.ingress.enabled }}
+
+API Ingress:
+  {{- if .Values.api.ingress.host }}
+  URL: http{{ if .Values.api.ingress.tls }}s{{ end }}://{{ .Values.api.ingress.host }}
+  {{- else }}
+  URL: configured without a host (catch-all)
+  {{- end }}
+{{- end }}
+
+{{- if .Values.ui.ingress.enabled }}
+
+UI Ingress:
+  {{- if .Values.ui.ingress.host }}
+  URL: http{{ if .Values.ui.ingress.tls }}s{{ end }}://{{ .Values.ui.ingress.host }}
+  {{- else }}
+  URL: configured without a host (catch-all)
+  {{- end }}
+{{- end }}
+
+To access the API locally:
+  kubectl port-forward svc/{{ include "netapp-neo.fullname" . }}-api {{ .Values.api.service.port }}:{{ .Values.api.service.port }}
+
+To access the UI locally:
+  kubectl port-forward svc/{{ include "netapp-neo.fullname" . }}-ui {{ .Values.ui.service.port }}:{{ .Values.ui.service.port }}

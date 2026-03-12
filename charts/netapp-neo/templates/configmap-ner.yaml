@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "netapp-neo.fullname" . }}-ner
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "netapp-neo.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ner
+data:
+  NER_MODEL_NAME: {{ .Values.ner.env.NER_MODEL_NAME | quote }}
+  NER_CONFIDENCE_THRESHOLD: {{ .Values.ner.env.NER_CONFIDENCE_THRESHOLD | quote }}
+  NER_MAX_TEXT_LENGTH: {{ .Values.ner.env.NER_MAX_TEXT_LENGTH | quote }}
+  NER_DEVICE: {{ .Values.ner.env.NER_DEVICE | quote }}
+  NER_CUDA_MAX_TEXT_LENGTH: {{ .Values.ner.env.NER_CUDA_MAX_TEXT_LENGTH | quote }}
+  NER_CHUNK_OVERLAP: {{ .Values.ner.env.NER_CHUNK_OVERLAP | quote }}
+  TOKENIZERS_PARALLELISM: {{ .Values.ner.env.TOKENIZERS_PARALLELISM | quote }}

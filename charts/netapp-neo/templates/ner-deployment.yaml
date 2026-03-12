@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "netapp-neo.fullname" . }}-ner
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "netapp-neo.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ner
+spec:
+  replicas: {{ .Values.ner.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "netapp-neo.selectorLabels" (dict "context" . "component" "ner") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "netapp-neo.selectorLabels" (dict "context" . "component" "ner") | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ner.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ner.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: ner
+          image: "{{ .Values.ner.image.repository }}:{{ include "netapp-neo.imageTag" (dict "imageTag" .Values.ner.image.tag "appVersion" .Chart.AppVersion) }}"
+          imagePullPolicy: {{ .Values.ner.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.ner.service.port }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "netapp-neo.fullname" . }}-ner
+          {{- if .Values.ner.gpu.enabled }}
+          resources:
+            limits:
+              nvidia.com/gpu: {{ .Values.ner.gpu.count }}
+          {{- else if .Values.ner.resources }}
+          resources:
+            {{- toYaml .Values.ner.resources | nindent 12 }}
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 180
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 180
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 5
+      restartPolicy: Always

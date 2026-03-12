@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "netapp-neo.fullname" . }}-extractor
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "netapp-neo.labels" . | nindent 4 }}
+    app.kubernetes.io/component: extractor
+data:
+  EXTRACTOR_LOG_LEVEL: {{ .Values.extractor.env.EXTRACTOR_LOG_LEVEL | quote }}
+  EXTRACTOR_DEFAULT_PIPELINE: {{ .Values.extractor.env.EXTRACTOR_DEFAULT_PIPELINE | quote }}
+  EXTRACTOR_MOUNT_TTL: {{ .Values.extractor.env.EXTRACTOR_MOUNT_TTL | quote }}
+  EXTRACTOR_FORCE_CPU: {{ .Values.extractor.env.EXTRACTOR_FORCE_CPU | quote }}
+  VLM_MODEL: {{ .Values.extractor.env.VLM_MODEL | quote }}
+  VLM_API_URL: {{ .Values.extractor.env.VLM_API_URL | quote }}
+  VLM_API_MODEL: {{ .Values.extractor.env.VLM_API_MODEL | quote }}
+  OPENAI_MODEL: {{ .Values.extractor.env.OPENAI_MODEL | quote }}
