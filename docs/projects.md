@@ -13,4 +13,4 @@
 * ***Neo***: a data connector to structure unstructured data and enable any ML/AI solutions with your organization's knowledge. 
 * ***Neo UI Framework***: an open-source user interface framework supporting the Neo Web Console and enabling our customers and partners to build their own solutions.
 * ***Neo Fuse Client***: an open-source Linux Fuse client to mount content from NetApp Neo as a local filesystem.
-
+* ***RAG Pipelines***: a collection of RAG Pipelines based on Graph, BM25, Vector to support AI Governance.

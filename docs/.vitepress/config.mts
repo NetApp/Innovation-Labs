@@ -99,6 +99,16 @@ export default defineConfig({
         },
         { text: 'Neo UI Framework', link: '/projects/mlai/neo/uif/ui-framework' },
         { text: 'Neo Fuse Client', link: '/projects/mlai/neo/nfc/fuse-client' },
+        {
+          text: 'RAG Pipelines', link: '/projects/mlai/rag',
+          collapsed: true,
+          items: [
+            { text: 'Hybrid (BM25 + Vector) RAG', link: '/projects/mlai/rag/hybrid-rag-bm25' },
+            { text: 'Hybrid (Graph + Vector) RAG', link: '/projects/mlai/rag/hybrid-rag-graph' },
+            { text: 'BM25/Document RAG', link: '/projects/mlai/rag/document-rag' },
+            { text: 'Graph RAG', link: '/projects/mlai/rag/graph-rag' },
+          ],
+        },
           ]
       },
       { text: 'Legal Notices', link: '/projects/legal-notices' },   
