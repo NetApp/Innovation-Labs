@@ -79,7 +79,7 @@ curl -s -X POST -H "Authorization: Bearer $TOKEN" \
     "protocol": "smb",
     "share_path": "//fileserver01/shared-docs",
     "username": "svc-neo",
-    "password": "SecureP@ssw0rd",
+    "password": "YOUR_PASSWORD_HERE",
     "domain": "CORP"
   }' \
   "http://localhost:8000/api/v1/shares?crawl_immediately=true"
@@ -94,7 +94,7 @@ curl -s -X POST -H "Authorization: Bearer $TOKEN" \
     "protocol": "smb",
     "share_path": "//nas.corp.com/finance",
     "username": "svc-neo",
-    "password": "SecureP@ssw0rd",
+    "password": "YOUR_PASSWORD_HERE",
     "domain": "CORP",
     "crawl_schedule": "0 2 * * 0",
     "rules": {
@@ -226,7 +226,7 @@ curl -s -X POST -H "Authorization: Bearer $TOKEN" \
     "nfs_version": "4",
     "nfs_security": "krb5i",
     "username": "svc-neo@CORP.COM",
-    "password": "kerberos-password"
+    "password": "YOUR_KERBEROS_PASSWORD_HERE"
   }' \
   "http://localhost:8000/api/v1/shares"
 ```
@@ -352,8 +352,8 @@ curl -s -X POST -H "Authorization: Bearer $TOKEN" \
   -d '{
     "protocol": "s3",
     "share_path": "s3://company-documents",
-    "username": "AKIAIOSFODNN7EXAMPLE",
-    "password": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+    "username": "YOUR_AWS_ACCESS_KEY_HERE",
+    "password": "YOUR_AWS_SECRET_KEY_HERE",
     "s3_region": "us-east-1"
   }' \
   "http://localhost:8000/api/v1/shares?crawl_immediately=true"
@@ -367,8 +367,8 @@ curl -s -X POST -H "Authorization: Bearer $TOKEN" \
   -d '{
     "protocol": "s3",
     "share_path": "s3://grid-archive/legal",
-    "username": "GRIDACCESSKEY",
-    "password": "GRIDSECRETKEY",
+    "username": "YOUR_GRID_ACCESS_KEY_HERE",
+    "password": "YOUR_GRID_SECRET_KEY_HERE",
     "s3_endpoint_url": "https://s3.storagegrid.company.com:8082",
     "s3_region": "us-east-1",
     "s3_use_ssl": true
@@ -384,8 +384,8 @@ curl -s -X POST -H "Authorization: Bearer $TOKEN" \
   -d '{
     "protocol": "s3",
     "share_path": "s3://test-bucket",
-    "username": "minioadmin",
-    "password": "minioadmin",
+    "username": "YOUR_MINIO_ACCESS_KEY_HERE",
+    "password": "YOUR_MINIO_SECRET_KEY_HERE",
     "s3_endpoint_url": "http://minio.local:9000",
     "s3_region": "us-east-1",
     "s3_use_ssl": false
@@ -401,8 +401,8 @@ curl -s -X POST -H "Authorization: Bearer $TOKEN" \
   -d '{
     "protocol": "s3",
     "share_path": "s3://prod-data-lake/customer-docs",
-    "username": "AKIAIOSFODNN7EXAMPLE",
-    "password": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+    "username": "YOUR_AWS_ACCESS_KEY_HERE",
+    "password": "YOUR_AWS_SECRET_KEY_HERE",
     "s3_region": "eu-west-1",
     "crawl_schedule": "0 1 * * 0",
     "rules": {

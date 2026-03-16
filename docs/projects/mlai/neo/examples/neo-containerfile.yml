@@ -6,7 +6,7 @@ services:
     container_name: neo-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-neo}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-neo_password}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-YOUR_DB_PASSWORD_HERE}
       POSTGRES_DB: ${POSTGRES_DB:-neo_connector}
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -25,7 +25,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-neo}:${POSTGRES_PASSWORD:-neo_password}@postgres:5432/${POSTGRES_DB:-neo_connector}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-neo}:${POSTGRES_PASSWORD:-YOUR_DB_PASSWORD_HERE}@postgres:5432/${POSTGRES_DB:-neo_connector}
       WORKER_SERVICE_URL: http://worker:8000
       NER_SERVICE_URL: http://ner:8000
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-}
@@ -61,7 +61,7 @@ services:
     image: ghcr.io/netapp/netapp-neo-extractor:4.0.2
     privileged: true
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-neo}:${POSTGRES_PASSWORD:-neo_password}@postgres:5432/${POSTGRES_DB:-neo_connector}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-neo}:${POSTGRES_PASSWORD:-YOUR_DB_PASSWORD_HERE}@postgres:5432/${POSTGRES_DB:-neo_connector}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
       EXTRACTOR_LOG_LEVEL: ${EXTRACTOR_LOG_LEVEL:-INFO}
       # EXTRACTOR_DEFAULT_PIPELINE: ${EXTRACTOR_DEFAULT_PIPELINE:-markitdown}
@@ -116,7 +116,7 @@ services:
     security_opt:
       - apparmor:unconfined
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-neo}:${POSTGRES_PASSWORD:-neo_password}@postgres:5432/${POSTGRES_DB:-neo_connector}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-neo}:${POSTGRES_PASSWORD:-YOUR_DB_PASSWORD_HERE}@postgres:5432/${POSTGRES_DB:-neo_connector}
       EXTRACTOR_SERVICE_URL: http://extractor:8000
       NER_SERVICE_URL: http://ner:8000
       NUM_UPLOAD_WORKERS: ${NUM_UPLOAD_WORKERS:-3}

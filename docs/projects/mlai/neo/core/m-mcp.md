@@ -205,9 +205,9 @@ Add these to your `.env` file or container environment:
 ```bash
 # OAuth Configuration (Required for MCP)
 MCP_OAUTH_ENABLED=true
-MCP_OAUTH_TENANT_ID=your-tenant-id          # Microsoft Entra tenant ID
-MCP_OAUTH_CLIENT_ID=your-client-id          # App registration client ID
-MCP_OAUTH_CLIENT_SECRET=your-client-secret  # App registration secret
+MCP_OAUTH_TENANT_ID=YOUR_TENANT_ID_HERE          # Microsoft Entra tenant ID
+MCP_OAUTH_CLIENT_ID=YOUR_CLIENT_ID_HERE          # App registration client ID
+MCP_OAUTH_CLIENT_SECRET=YOUR_CLIENT_SECRET_HERE  # App registration secret
 
 # Optional: Rate Limiting Configuration
 MCP_RATE_LIMIT_SEARCH=30        # search_files requests per minute
@@ -265,8 +265,8 @@ This method allows Claude Desktop to handle OAuth automatically. Edit your Claud
     "netapp-files": {
       "url": "http://localhost:8080/mcp",
       "oauth": {
-        "client_id": "your-client-id",
-        "client_secret": "your-client-secret",
+        "client_id": "YOUR_CLIENT_ID_HERE",
+        "client_secret": "YOUR_CLIENT_SECRET_HERE",
         "authorization_url": "http://localhost:8080/authorize",
         "token_url": "http://localhost:8080/token",
         "scopes": ["openid", "profile", "email"]
@@ -327,10 +327,10 @@ For development or when HTTP transport isn't available:
       "env": {
         "NETAPP_API_URL": "http://localhost:8080",
         "MCP_OAUTH_ENABLED": "true",
-        "MCP_OAUTH_TENANT_ID": "your-tenant-id",
-        "MCP_OAUTH_CLIENT_ID": "your-client-id",
-        "MCP_OAUTH_CLIENT_SECRET": "your-client-secret",
-        "MCP_OAUTH_TOKEN": "your-user-oauth-token"
+        "MCP_OAUTH_TENANT_ID": "YOUR_TENANT_ID_HERE",
+        "MCP_OAUTH_CLIENT_ID": "YOUR_CLIENT_ID_HERE",
+        "MCP_OAUTH_CLIENT_SECRET": "YOUR_CLIENT_SECRET_HERE",
+        "MCP_OAUTH_TOKEN": "YOUR_OAUTH_TOKEN_HERE"
       }
     }
   }
@@ -372,7 +372,7 @@ curl -X POST "http://localhost:8080/auth/device/poll?device_code=YOUR_DEVICE_COD
 
 ```bash
 az login
-az account get-access-token --resource api://your-client-id --query accessToken -o tsv
+az account get-access-token --resource api://YOUR_CLIENT_ID_HERE --query accessToken -o tsv
 ```
 
 ---
@@ -544,7 +544,7 @@ There are two ways to configure an MCP API key:
 Set the `MCP_API_KEY` environment variable in your deployment:
 
 ```bash
-MCP_API_KEY=your-secret-api-key
+MCP_API_KEY=YOUR_MCP_API_KEY_HERE
 ```
 
 This takes precedence over any key stored in the database.
@@ -741,9 +741,9 @@ When rate limited, tools return:
 
 ```bash
 MCP_OAUTH_ENABLED=true
-MCP_OAUTH_TENANT_ID=your-tenant-id
-MCP_OAUTH_CLIENT_ID=your-client-id
-MCP_OAUTH_CLIENT_SECRET=your-client-secret
+MCP_OAUTH_TENANT_ID=YOUR_TENANT_ID_HERE
+MCP_OAUTH_CLIENT_ID=YOUR_CLIENT_ID_HERE
+MCP_OAUTH_CLIENT_SECRET=YOUR_CLIENT_SECRET_HERE
 ```
 
 #### 2\. "Token validation failed"

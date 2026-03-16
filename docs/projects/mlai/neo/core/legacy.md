@@ -370,8 +370,8 @@ HTTPS_PROXY=http://proxy.company.com:8080
 HTTP_PROXY=http://proxy.company.com:8080
 
 # Proxy authentication (optional)
-PROXY_USERNAME=proxy_user
-PROXY_PASSWORD=proxy_password
+PROXY_USERNAME=YOUR_PROXY_USERNAME_HERE
+PROXY_PASSWORD=YOUR_PROXY_PASSWORD_HERE
 
 # SSL configuration
 GRAPH_VERIFY_SSL=true

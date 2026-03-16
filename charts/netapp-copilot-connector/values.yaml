@@ -57,7 +57,7 @@ postgresql:
   # Database credentials
   auth:
     username: postgres
-    password: neodbsecret
+    password: YOUR_DB_PASSWORD_HERE
     database: netappconnector
   service:
     type: ClusterIP

@@ -39,7 +39,7 @@ services:
 
       # POSTGRES_PASSWORD: Database superuser password. Use a strong value in
       # production. Change this and update DATABASE_URL references below.
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-neo_password}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-YOUR_DB_PASSWORD_HERE}
 
       # POSTGRES_DB: Database name created on first startup.
       POSTGRES_DB: ${POSTGRES_DB:-neo_connector}
@@ -70,7 +70,7 @@ services:
 
       # DATABASE_URL: PostgreSQL connection string. All services that need the
       # database use this. Format: postgresql://user:password@host:port/dbname
-      DATABASE_URL: postgresql://${POSTGRES_USER:-neo}:${POSTGRES_PASSWORD:-neo_password}@postgres:5432/${POSTGRES_DB:-neo_connector}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-neo}:${POSTGRES_PASSWORD:-YOUR_DB_PASSWORD_HERE}@postgres:5432/${POSTGRES_DB:-neo_connector}
 
       # -----------------------------------------------------------------------
       # Internal service communication
@@ -229,7 +229,7 @@ services:
     environment:
       # DATABASE_URL: Used only at startup to retrieve the encryption key
       # from the system_config table (for decrypting SMB credentials).
-      DATABASE_URL: postgresql://${POSTGRES_USER:-neo}:${POSTGRES_PASSWORD:-neo_password}@postgres:5432/${POSTGRES_DB:-neo_connector}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-neo}:${POSTGRES_PASSWORD:-YOUR_DB_PASSWORD_HERE}@postgres:5432/${POSTGRES_DB:-neo_connector}
 
       # ENCRYPTION_KEY: Same Fernet key as the API/worker. Auto-retrieved
       # from the database at startup if not set. Only set this to override
@@ -389,7 +389,7 @@ services:
       # -----------------------------------------------------------------------
       # Database
       # -----------------------------------------------------------------------
-      DATABASE_URL: postgresql://${POSTGRES_USER:-neo}:${POSTGRES_PASSWORD:-neo_password}@postgres:5432/${POSTGRES_DB:-neo_connector}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-neo}:${POSTGRES_PASSWORD:-YOUR_DB_PASSWORD_HERE}@postgres:5432/${POSTGRES_DB:-neo_connector}
 
       # -----------------------------------------------------------------------
       # External service URLs

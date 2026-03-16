@@ -60,7 +60,7 @@ Neo can be fully configured after startup via the UI or API. However, if you pre
 ```bash
 # Database credentials (defaults shown)
 POSTGRES_USER=neo
-POSTGRES_PASSWORD=neo_password
+POSTGRES_PASSWORD=YOUR_DB_PASSWORD_HERE
 POSTGRES_DB=neo_connector
 
 # License key (can also be set via UI/API during setup)
@@ -181,9 +181,9 @@ curl -X POST http://localhost:8000/api/v1/setup/license \
 curl -X POST http://localhost:8000/api/v1/setup/graph \
   -H "Content-Type: application/json" \
   -d '{
-    "tenant_id": "your-tenant-id",
-    "client_id": "your-client-id",
-    "client_secret": "your-client-secret"
+    "tenant_id": "YOUR_TENANT_ID_HERE",
+    "client_id": "YOUR_CLIENT_ID_HERE",
+    "client_secret": "YOUR_CLIENT_SECRET_HERE"
   }'
 ```
 

@@ -119,8 +119,8 @@ curl -s -X PATCH http://localhost:8000/api/v1/users/me/password \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "current_password": "oldP@ssw0rd",
-    "new_password": "newS3cur3P@ss!"
+    "current_password": "YOUR_CURRENT_PASSWORD_HERE",
+    "new_password": "YOUR_NEW_PASSWORD_HERE"
   }'
 ```
 
@@ -207,7 +207,7 @@ curl -s -X POST http://localhost:8000/api/v1/users \
   -H "Content-Type: application/json" \
   -d '{
     "username": "analyst",
-    "password": "An@lyst2026!",
+    "password": "YOUR_PASSWORD_HERE",
     "email": "analyst@example.com",
     "is_admin": false
   }'
@@ -334,7 +334,7 @@ curl -s -X POST http://localhost:8000/api/v1/users/admin \
   -H "Content-Type: application/json" \
   -d '{
     "username": "backup_admin",
-    "password": "B@ckup2026!"
+    "password": "YOUR_PASSWORD_HERE"
   }'
 ```
 
@@ -361,7 +361,7 @@ curl -s http://localhost:8000/api/v1/setup/initial-credentials | jq
 ```json
 {
   "username": "admin",
-  "password": "aB3$kL9mNpQ2",
+  "password": "YOUR_AUTO_GENERATED_PASSWORD_HERE",
   "message": "Please change this password immediately after logging in. This endpoint will be disabled after first login."
 }
 ```
@@ -383,7 +383,7 @@ curl -s http://localhost:8000/api/v1/setup/initial-credentials | jq
 3. Authenticate with the initial credentials:
    ```bash
    TOKEN=$(curl -s -X POST http://localhost:8000/api/v1/token \
-     -d "username=admin&password=aB3\$kL9mNpQ2" | jq -r .access_token)
+     -d "username=admin&password=YOUR_AUTO_GENERATED_PASSWORD_HERE" | jq -r .access_token)
    ```
 4. Change the admin password immediately:
    ```bash
@@ -391,8 +391,8 @@ curl -s http://localhost:8000/api/v1/setup/initial-credentials | jq
      -H "Authorization: Bearer $TOKEN" \
      -H "Content-Type: application/json" \
      -d '{
-       "current_password": "aB3$kL9mNpQ2",
-       "new_password": "YourSecurePassword!"
+       "current_password": "YOUR_AUTO_GENERATED_PASSWORD_HERE",
+       "new_password": "YOUR_NEW_PASSWORD_HERE"
      }'
    ```
 5. Create additional user accounts as needed using the admin endpoints above.

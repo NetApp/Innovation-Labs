@@ -3,7 +3,7 @@
 
 ## Database Settings (required)
 POSTGRES_USER=neo
-POSTGRES_PASSWORD=neo_password
+POSTGRES_PASSWORD=YOUR_DB_PASSWORD_HERE
 POSTGRES_DB=neo_connector
 
 ## Constructed DATABASE_URL (used by all services)
