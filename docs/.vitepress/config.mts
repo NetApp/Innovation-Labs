@@ -100,7 +100,7 @@ export default defineConfig({
         { text: 'Neo UI Framework', link: '/projects/mlai/neo/uif/ui-framework' },
         { text: 'Neo Fuse Client', link: '/projects/mlai/neo/nfc/fuse-client' },
         {
-          text: 'RAG Pipelines', link: '/projects/mlai/rag',
+          text: 'RAG Pipelines', link: '/projects/mlai/rag/overview',
           collapsed: true,
           items: [
             { text: 'Hybrid (BM25 + Vector) RAG', link: '/projects/mlai/rag/hybrid-rag-bm25' },
