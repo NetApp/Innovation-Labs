@@ -18,25 +18,25 @@ NetApp Project Neo is a secure enterprise application that indexes content from 
                               │ HTTPS
                               ▼
 ┌─────────────┐  ┌──────────────────────────────────────────────────────────┐
-│ MCP Clients │  │  neo-network (Docker bridge)                            │
+│ MCP Clients │  │  neo-network (Docker bridge)                             │
 │ (AI tools)  │  │                                                          │
-└──────┬──────┘  │  ┌──────────┐  ┌────────┐  ┌────────┐  ┌────────────┐  │
-       │         │  │   API    │  │ Worker │  │  NER   │  │ Extractor  │  │
-       │ HTTPS   │  │  :8000   │─►│(intern)│─►│(intern)│  │  (intern)  │  │
-       └────────►│  └────┬─────┘  │        │  │GLiNER2 │  │GPU-accel.  │  │
-                 │       │        └────────┘  └────────┘  └──────┬─────┘  │
-┌─────────────┐  │       │                           ▲            │        │
-│  Neo UI     │  │       │                           └────────────┘        │
-│  :8081      │──►       │                       Worker orchestrates       │
-└─────────────┘  │       ▼                                        │        │
-                 │  ┌──────────┐                                  │        │
-                 │  │PostgreSQL│                                  │        │
-                 │  │  :5432   │                                  │        │
-                 │  └──────────┘                                  │        │
-                 └────────────────────────────────────────────────┼────────┘
-                                                                  │
-                                                                  │ SMB/NFS/S3
-                                                                  ▼
+└──────┬──────┘  │  ┌──────────┐  ┌────────┐  ┌────────┐  ┌────────────┐    │
+       │         │  │   API    │  │ Worker │  │  NER   │  │ Extractor  │    │
+       │ HTTPS   │  │  :8000   │─►│(intern)│─►│(intern)│  │  (intern)  │    │
+       └────────►│  └────┬─────┘  │        │  │GLiNER2 │  │GPU-accel.  │    │
+                 │       │        └────────┘  └────────┘  └──────┬─────┘    │
+┌─────────────┐  │       │                           ▲           │          │
+│  Neo UI     │  │       │                           └───────────┘          │
+│  :8081      │──►       │                       Worker orchestrates        │
+└─────────────┘  │       ▼                                       │          │
+                 │  ┌──────────┐                                 │          │
+                 │  │PostgreSQL│                                 │          │
+                 │  │  :5432   │                                 │          │
+                 │  └──────────┘                                 │          │
+                 └───────────────────────────────────────────────┼──────────┘
+                                                                 │
+                                                                 │ SMB/NFS/S3
+                                                                 ▼
                                                ┌──────────────────────────────┐
                                                │  File Shares                 │
                                                │  (NetApp, third-party, any   │
@@ -53,11 +53,11 @@ Neo v4 is composed of four microservices communicating over an internal Docker n
 
 1. **API Service** (port 8000): FastAPI application handling REST API, MCP server, authentication, and share management. Exposed externally.
 1. **Neo UI** (port 8081): Web-based management console (separate container: `ghcr.io/beezy-dev/neo-ui-framework`). Connects to the API service internally. Exposed externally.
-2. **Worker Service** (internal only): Background service that crawls file shares, enumerates directories, processes work queue items, and uploads content to Microsoft Graph.
-3. **Extractor Service** (internal only): GPU-accelerated document content extraction using Docling. Converts files (PDF, DOCX, PPTX, etc.) to markdown for indexing.
-4. **NER Service** (internal only): Named Entity Recognition using GLiNER2 for entity extraction, document classification, and structured data extraction from indexed content.
-5. **Database Layer**: PostgreSQL (primary) or MySQL for metadata, user accounts, work queues, and operational logs.
-6. **Security Manager**: Shared library (`netapp_shared/security/`) providing authentication, encryption, OAuth validation, and access control across all services.
+1. **Worker Service** (internal only): Background service that crawls file shares, enumerates directories, processes work queue items, and uploads content to Microsoft Graph.
+1. **Extractor Service** (internal only): GPU-accelerated document content extraction using Docling. Converts files (PDF, DOCX, PPTX, etc.) to markdown for indexing.
+1. **NER Service** (internal only): Named Entity Recognition using GLiNER2 for entity extraction, document classification, and structured data extraction from indexed content.
+1. **Database Layer**: PostgreSQL (primary) or MySQL for metadata, user accounts, work queues, and operational logs.
+1. **Security Manager**: Shared library (`netapp_shared/security/`) providing authentication, encryption, OAuth validation, and access control across all services.
 
 ### Firewall Rules
 
@@ -179,25 +179,25 @@ Microsoft Graph integration is optional. It is only required when using Neo with
 
 #### Service Architecture & Ports
 
-| Service   | Port | Exposure      | Purpose                                  |
-| --------- | ---- | ------------- | ---------------------------------------- |
-| API       | 8000 | External      | REST API and MCP server                  |
-| UI        | 8081 | External      | Web administration interface              |
-| Worker    | --   | Internal only | File crawling, Graph sync, work queue    |
-| Extractor | 8000 | Internal only | Document content extraction (GPU)        |
-| NER       | 8000 | Internal only | Named entity recognition (GPU)           |
-| PostgreSQL| 5432 | Internal only | Database                                 |
+| Service    | Port | Exposure      | Purpose                               |
+| ---------- | ---- | ------------- | ------------------------------------- |
+| API        | 8000 | External      | REST API and MCP server               |
+| UI         | 8081 | External      | Web administration interface          |
+| Worker     | --   | Internal only | File crawling, Graph sync, work queue |
+| Extractor  | 8000 | Internal only | Document content extraction (GPU)     |
+| NER        | 8000 | Internal only | Named entity recognition (GPU)        |
+| PostgreSQL | 5432 | Internal only | Database                              |
 
 #### Container Security (Per-Service)
 
 Each microservice runs with the minimum privileges required for its function:
 
-| Service   | User          | Capabilities                           | Privileged | Notes                                        |
-| --------- | ------------- | -------------------------------------- | ---------- | -------------------------------------------- |
-| API       | netapp (1000) | None required                          | No         | Minimal privileges                           |
-| Worker    | netapp (1000) | SYS_ADMIN, DAC_READ_SEARCH, DAC_OVERRIDE | No      | Required for SMB/NFS mounting                |
-| Extractor | netapp (1000) | (varies)                               | Yes        | Privileged mode for GPU device access        |
-| NER       | netapp (1000) | None required                          | No         | Minimal privileges                           |
+| Service   | User          | Capabilities                             | Privileged | Notes                                 |
+| --------- | ------------- | ---------------------------------------- | ---------- | ------------------------------------- |
+| API       | netapp (1000) | None required                            | No         | Minimal privileges                    |
+| Worker    | netapp (1000) | SYS_ADMIN, DAC_READ_SEARCH, DAC_OVERRIDE | No         | Required for SMB/NFS mounting         |
+| Extractor | netapp (1000) | (varies)                                 | Yes        | Privileged mode for GPU device access |
+| NER       | netapp (1000) | None required                            | No         | Minimal privileges                    |
 
 #### Network Isolation
 
@@ -237,14 +237,14 @@ Each microservice runs with the minimum privileges required for its function:
 
 The following operation types are tracked in the audit log:
 
-| Category        | Operation Types                                                    |
-| --------------- | ------------------------------------------------------------------ |
-| Share Management| ADD_SHARE, DELETE_SHARE, UPDATE_SHARE                              |
-| Crawling        | CRAWL_START, CRAWL_COMPLETE, CRAWL_ERROR                          |
-| Graph Sync      | GRAPH_SYNC_START, GRAPH_SYNC_COMPLETE, GRAPH_CLEANUP               |
-| MCP Access      | MCP_{TOOL_NAME} (dynamic, e.g., MCP_SEARCH_FILES, MCP_GET_FILE_CONTENT, MCP_FULL_TEXT_SEARCH, MCP_LIST_SHARES, MCP_SEARCH_ENTITIES) |
-| NER             | NER_ANALYSIS (entity extraction and classification)                |
-| Authentication  | USER_LOGIN                                                         |
+| Category         | Operation Types                                                                                                                      |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Share Management | ADD_SHARE, DELETE_SHARE, UPDATE_SHARE                                                                                                |
+| Crawling         | CRAWL_START, CRAWL_COMPLETE, CRAWL_ERROR                                                                                             |
+| Graph Sync       | GRAPH_SYNC_START, GRAPH_SYNC_COMPLETE, GRAPH_CLEANUP                                                                                 |
+| MCP Access       | MCP\_{TOOL_NAME} (dynamic, e.g., MCP_SEARCH_FILES, MCP_GET_FILE_CONTENT, MCP_FULL_TEXT_SEARCH, MCP_LIST_SHARES, MCP_SEARCH_ENTITIES) |
+| NER              | NER_ANALYSIS (entity extraction and classification)                                                                                  |
+| Authentication   | USER_LOGIN                                                                                                                           |
 
 #### Audit Trail
 
@@ -344,7 +344,7 @@ securityContext:
 securityContext:
   runAsUser: 1000
   runAsGroup: 1000
-  allowPrivilegeEscalation: true  # Required for SMB/NFS mounting
+  allowPrivilegeEscalation: true # Required for SMB/NFS mounting
   capabilities:
     add: ["SYS_ADMIN", "DAC_READ_SEARCH", "DAC_OVERRIDE"]
 ```
@@ -353,7 +353,7 @@ securityContext:
 
 ```yaml
 securityContext:
-  privileged: true  # Required for GPU device access
+  privileged: true # Required for GPU device access
   runAsUser: 1000
   runAsGroup: 1000
 ```
