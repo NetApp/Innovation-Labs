@@ -74,7 +74,7 @@ helm install netapp-neo innovation-labs/netapp-neo \
   --namespace netapp-neo \
   --create-namespace \
   --set postgresql.enabled=true \
-  --set postgresql.auth.password="your-secure-password" \
+  --set postgresql.auth.password="YOUR_DB_PASSWORD_HERE" \
   --set postgresql.auth.database="neo_connector"
 ```
 
@@ -89,7 +89,7 @@ helm install netapp-neo innovation-labs/netapp-neo \
   --create-namespace \
   --set postgresql.enabled=false \
   --set api.env.DB_TYPE="postgres" \
-  --set api.env.DATABASE_URL="postgresql://user:password@external-host:5432/neo_connector"
+  --set api.env.DATABASE_URL="postgresql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@external-host:5432/neo_connector"
 ```
 
 </details>
@@ -111,7 +111,7 @@ postgresql:
   enabled: true
   auth:
     username: postgres
-    password: "your-secure-password"
+    password: "YOUR_DB_PASSWORD_HERE"
     database: neo_connector
   persistence:
     enabled: true
@@ -174,9 +174,9 @@ api:
   # --- External Database Configuration ---
   env:
     # For PostgreSQL
-    DATABASE_URL: "postgresql://username@servername:password@servername.postgres.database.mydomain.com:5432/neo_connector" # parameter like ?sslmode=require could be added
+    DATABASE_URL: "postgresql://YOUR_DB_USER@servername:YOUR_DB_PASSWORD_HERE@servername.postgres.database.mydomain.com:5432/neo_connector" # parameter like ?sslmode=require could be added
     # For MySQL
-    # DATABASE_URL: "mysql://username:password@hostname:3306/neo_connector"
+    # DATABASE_URL: "mysql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@hostname:3306/neo_connector"
   # --- Optional API Ingress Configuration ---
   ingress:
     enabled: true
@@ -191,15 +191,15 @@ api:
 
 worker:
   env:
-    DATABASE_URL: "postgresql://username@servername:password@servername.postgres.database.mydomain.com:5432/neo_connector"
+    DATABASE_URL: "postgresql://YOUR_DB_USER@servername:YOUR_DB_PASSWORD_HERE@servername.postgres.database.mydomain.com:5432/neo_connector"
 
 extractor:
   env:
-    DATABASE_URL: "postgresql://username@servername:password@servername.postgres.database.mydomain.com:5432/neo_connector"
+    DATABASE_URL: "postgresql://YOUR_DB_USER@servername:YOUR_DB_PASSWORD_HERE@servername.postgres.database.mydomain.com:5432/neo_connector"
 
 ner:
   env:
-    DATABASE_URL: "postgresql://username@servername:password@servername.postgres.database.mydomain.com:5432/neo_connector"
+    DATABASE_URL: "postgresql://YOUR_DB_USER@servername:YOUR_DB_PASSWORD_HERE@servername.postgres.database.mydomain.com:5432/neo_connector"
 
 ui:
   # --- Optional UI Ingress Configuration ---
@@ -259,7 +259,7 @@ postgresql:
   enabled: true
   auth:
     username: postgres
-    password: "secure-password"
+    password: "YOUR_DB_PASSWORD_HERE"
     database: neo_connector
   persistence:
     enabled: true
@@ -269,7 +269,7 @@ postgresql:
 
 **Auto-generated Connection String:**
 ```
-postgresql://postgres:secure-password@neo-postgres:5432/neo_connector
+postgresql://postgres:YOUR_DB_PASSWORD_HERE@neo-postgres:5432/neo_connector
 ```
 </details>
 
@@ -286,19 +286,19 @@ postgresql:
 api:
   env:
     DB_TYPE: postgres
-    DATABASE_URL: "postgresql://username:password@hostname:5432/neo_connector"
+    DATABASE_URL: "postgresql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@hostname:5432/neo_connector"
 
 worker:
   env:
-    DATABASE_URL: "postgresql://username:password@hostname:5432/neo_connector"
+    DATABASE_URL: "postgresql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@hostname:5432/neo_connector"
 
 extractor:
   env:
-    DATABASE_URL: "postgresql://username:password@hostname:5432/neo_connector"
+    DATABASE_URL: "postgresql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@hostname:5432/neo_connector"
 
 ner:
   env:
-    DATABASE_URL: "postgresql://username:password@hostname:5432/neo_connector"
+    DATABASE_URL: "postgresql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@hostname:5432/neo_connector"
 ```
 
 **MySQL Example:**
@@ -309,19 +309,19 @@ postgresql:
 api:
   env:
     DB_TYPE: mysql
-    DATABASE_URL: "mysql://username:password@hostname:3306/neo_connector"
+    DATABASE_URL: "mysql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@hostname:3306/neo_connector"
 
 worker:
   env:
-    DATABASE_URL: "mysql://username:password@hostname:3306/neo_connector"
+    DATABASE_URL: "mysql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@hostname:3306/neo_connector"
 
 extractor:
   env:
-    DATABASE_URL: "mysql://username:password@hostname:3306/neo_connector"
+    DATABASE_URL: "mysql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@hostname:3306/neo_connector"
 
 ner:
   env:
-    DATABASE_URL: "mysql://username:password@hostname:3306/neo_connector"
+    DATABASE_URL: "mysql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@hostname:3306/neo_connector"
 ```
 
 **AWS RDS for PostgreSQL:**
@@ -329,19 +329,19 @@ ner:
 api:
   env:
     DB_TYPE: postgres
-    DATABASE_URL: "postgresql://username:password@database-instance.xxxxx.us-east-1.rds.amazonaws.com:5432/neo_connector?sslmode=require"
+    DATABASE_URL: "postgresql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@database-instance.xxxxx.us-east-1.rds.amazonaws.com:5432/neo_connector?sslmode=require"
 
 worker:
   env:
-    DATABASE_URL: "postgresql://username:password@database-instance.xxxxx.us-east-1.rds.amazonaws.com:5432/neo_connector?sslmode=require"
+    DATABASE_URL: "postgresql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@database-instance.xxxxx.us-east-1.rds.amazonaws.com:5432/neo_connector?sslmode=require"
 
 extractor:
   env:
-    DATABASE_URL: "postgresql://username:password@database-instance.xxxxx.us-east-1.rds.amazonaws.com:5432/neo_connector?sslmode=require"
+    DATABASE_URL: "postgresql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@database-instance.xxxxx.us-east-1.rds.amazonaws.com:5432/neo_connector?sslmode=require"
 
 ner:
   env:
-    DATABASE_URL: "postgresql://username:password@database-instance.xxxxx.us-east-1.rds.amazonaws.com:5432/neo_connector?sslmode=require"
+    DATABASE_URL: "postgresql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@database-instance.xxxxx.us-east-1.rds.amazonaws.com:5432/neo_connector?sslmode=require"
 ```
 
 **AWS RDS for MySQL:**
@@ -349,19 +349,19 @@ ner:
 api:
   env:
     DB_TYPE: mysql
-    DATABASE_URL: "mysql://username:password@database-instance.xxxxx.us-east-1.rds.amazonaws.com:3306/neo_connector?ssl-mode=REQUIRED"
+    DATABASE_URL: "mysql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@database-instance.xxxxx.us-east-1.rds.amazonaws.com:3306/neo_connector?ssl-mode=REQUIRED"
 
 worker:
   env:
-    DATABASE_URL: "mysql://username:password@database-instance.xxxxx.us-east-1.rds.amazonaws.com:3306/neo_connector?ssl-mode=REQUIRED"
+    DATABASE_URL: "mysql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@database-instance.xxxxx.us-east-1.rds.amazonaws.com:3306/neo_connector?ssl-mode=REQUIRED"
 
 extractor:
   env:
-    DATABASE_URL: "mysql://username:password@database-instance.xxxxx.us-east-1.rds.amazonaws.com:3306/neo_connector?ssl-mode=REQUIRED"
+    DATABASE_URL: "mysql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@database-instance.xxxxx.us-east-1.rds.amazonaws.com:3306/neo_connector?ssl-mode=REQUIRED"
 
 ner:
   env:
-    DATABASE_URL: "mysql://username:password@database-instance.xxxxx.us-east-1.rds.amazonaws.com:3306/neo_connector?ssl-mode=REQUIRED"
+    DATABASE_URL: "mysql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@database-instance.xxxxx.us-east-1.rds.amazonaws.com:3306/neo_connector?ssl-mode=REQUIRED"
 ```
 
 **Azure Database for PostgreSQL Flexible Server:**
@@ -369,19 +369,19 @@ ner:
 api:
   env:
     DB_TYPE: postgres
-    DATABASE_URL: "postgresql://username@servername:password@servername.postgres.database.azure.com:5432/neo_connector?sslmode=require"
+    DATABASE_URL: "postgresql://YOUR_DB_USER@servername:YOUR_DB_PASSWORD_HERE@servername.postgres.database.azure.com:5432/neo_connector?sslmode=require"
 
 worker:
   env:
-    DATABASE_URL: "postgresql://username@servername:password@servername.postgres.database.azure.com:5432/neo_connector?sslmode=require"
+    DATABASE_URL: "postgresql://YOUR_DB_USER@servername:YOUR_DB_PASSWORD_HERE@servername.postgres.database.azure.com:5432/neo_connector?sslmode=require"
 
 extractor:
   env:
-    DATABASE_URL: "postgresql://username@servername:password@servername.postgres.database.azure.com:5432/neo_connector?sslmode=require"
+    DATABASE_URL: "postgresql://YOUR_DB_USER@servername:YOUR_DB_PASSWORD_HERE@servername.postgres.database.azure.com:5432/neo_connector?sslmode=require"
 
 ner:
   env:
-    DATABASE_URL: "postgresql://username@servername:password@servername.postgres.database.azure.com:5432/neo_connector?sslmode=require"
+    DATABASE_URL: "postgresql://YOUR_DB_USER@servername:YOUR_DB_PASSWORD_HERE@servername.postgres.database.azure.com:5432/neo_connector?sslmode=require"
 ```
 
 **Azure Database for MySQL Flexible Server:**
@@ -389,19 +389,19 @@ ner:
 api:
   env:
     DB_TYPE: mysql
-    DATABASE_URL: "mysql://username:password@servername.mysql.database.azure.com:3306/neo_connector?ssl-mode=REQUIRED"
+    DATABASE_URL: "mysql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@servername.mysql.database.azure.com:3306/neo_connector?ssl-mode=REQUIRED"
 
 worker:
   env:
-    DATABASE_URL: "mysql://username:password@servername.mysql.database.azure.com:3306/neo_connector?ssl-mode=REQUIRED"
+    DATABASE_URL: "mysql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@servername.mysql.database.azure.com:3306/neo_connector?ssl-mode=REQUIRED"
 
 extractor:
   env:
-    DATABASE_URL: "mysql://username:password@servername.mysql.database.azure.com:3306/neo_connector?ssl-mode=REQUIRED"
+    DATABASE_URL: "mysql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@servername.mysql.database.azure.com:3306/neo_connector?ssl-mode=REQUIRED"
 
 ner:
   env:
-    DATABASE_URL: "mysql://username:password@servername.mysql.database.azure.com:3306/neo_connector?ssl-mode=REQUIRED"
+    DATABASE_URL: "mysql://YOUR_DB_USER:YOUR_DB_PASSWORD_HERE@servername.mysql.database.azure.com:3306/neo_connector?ssl-mode=REQUIRED"
 ```
 
 > [!TIP]
@@ -1099,7 +1099,7 @@ helm uninstall netapp-neo --namespace netapp-neo
 | `postgresql.image.tag` | PostgreSQL image tag. | `17` |
 | `postgresql.image.pullPolicy` | PostgreSQL image pull policy. | `IfNotPresent` |
 | `postgresql.auth.username` | PostgreSQL username. | `postgres` |
-| `postgresql.auth.password` | PostgreSQL password. **Should be changed for production.** | `neodbsecret` |
+| `postgresql.auth.password` | PostgreSQL password. **Should be changed for production.** | `YOUR_DB_PASSWORD_HERE` |
 | `postgresql.auth.database` | PostgreSQL database name. | `neo_connector` |
 | `postgresql.service.type` | PostgreSQL service type. | `ClusterIP` |
 | `postgresql.service.port` | PostgreSQL service port. | `5432` |

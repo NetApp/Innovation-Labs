@@ -37,7 +37,7 @@ POST /shares
 {
   "share_path": "\\\\fileserver\\public-documents",
   "username": "domain\\serviceaccount",
-  "password": "your-password",
+  "password": "YOUR_PASSWORD_HERE",
   "crawl_schedule": "0 2 * * *",
   "rules": {
     "acl_override_mode": "everyone"
@@ -56,7 +56,7 @@ POST /shares
 {
   "share_path": "\\\\fileserver\\department-files",
   "username": "domain\\serviceaccount",
-  "password": "your-password",
+  "password": "YOUR_PASSWORD_HERE",
   "crawl_schedule": "0 2 * * *",
   "rules": {
     "acl_override_mode": "specified",
@@ -164,7 +164,7 @@ ACL overrides can be combined with other share rules:
 {
   "share_path": "\\\\fileserver\\documents",
   "username": "domain\\serviceaccount",
-  "password": "your-password",
+  "password": "YOUR_PASSWORD_HERE",
   "rules": {
     "acl_override_mode": "specified",
     "acl_override_principals": [

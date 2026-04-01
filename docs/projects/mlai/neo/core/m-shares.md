@@ -152,8 +152,8 @@ curl -X POST "http://localhost:8000/api/v1/shares?crawl_immediately=true" \
   -d '{
     "protocol": "s3",
     "share_path": "s3://my-documents/reports",
-    "username": "AKIAIOSFODNN7EXAMPLE",
-    "password": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+    "username": "YOUR_AWS_ACCESS_KEY_HERE",
+    "password": "YOUR_AWS_SECRET_KEY_HERE",
     "s3_bucket": "my-documents",
     "s3_prefix": "reports/",
     "s3_region": "us-east-1",

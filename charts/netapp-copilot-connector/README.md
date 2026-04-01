@@ -914,7 +914,7 @@ helm uninstall netapp-connector --namespace netapp-connector
 | `postgresql.image.tag` | PostgreSQL image tag. | `16.10-alpine3.21` |
 | `postgresql.image.pullPolicy` | PostgreSQL image pull policy. | `IfNotPresent` |
 | `postgresql.auth.username` | PostgreSQL username. | `postgres` |
-| `postgresql.auth.password` | PostgreSQL password. **Should be changed for production.** | `neodbsecret` |
+| `postgresql.auth.password` | PostgreSQL password. **Should be changed for production.** | `YOUR_DB_PASSWORD_HERE` |
 | `postgresql.auth.database` | PostgreSQL database name. | `netappconnector` |
 | `postgresql.service.type` | PostgreSQL service type. | `ClusterIP` |
 | `postgresql.service.port` | PostgreSQL service port. | `5432` |

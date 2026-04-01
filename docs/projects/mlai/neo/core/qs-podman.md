@@ -36,14 +36,14 @@ Before deploying Neo using Podman Compose, ensure that you have the following pr
 
    ```yaml
    environment:
-     - DATABASE_URL=postgresql://postgres:yourStrongPasswordHere!@db:5432/neo
+     - DATABASE_URL=postgresql://postgres:YOUR_DB_PASSWORD_HERE@db:5432/neo
    ```
 
-   For example, if my server's IP address is `10.100.20.05`, my username is `postgres`, the port is `5432` and my password is `yourStrongPasswordHere!`, I would set the `DATABASE_URL` as follows:
+   For example, if my server's IP address is `10.100.20.05`, my username is `postgres`, the port is `5432` and my password is `YOUR_DB_PASSWORD_HERE`, I would set the `DATABASE_URL` as follows:
 
    ```yaml
    environment:
-     - DATABASE_URL=postgresql://postgres:yourStrongPasswordHere!@10.100.20.05:5432/neo
+     - DATABASE_URL=postgresql://postgres:YOUR_DB_PASSWORD_HERE@10.100.20.05:5432/neo
    ```
 
 3. **Start the Containers**:
