@@ -33,7 +33,7 @@ UI Ingress:
 {{- end }}
 
 To access the API locally:
-  kubectl port-forward svc/{{ include "netapp-neo.fullname" . }}-api {{ .Values.api.service.port }}:{{ .Values.api.service.port }}
+  kubectl port-forward svc/{{ include "netapp-neo.fullname" . }}-api {{ .Values.api.service.port }}:{{ .Values.api.service.port }} --n {{ .Release.Namespace}}
 
 To access the UI locally:
-  kubectl port-forward svc/{{ include "netapp-neo.fullname" . }}-ui {{ .Values.ui.service.port }}:{{ .Values.ui.service.port }}
+  kubectl port-forward svc/{{ include "netapp-neo.fullname" . }}-ui {{ .Values.ui.service.port }}:{{ .Values.ui.service.port }} --n {{ .Release.Namespace}}

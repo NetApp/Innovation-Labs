@@ -1,6 +1,6 @@
 apiVersion: v2
 name: netapp-neo
-description: NetApp Neo v4.x — microservice architecture for Microsoft 365 Copilot Connector
+description: NetApp Neo v4.x — context lake microservice architecture for AI services via MCP service
 type: application
-version: 1.0.0
-appVersion: "4.0.2"
+version: 26.3.1
+appVersion: "4.0.3p7"

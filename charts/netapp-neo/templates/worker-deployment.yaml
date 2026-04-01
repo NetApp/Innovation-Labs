@@ -49,41 +49,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "netapp-neo.fullname" . }}-db
                   key: DATABASE_URL
-            - name: ENCRYPTION_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-encryption
-                  key: ENCRYPTION_KEY
-            - name: NETAPP_CONNECTOR_LICENSE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-license
-                  key: NETAPP_CONNECTOR_LICENSE
-            - name: CONNECTOR_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-license
-                  key: CONNECTOR_ID
-            - name: MS_GRAPH_TENANT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-graph
-                  key: MS_GRAPH_TENANT_ID
-            - name: MS_GRAPH_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-graph
-                  key: MS_GRAPH_CLIENT_ID
-            - name: MS_GRAPH_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-graph
-                  key: MS_GRAPH_CLIENT_SECRET
-            - name: MS_GRAPH_CONNECTOR_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-graph
-                  key: MS_GRAPH_CONNECTOR_ID
           securityContext:
             capabilities:
               add:

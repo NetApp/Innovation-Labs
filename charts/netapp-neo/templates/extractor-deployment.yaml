@@ -41,16 +41,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "netapp-neo.fullname" . }}-db
                   key: DATABASE_URL
-            - name: ENCRYPTION_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-encryption
-                  key: ENCRYPTION_KEY
-            - name: OPENAI_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-openai
-                  key: OPENAI_API_KEY
           securityContext:
             privileged: true
           {{- with .Values.extractor.resources }}

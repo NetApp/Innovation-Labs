@@ -36,85 +36,15 @@ spec:
             - name: http
               containerPort: {{ .Values.api.service.port }}
               protocol: TCP
-          envFrom:
-            - configMapRef:
-                name: {{ include "netapp-neo.fullname" . }}-api
+          # envFrom:
+          #   - configMapRef:
+          #       name: {{ include "netapp-neo.fullname" . }}-api
           env:
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   name: {{ include "netapp-neo.fullname" . }}-db
                   key: DATABASE_URL
-            - name: ENCRYPTION_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-encryption
-                  key: ENCRYPTION_KEY
-            - name: JWT_SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-jwt
-                  key: JWT_SECRET_KEY
-            - name: NETAPP_CONNECTOR_LICENSE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-license
-                  key: NETAPP_CONNECTOR_LICENSE
-            - name: CONNECTOR_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-license
-                  key: CONNECTOR_ID
-            - name: MS_GRAPH_TENANT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-graph
-                  key: MS_GRAPH_TENANT_ID
-            - name: MS_GRAPH_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-graph
-                  key: MS_GRAPH_CLIENT_ID
-            - name: MS_GRAPH_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-graph
-                  key: MS_GRAPH_CLIENT_SECRET
-            - name: MS_GRAPH_CONNECTOR_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-graph
-                  key: MS_GRAPH_CONNECTOR_ID
-            - name: MCP_OAUTH_ENABLED
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-mcp
-                  key: MCP_OAUTH_ENABLED
-            - name: MCP_OAUTH_TENANT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-mcp
-                  key: MCP_OAUTH_TENANT_ID
-            - name: MCP_OAUTH_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-mcp
-                  key: MCP_OAUTH_CLIENT_ID
-            - name: MCP_OAUTH_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-mcp
-                  key: MCP_OAUTH_CLIENT_SECRET
-            - name: MCP_OAUTH_AUDIENCE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-mcp
-                  key: MCP_OAUTH_AUDIENCE
-            - name: MCP_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "netapp-neo.fullname" . }}-mcp
-                  key: MCP_API_KEY
           {{- with .Values.api.resources }}
           resources:
             {{- toYaml . | nindent 12 }}

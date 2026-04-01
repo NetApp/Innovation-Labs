@@ -1,11 +1,8 @@
 ---
 # -- Global overrides
 nameOverride: ""
-fullnameOverride: ""
-
 # -- Image pull secrets (shared across all services)
 imagePullSecrets: []
-
 # =============================================================================
 # API Service
 # =============================================================================
@@ -28,30 +25,7 @@ api:
     annotations: {}
     tls: []
   resources: {}
-  env:
-    # JWT
-    JWT_SECRET_KEY: ""
-    ACCESS_TOKEN_EXPIRE_MINUTES: "1440"
-    # Encryption
-    ENCRYPTION_KEY: ""
-    # License
-    NETAPP_CONNECTOR_LICENSE: ""
-    CONNECTOR_ID: "netappneo"
-    # Microsoft Graph
-    MS_GRAPH_TENANT_ID: ""
-    MS_GRAPH_CLIENT_ID: ""
-    MS_GRAPH_CLIENT_SECRET: ""
-    MS_GRAPH_CONNECTOR_ID: "netappneo"
-    MS_GRAPH_CONNECTOR_NAME: "NetApp NEO Connector"
-    MS_GRAPH_CONNECTOR_DESCRIPTION: ""
-    # MCP OAuth
-    MCP_OAUTH_ENABLED: "false"
-    MCP_OAUTH_TENANT_ID: ""
-    MCP_OAUTH_CLIENT_ID: ""
-    MCP_OAUTH_CLIENT_SECRET: ""
-    MCP_OAUTH_AUDIENCE: ""
-    # MCP API Key
-    MCP_API_KEY: ""
+
 
 # =============================================================================
 # Worker Service
@@ -67,16 +41,6 @@ worker:
     port: 8000
   resources: {}
   env:
-    # Encryption
-    ENCRYPTION_KEY: ""
-    # License
-    NETAPP_CONNECTOR_LICENSE: ""
-    CONNECTOR_ID: "netappneo"
-    # Microsoft Graph
-    MS_GRAPH_TENANT_ID: ""
-    MS_GRAPH_CLIENT_ID: ""
-    MS_GRAPH_CLIENT_SECRET: ""
-    MS_GRAPH_CONNECTOR_ID: "netappneo"
     # Concurrency
     NUM_UPLOAD_WORKERS: "3"
     NUM_EXTRACTION_WORKERS: "2"
@@ -100,20 +64,11 @@ extractor:
     port: 8000
   resources: {}
   env:
-    # Encryption
-    ENCRYPTION_KEY: ""
     # Extraction
     EXTRACTOR_LOG_LEVEL: "INFO"
     EXTRACTOR_DEFAULT_PIPELINE: ""
     EXTRACTOR_MOUNT_TTL: ""
     EXTRACTOR_FORCE_CPU: ""
-    # VLM
-    VLM_MODEL: ""
-    VLM_API_URL: ""
-    VLM_API_MODEL: ""
-    # OpenAI
-    OPENAI_API_KEY: ""
-    OPENAI_MODEL: "gpt-4o"
 
 # =============================================================================
 # NER Service
@@ -169,15 +124,15 @@ ui:
 # =============================================================================
 postgresql:
   enabled: true
-  name: neo-postgres
+  name: postgres
   image:
     repository: docker.io/library/postgres
     tag: "17-alpine"
     pullPolicy: IfNotPresent
   auth:
-    username: neo
-    password: neo_password
-    database: neo_connector
+    username: 
+    password: 
+    database: 
   service:
     type: ClusterIP
     port: 5432
