@@ -1,0 +1,559 @@
+# =============================================================================
+# NetApp Project Neo v4 - Docker Compose Example
+# =============================================================================
+#
+# Multi-service deployment with independently scalable components:
+#   - postgres:   PostgreSQL database (shared by all services)
+#   - api:        HTTP API + MCP transport (user-facing)
+#   - worker:     Background processing (crawling, upload, orchestration)
+#   - extractor:  Content extraction (MarkItDown, Docling, VLM)
+#   - ner:        Named Entity Recognition (GLiNER2)
+#   - neoui:      Web management console
+#
+# Quick start:
+#   1. Copy this file:  cp docker-compose.example.yml docker-compose.yml
+#   2. Optionally pre-configure environment variables below, or configure
+#      via the API/UI after first boot (the system enters setup mode).
+#   3. Launch:          docker compose up -d
+#
+# Scale independently:
+#   docker compose up -d --scale worker=3
+#   docker compose up -d --scale extractor=5 --scale ner=2
+#
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Database
+  # ---------------------------------------------------------------------------
+  # Shared by API, worker, and extractor services.
+  # Data persists in the postgres_data volume.
+  postgres:
+    image: postgres:17
+    container_name: neo-postgres
+    environment:
+      # POSTGRES_USER: Database superuser name. Used to construct DATABASE_URL
+      # for all services. Change this and update DATABASE_URL references below.
+      POSTGRES_USER: ${POSTGRES_USER:-neo}
+
+      # POSTGRES_PASSWORD: Database superuser password. Use a strong value in
+      # production. Change this and update DATABASE_URL references below.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-neo_password}
+
+      # POSTGRES_DB: Database name created on first startup.
+      POSTGRES_DB: ${POSTGRES_DB:-neo_connector}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-neo} -d ${POSTGRES_DB:-neo_connector}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - neo-network
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # API Service
+  # ---------------------------------------------------------------------------
+  # Lightweight FastAPI service handling HTTP endpoints, MCP transport, and
+  # OAuth. No background processing — delegates to the worker service.
+  api:
+    image: ghcr.io/netapp/netapp-neo-api:4.0.2
+    ports:
+      - "8000:8000"
+    environment:
+      # -----------------------------------------------------------------------
+      # Database
+      # -----------------------------------------------------------------------
+
+      # DATABASE_URL: PostgreSQL connection string. All services that need the
+      # database use this. Format: postgresql://user:password@host:port/dbname
+      DATABASE_URL: postgresql://${POSTGRES_USER:-neo}:${POSTGRES_PASSWORD:-neo_password}@postgres:5432/${POSTGRES_DB:-neo_connector}
+
+      # -----------------------------------------------------------------------
+      # Internal service communication
+      # -----------------------------------------------------------------------
+
+      # WORKER_SERVICE_URL: URL of the worker service. Used by the API to
+      # proxy SMB connection tests to the worker (which has SMB tools).
+      WORKER_SERVICE_URL: http://worker:8000
+
+      # NER_SERVICE_URL: URL of the NER service. Used by the API to
+      # forward device configuration changes (GPU/CPU switching).
+      NER_SERVICE_URL: http://ner:8000
+
+      # -----------------------------------------------------------------------
+      # Authentication (JWT)
+      # -----------------------------------------------------------------------
+
+      # JWT_SECRET_KEY: Secret key for signing JWT access tokens. Auto-generated
+      # and stored in the database if not set. All services sharing the same
+      # database will use the same key automatically. Only set this if you need
+      # to override the database-stored key.
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-}
+
+      # ACCESS_TOKEN_EXPIRE_MINUTES: How long JWT tokens remain valid.
+      # Default: 1440 (24 hours).
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
+
+      # -----------------------------------------------------------------------
+      # Encryption
+      # -----------------------------------------------------------------------
+
+      # ENCRYPTION_KEY: Fernet key for encrypting sensitive data (SMB
+      # passwords). Auto-generated and stored in the database on first
+      # startup if not set. All services sharing the same database will
+      # retrieve the same key automatically. Only set this to override
+      # the database-stored key.
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
+
+      # -----------------------------------------------------------------------
+      # License
+      # -----------------------------------------------------------------------
+
+      # NETAPP_CONNECTOR_LICENSE: License key for the connector. Can also
+      # be configured via API at /api/v1/setup/license after deployment.
+      NETAPP_CONNECTOR_LICENSE: ${NETAPP_CONNECTOR_LICENSE:-}
+
+      # CONNECTOR_ID: Identifier used for license validation.
+      # Default: netappneo. Change only if instructed by NetApp support.
+      CONNECTOR_ID: ${CONNECTOR_ID:-netappneo}
+
+      # -----------------------------------------------------------------------
+      # Microsoft Graph (optional - for Copilot upload)
+      # -----------------------------------------------------------------------
+      # These can also be configured at any time via the API/UI or during
+      # setup mode on first boot.
+
+      # MS_GRAPH_TENANT_ID: Your Microsoft Entra (Azure AD) tenant ID.
+      # Required only if using Microsoft 365 Copilot integration.
+      MS_GRAPH_TENANT_ID: ${MS_GRAPH_TENANT_ID:-}
+
+      # MS_GRAPH_CLIENT_ID: Application (client) ID of the registered
+      # Entra app. Required for Graph integration.
+      MS_GRAPH_CLIENT_ID: ${MS_GRAPH_CLIENT_ID:-}
+
+      # MS_GRAPH_CLIENT_SECRET: Client secret for the Entra app.
+      # Required for Graph integration.
+      MS_GRAPH_CLIENT_SECRET: ${MS_GRAPH_CLIENT_SECRET:-}
+
+      # MS_GRAPH_CONNECTOR_ID: Connector ID registered with Microsoft Graph.
+      # Must match the connector registration. Default: netappneo.
+      MS_GRAPH_CONNECTOR_ID: ${MS_GRAPH_CONNECTOR_ID:-netappneo}
+
+      # MS_GRAPH_CONNECTOR_NAME: Display name shown in Microsoft 365 admin.
+      MS_GRAPH_CONNECTOR_NAME: ${MS_GRAPH_CONNECTOR_NAME:-NetApp NEO Connector}
+
+      # MS_GRAPH_CONNECTOR_DESCRIPTION: Description shown in Microsoft 365.
+      MS_GRAPH_CONNECTOR_DESCRIPTION: ${MS_GRAPH_CONNECTOR_DESCRIPTION:-}
+
+      # -----------------------------------------------------------------------
+      # MCP OAuth (optional - for securing MCP endpoints)
+      # -----------------------------------------------------------------------
+
+      # MCP_OAUTH_ENABLED: Enable OAuth 2.0 authentication on MCP endpoints.
+      # When false, MCP endpoints use JWT auth like the rest of the API.
+      MCP_OAUTH_ENABLED: ${MCP_OAUTH_ENABLED:-false}
+
+      # MCP_OAUTH_TENANT_ID: Entra tenant for MCP OAuth validation.
+      # Defaults to MS_GRAPH_TENANT_ID if not set.
+      MCP_OAUTH_TENANT_ID: ${MCP_OAUTH_TENANT_ID:-}
+
+      # MCP_OAUTH_CLIENT_ID: Client ID for MCP OAuth token validation.
+      MCP_OAUTH_CLIENT_ID: ${MCP_OAUTH_CLIENT_ID:-}
+
+      # MCP_OAUTH_CLIENT_SECRET: Client secret for MCP OAuth.
+      # Defaults to MS_GRAPH_CLIENT_SECRET if not set.
+      MCP_OAUTH_CLIENT_SECRET: ${MCP_OAUTH_CLIENT_SECRET:-}
+
+      # MCP_OAUTH_AUDIENCE: Expected audience claim in MCP OAuth tokens.
+      MCP_OAUTH_AUDIENCE: ${MCP_OAUTH_AUDIENCE:-}
+
+      # -----------------------------------------------------------------------
+      # MCP API Key (optional - bypass OAuth for CLI/automation clients)
+      # -----------------------------------------------------------------------
+      # When set, clients authenticate to the MCP endpoint by sending this
+      # value as a Bearer token instead of going through OAuth.
+      # Can also be managed via API: POST /api/v1/setup/mcp/api-key
+      # Generate with: python3 -c "import secrets; print(secrets.token_urlsafe(48))"
+      MCP_API_KEY: ${MCP_API_KEY:-}
+      # MCP_API_KEY_EMAIL: ${MCP_API_KEY_EMAIL:-mcp-api-key@local}
+      # MCP_API_KEY_NAME: ${MCP_API_KEY_NAME:-MCP API Key User}
+      # MCP_API_KEY_SUB: ${MCP_API_KEY_SUB:-mcp-api-key}
+
+      # -----------------------------------------------------------------------
+      # SSL / Proxy (optional)
+      # -----------------------------------------------------------------------
+
+      # HTTPS_PROXY: Proxy URL for outbound HTTPS traffic (Graph API calls).
+      # Example: http://proxy.corp.com:8080
+      # HTTPS_PROXY: ${HTTPS_PROXY:-}
+
+      # GRAPH_CA_BUNDLE: Path to a custom CA certificate bundle. Required
+      # when behind SSL-inspecting proxies. Mount the cert file into the
+      # container and set this path.
+      # GRAPH_CA_BUNDLE: ${GRAPH_CA_BUNDLE:-}
+
+      # GRAPH_VERIFY_SSL: Set to "false" to disable SSL verification for
+      # Graph API calls. NOT recommended for production.
+      # GRAPH_VERIFY_SSL: ${GRAPH_VERIFY_SSL:-true}
+
+      # GRAPH_ALLOW_LEGACY_CERTIFICATES: Set to "true" to accept legacy
+      # X.509 certificates (needed for some corporate proxies on Python 3.13+).
+      # GRAPH_ALLOW_LEGACY_CERTIFICATES: ${GRAPH_ALLOW_LEGACY_CERTIFICATES:-false}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - neo-network
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Extractor Service
+  # ---------------------------------------------------------------------------
+  # Extracts text content from documents on SMB shares. Supports multiple
+  # backends: MarkItDown (Office/PDF), Docling (OCR/tables), Docling VLM
+  # (vision language models). Mounts shares independently via CIFS.
+  extractor:
+    image: ghcr.io/netapp/netapp-neo-extractor:4.0.2
+    # privileged needed for NFS/CIFS mounting inside the container
+    privileged: true
+    environment:
+      # DATABASE_URL: Used only at startup to retrieve the encryption key
+      # from the system_config table (for decrypting SMB credentials).
+      DATABASE_URL: postgresql://${POSTGRES_USER:-neo}:${POSTGRES_PASSWORD:-neo_password}@postgres:5432/${POSTGRES_DB:-neo_connector}
+
+      # ENCRYPTION_KEY: Same Fernet key as the API/worker. Auto-retrieved
+      # from the database at startup if not set. Only set this to override
+      # the database-stored key.
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
+
+      # EXTRACTOR_LOG_LEVEL: Logging verbosity. Options: DEBUG, INFO, WARNING, ERROR.
+      EXTRACTOR_LOG_LEVEL: ${EXTRACTOR_LOG_LEVEL:-INFO}
+
+      # EXTRACTOR_DEFAULT_PIPELINE: Default extraction backend.
+      # Options: markitdown (default), docling, vlm.
+      # EXTRACTOR_DEFAULT_PIPELINE: ${EXTRACTOR_DEFAULT_PIPELINE:-markitdown}
+
+      # EXTRACTOR_MOUNT_TTL: Seconds an idle SMB mount stays cached before
+      # being unmounted. Default: 300 (5 minutes). Increase for high-throughput
+      # workloads to reduce mount/unmount overhead.
+      # EXTRACTOR_MOUNT_TTL: ${EXTRACTOR_MOUNT_TTL:-300}
+
+      # EXTRACTOR_FORCE_CPU: Force CPU-only processing even if a GPU is
+      # available. Useful for debugging or resource-constrained environments.
+      # EXTRACTOR_FORCE_CPU: ${EXTRACTOR_FORCE_CPU:-false}
+
+      # --- VLM (Vision Language Model) - optional ---
+      # Enable VLM for complex PDF extraction (diagrams, charts, handwriting).
+      # Requires either a local GPU or a remote vLLM/Ollama server.
+
+      # VLM_MODEL: Which VLM to use. Options:
+      #   - "" (empty, default): VLM disabled
+      #   - "SMOLDOCLING_TRANSFORMERS": Local SmolDocling model (needs GPU)
+      #   - "GRANITEDOCLING_TRANSFORMERS": Local Granite model (needs GPU)
+      #   - "api": Use a remote API endpoint (set VLM_API_URL + VLM_API_MODEL)
+      VLM_MODEL: ${VLM_MODEL:-}
+
+      # VLM_API_URL: vLLM or Ollama endpoint. Only used when VLM_MODEL=api.
+      # Example: http://vllm-server:8000/v1/chat/completions
+      VLM_API_URL: ${VLM_API_URL:-}
+
+      # VLM_API_MODEL: Model name at the remote endpoint.
+      # Example: ds4sd/SmolDocling-256M-preview
+      VLM_API_MODEL: ${VLM_API_MODEL:-}
+
+      # --- OpenAI (optional) ---
+      # Used by MarkItDown for enhanced image descriptions and audio
+      # transcription. Not required for basic document extraction.
+
+      # OPENAI_API_KEY: Your OpenAI API key. When set, MarkItDown uses
+      # GPT to describe images and transcribe audio files.
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+
+      # OPENAI_MODEL: OpenAI model for image/audio processing.
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - neo-network
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # NER Service
+  # ---------------------------------------------------------------------------
+  # Named Entity Recognition using GLiNER2. Receives extracted text from the
+  # worker, returns entities (people, organizations, dates, etc.),
+  # classifications (document type), and structured data. Stateless — no file
+  # or database access needed.
+  ner:
+    image: ghcr.io/netapp/netapp-neo-ner:4.0.2
+    environment:
+      # NER_MODEL_NAME: Hugging Face model ID for GLiNER2. The model is
+      # downloaded on first startup and cached in the container.
+      NER_MODEL_NAME: ${NER_MODEL_NAME:-fastino/gliner2-base-v1}
+
+      # NER_CONFIDENCE_THRESHOLD: Minimum confidence score (0.0-1.0) for
+      # entity extraction. Higher = fewer but more accurate results.
+      NER_CONFIDENCE_THRESHOLD: ${NER_CONFIDENCE_THRESHOLD:-0.7}
+
+      # NER_MAX_TEXT_LENGTH: Maximum characters to analyze per document.
+      # Large documents are chunked (not truncated) for full coverage.
+      # Default: 100000. Automatically capped to NER_CUDA_MAX_TEXT_LENGTH
+      # when running on GPU.
+      NER_MAX_TEXT_LENGTH: ${NER_MAX_TEXT_LENGTH:-100000}
+
+      # NER_DEVICE: Device for model inference. Options:
+      #   - "auto" (default): Auto-detect GPU, fall back to CPU
+      #   - "cuda": Force NVIDIA GPU (fails if unavailable)
+      #   - "cpu": Force CPU-only processing
+      NER_DEVICE: ${NER_DEVICE:-auto}
+
+      # NER_CUDA_MAX_TEXT_LENGTH: Maximum chunk size when running on CUDA.
+      # Prevents GPU out-of-memory errors. Texts larger than this are
+      # automatically chunked with overlap. Default: 25000.
+      NER_CUDA_MAX_TEXT_LENGTH: ${NER_CUDA_MAX_TEXT_LENGTH:-25000}
+
+      # NER_CHUNK_OVERLAP: Character overlap between chunks when splitting
+      # large documents. Ensures entities at chunk boundaries are captured.
+      # Default: 500.
+      NER_CHUNK_OVERLAP: ${NER_CHUNK_OVERLAP:-500}
+
+      # NER_LOG_LEVEL: Logging verbosity.
+      # NER_LOG_LEVEL: ${NER_LOG_LEVEL:-INFO}
+
+      # TOKENIZERS_PARALLELISM: Disable HuggingFace tokenizer parallelism
+      # to prevent deadlocks during model loading in async/container contexts.
+      TOKENIZERS_PARALLELISM: "false"
+
+    # --- GPU Acceleration (NVIDIA) ---
+    # Uncomment the deploy section below to expose an NVIDIA GPU.
+    # Requires: nvidia-container-toolkit installed on the host.
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+    # --- GPU Acceleration (AMD ROCm) ---
+    # For AMD GPUs, use device passthrough instead of deploy.
+    # Set NER_DEVICE=cuda (ROCm uses the CUDA compatibility layer).
+    # Requires: ROCm drivers installed on the host.
+    # devices:
+    #   - /dev/kfd:/dev/kfd
+    #   - /dev/dri:/dev/dri
+    # group_add:
+    #   - video
+    #   - render
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 180s  # GLiNER2 model loading on CUDA takes ~2 min
+    networks:
+      - neo-network
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Worker Service
+  # ---------------------------------------------------------------------------
+  # Background processing: SMB file crawling, content extraction orchestration,
+  # Microsoft Graph upload, ACL resolution, and NER orchestration. Delegates
+  # extraction to the extractor service and NER to the NER service.
+  worker:
+    image: ghcr.io/netapp/netapp-neo-worker:4.0.2
+    cap_add:
+      - SYS_ADMIN
+      - DAC_READ_SEARCH
+    security_opt:
+      - apparmor:unconfined
+    environment:
+      # -----------------------------------------------------------------------
+      # Database
+      # -----------------------------------------------------------------------
+      DATABASE_URL: postgresql://${POSTGRES_USER:-neo}:${POSTGRES_PASSWORD:-neo_password}@postgres:5432/${POSTGRES_DB:-neo_connector}
+
+      # -----------------------------------------------------------------------
+      # External service URLs
+      # -----------------------------------------------------------------------
+
+      # EXTRACTOR_SERVICE_URL: URL of the extractor service. The worker sends
+      # document extraction requests here instead of extracting locally.
+      EXTRACTOR_SERVICE_URL: http://extractor:8000
+
+      # NER_SERVICE_URL: URL of the NER service. The worker sends extracted
+      # text here for entity recognition instead of running GLiNER2 locally.
+      NER_SERVICE_URL: http://ner:8000
+
+      # -----------------------------------------------------------------------
+      # Worker concurrency
+      # -----------------------------------------------------------------------
+
+      # NUM_UPLOAD_WORKERS: Concurrent threads uploading to Microsoft Graph.
+      # More workers = faster upload, but higher API rate limit pressure.
+      NUM_UPLOAD_WORKERS: ${NUM_UPLOAD_WORKERS:-3}
+
+      # NUM_EXTRACTION_WORKERS: Concurrent threads sending extraction requests.
+      # Each thread handles one file at a time to the extractor service.
+      NUM_EXTRACTION_WORKERS: ${NUM_EXTRACTION_WORKERS:-2}
+
+      # NUM_ACL_RESOLUTION_WORKERS: Concurrent threads resolving SMB ACLs
+      # to Microsoft Entra identities. Requires smbcacls + domain connectivity.
+      NUM_ACL_RESOLUTION_WORKERS: ${NUM_ACL_RESOLUTION_WORKERS:-2}
+
+      # NUM_NER_WORKERS: Concurrent threads sending NER requests.
+      NUM_NER_WORKERS: ${NUM_NER_WORKERS:-1}
+
+      # MAX_NER_CONCURRENT_WORK: Maximum concurrent NER work items per
+      # worker. GPU inference serializes internally, so concurrency >1
+      # only adds latency and VRAM pressure without throughput gain.
+      # Default: 1.
+      MAX_NER_CONCURRENT_WORK: ${MAX_NER_CONCURRENT_WORK:-1}
+
+      # -----------------------------------------------------------------------
+      # Microsoft Graph
+      # -----------------------------------------------------------------------
+      MS_GRAPH_TENANT_ID: ${MS_GRAPH_TENANT_ID:-}
+      MS_GRAPH_CLIENT_ID: ${MS_GRAPH_CLIENT_ID:-}
+      MS_GRAPH_CLIENT_SECRET: ${MS_GRAPH_CLIENT_SECRET:-}
+      MS_GRAPH_CONNECTOR_ID: ${MS_GRAPH_CONNECTOR_ID:-netappneo}
+
+      # -----------------------------------------------------------------------
+      # License & Security
+      # -----------------------------------------------------------------------
+      NETAPP_CONNECTOR_LICENSE: ${NETAPP_CONNECTOR_LICENSE:-}
+      CONNECTOR_ID: ${CONNECTOR_ID:-netappneo}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
+
+      # -----------------------------------------------------------------------
+      # ACL behavior
+      # -----------------------------------------------------------------------
+
+      # ACL_STRICT_MODE: Controls what happens when file ACLs can't be
+      # resolved to Microsoft Entra identities.
+      #   true (default): Skip the file — prevents accidental data exposure
+      #   false: Fall back to tenant-wide access (everyone can see the file)
+      ACL_STRICT_MODE: ${ACL_STRICT_MODE:-true}
+
+      # -----------------------------------------------------------------------
+      # Graph API tuning (optional)
+      # -----------------------------------------------------------------------
+
+      # GRAPH_RATE_LIMIT: Max Graph API requests per second. Microsoft's
+      # default throttling limit is ~25 req/s per connector.
+      # GRAPH_RATE_LIMIT: ${GRAPH_RATE_LIMIT:-25.0}
+
+      # GRAPH_API_MAX_RETRIES: How many times to retry failed Graph API calls.
+      # GRAPH_API_MAX_RETRIES: ${GRAPH_API_MAX_RETRIES:-3}
+
+      # -----------------------------------------------------------------------
+      # Crawling tuning (optional)
+      # -----------------------------------------------------------------------
+
+      # FILE_BATCH_SIZE: Number of files processed per enumeration batch.
+      # Higher = more memory, lower = more database round-trips.
+      # FILE_BATCH_SIZE: ${FILE_BATCH_SIZE:-1000}
+
+      # MAX_ENUMERATION_WORKERS: Parallel threads for directory enumeration.
+      # Higher = faster crawling, but more SMB connections.
+      # MAX_ENUMERATION_WORKERS: ${MAX_ENUMERATION_WORKERS:-4}
+
+      # ENUMERATION_TIMEOUT: Max seconds for a full crawl before timeout.
+      # Default: 3600 (1 hour).
+      # ENUMERATION_TIMEOUT: ${ENUMERATION_TIMEOUT:-3600}
+
+      # -----------------------------------------------------------------------
+      # SSL / Proxy (optional, same as API)
+      # -----------------------------------------------------------------------
+      # HTTPS_PROXY: ${HTTPS_PROXY:-}
+      # GRAPH_CA_BUNDLE: ${GRAPH_CA_BUNDLE:-}
+      # GRAPH_VERIFY_SSL: ${GRAPH_VERIFY_SSL:-true}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      extractor:
+        condition: service_healthy
+      ner:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - neo-network
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Neo UI (Web Management Console)
+  # ---------------------------------------------------------------------------
+  # Browser-based management console for configuring shares, monitoring
+  # crawls, and managing the connector. Connects to the API service.
+  neoui:
+    image: ghcr.io/beezy-dev/neo-ui-framework:3.2.2
+    container_name: neoui
+    ports:
+      - "8081:80"
+    environment:
+      # NEO_API: URL of the API service. The UI proxies all requests here.
+      NEO_API: http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - neo-network
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Nginx Load Balancer (optional)
+  # ---------------------------------------------------------------------------
+  # Only starts when using the "with-lb" profile:
+  #   docker compose --profile with-lb up -d
+  #
+  # Requires nginx.conf and (optionally) certs/ in the project root.
+  nginx:
+    image: nginx:alpine
+    container_name: neo-lb
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - api
+    networks:
+      - neo-network
+    restart: unless-stopped
+    profiles:
+      - with-lb
+
+# =============================================================================
+# Volumes & Networks
+# =============================================================================
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  neo-network:
+    driver: bridge

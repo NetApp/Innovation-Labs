@@ -1,25 +1,47 @@
-## NetApp Neo v4 Settings
-## Copy this file to .env and modify as needed.
+# =============================================================================
+# NetApp Project Neo v4 - .env Example
+# =============================================================================
+#
+# Copy this file as .env in the same directory as the docker-compose.yaml
+
+# =============================================================================
+## MUST BE CONFIGURED PARAMETERS
+# =============================================================================
+# Neo container image versioning
+NEO_VERSION=4.0.3p7
+NUI_VERSION=3.2.2
 
 ## Database Settings (required)
+# Modify accordingly to your preferences
+# CAN NOT BE MODIFIED AFTER FIRST RUN.
+POSTGRES_HNAME=postgres
 POSTGRES_USER=neo
 POSTGRES_PASSWORD=neo_password
 POSTGRES_DB=neo_connector
+POSTGRES_PORT=5432
 
-## Constructed DATABASE_URL (used by all services)
-DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-
-## License (required - obtain from NetApp)
+# =============================================================================
+## OPTIONAL PARAMETERS
+# =============================================================================
+# License key for the connector. 
+# Can be configured via API at /api/v1/setup/license after deployment.
 # NETAPP_CONNECTOR_LICENSE=your-license-key
 
 ## Authentication
-## JWT_SECRET_KEY is auto-generated and stored in the database if not set.
-## Only set this to override the database-stored key.
+# JWT_SECRET_KEY: Secret key for signing JWT access tokens. Auto-generated and stored in the database if not set. All services sharing the same database will use the same key automatically. 
+# Only set this if you need to override the database-stored key.
 # JWT_SECRET_KEY=
+
+# ACCESS_TOKEN_EXPIRE_MINUTES: How long JWT tokens remain valid.
+# Default: 1440 (24 hours).
 # ACCESS_TOKEN_EXPIRE_MINUTES=1440
 
 ## Encryption
-## ENCRYPTION_KEY is auto-generated and stored in the database if not set.
+# ENCRYPTION_KEY: Fernet key for encrypting sensitive data (SMB
+# passwords). Auto-generated and stored in the database on first
+# startup if not set. All services sharing the same database will
+# retrieve the same key automatically. Only set this to override
+# the database-stored key.
 # ENCRYPTION_KEY=
 
 ## Microsoft Graph (optional - for M365 Copilot integration)
@@ -49,3 +71,13 @@ DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${
 ## Extractor Settings
 # EXTRACTOR_LOG_LEVEL=INFO
 # EXTRACTOR_DEFAULT_PIPELINE=markitdown
+
+# =============================================================================
+## ONLY CHANGE IF INSTRUCTED BY NETAPP SUPPORT
+# =============================================================================
+# License Connector Identifier.
+# Default: netappneo. Only change if instructed by NetApp support.
+CONNECTOR_ID=netappneo
+
+## Constructed DATABASE_URL (used by all services)
+DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HNAME}:${POSTGRES_PORT}/${POSTGRES_DB}

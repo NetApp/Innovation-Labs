@@ -3,12 +3,13 @@
 
 This guide walks through deploying NetApp Project Neo v4 using Docker or Podman Compose. The deployment includes six services:
 
-- **postgres** -- PostgreSQL 17 shared database
-- **api** -- FastAPI service (HTTP API + MCP transport) on port 8000
-- **worker** -- Background processing (crawling, upload, NER orchestration)
-- **extractor** -- Content extraction (MarkItDown, Docling, VLM)
-- **ner** -- GLiNER2 Named Entity Recognition
-- **neoui** -- Web management console on port 8081
+- `postgres` -- PostgreSQL 17 shared database
+- `api` -- FastAPI service (HTTP API + MCP transport) on port `8000`
+- `worker` -- Background processing (crawling, upload, NER orchestration)
+- `extractor` -- Content extraction (MarkItDown, Docling, VLM)
+- `ner` -- GLiNER2 Named Entity Recognition
+- `neoui` -- Web management console on port `8081`
+- `nginx` -- An optional load balancer for scaled deployment
 
 ## Prerequisites
 
@@ -20,57 +21,56 @@ This guide walks through deploying NetApp Project Neo v4 using Docker or Podman 
 ::: details Podman
 - Podman installed on your system. You can download Podman from the [official Podman website](https://podman.io/getting-started/installation).
 - Podman Compose installed. You can install it using the [Podman Compose installation instructions](https://github.com/containers/podman-compose).
+- Linux distribution, like RHEL-based, might not deploy all the podman packages for advanced networking configuration such as `podman-plugins` and `containernetworking-plugins`.
+
+> [!WARNING]
+> The main difference between ```docker``` and ```podman``` is that ```podman``` requires a ```sudo``` prefix for privileged containers. Docker's daemon already runs containers in a privileged mode.
 :::
 
 - Sufficient system resources to run NetApp Neo. Refer to the [Sizing Guide](/projects/neo/core/d-sizing.md) in the Deployment section for recommended specifications.
 - ```cifs-utils``` package deployed on the Linux host (required for SMB share mounting by the extractor service).
 - ```SELinux``` contexts may require adjustments based on your specific Linux host security profile.
 
-> [!WARNING]
-> The main difference between ```docker``` and ```podman``` is that ```podman``` requires a ```sudo``` prefix for privileged containers. Docker's daemon already runs containers in a privileged mode.
-
 ## Deployment Guide
 
-### Download the compose file
-
-Download ```docker-compose.yml``` from the [latest GitHub release](https://github.com/NetApp/Innovation-Labs/releases) into a directory of your choice:
-
-::: code-group
-
-```BASH [Docker]
-mkdir neo && cd neo
-# Download docker-compose.yml from the latest release
-curl -LO https://github.com/NetApp/Innovation-Labs/releases/latest/download/docker-compose.yml
-```
-
-```BASH [Podman]
-mkdir neo && cd neo
-# Download docker-compose.yml from the latest release
-curl -LO https://github.com/NetApp/Innovation-Labs/releases/latest/download/docker-compose.yml
-```
-:::
-
 > [!TIP]
-> A comprehensive [`docker-compose.example.yml`](/projects/neo/examples/docker-compose.example.yml) is also available with full inline documentation for every environment variable, GPU configuration options, and an optional nginx load balancer service. To use the load balancer profile: `docker compose --profile with-lb up -d`
+> Both `docker-compose.yml` and `.env` files provides a comprehensive inline documentation for every environment variable, GPU configuration options.
 
-### Environment variables (optional)
+### Docker Compose file
 
-Neo can be fully configured after startup via the UI or API. However, if you prefer to pre-configure settings, create a ```.env``` file in the same directory as your compose file:
+<!-- Download ```docker-compose.yml``` from the [latest GitHub release](https://github.com/NetApp/Innovation-Labs/releases) into a directory of your choice: -->
+
+Create a directory, e.g., `neov4`
+```BASH
+mkdir neov4 && cd neov4
+``` 
+
+The following Docker Compose file can be copied as `docker-compose.yaml`   
+
+<<< ../examples/docker-compose.example.yaml 
+
+### Environment file (`.env`)
+
+Aside from the versioning and database paramters, Neo services can be configured after startup either via the UI or the API. Here are the parameters to be modified from the example `.env` file:
 
 ```bash
-# Database credentials (defaults shown)
+# Neo container image versioning
+NEO_VERSION=4.0.3p7
+NUI_VERSION=3.2.2
+
+## Database Settings (required)
+# Modify accordingly to your preferences
+# CAN NOT BE MODIFIED AFTER FIRST RUN.
+POSTGRES_HNAME=postgres
 POSTGRES_USER=neo
 POSTGRES_PASSWORD=neo_password
 POSTGRES_DB=neo_connector
-
-# License key (can also be set via UI/API during setup)
-NETAPP_CONNECTOR_LICENSE=
-
-# Microsoft Graph integration (optional)
-MS_GRAPH_TENANT_ID=
-MS_GRAPH_CLIENT_ID=
-MS_GRAPH_CLIENT_SECRET=
+POSTGRES_PORT=5432
 ```
+
+Once you have the above parameters squared out, copy this `.env` file in the same directory where you have created the `docker-compose.yaml` file, and modify the versioning and database parameters accordingly to your preferences:
+
+<<< ../examples/env 
 
 > [!TIP]
 > The usage of [Docker/Podman Secrets](https://docs.docker.com/compose/how-tos/use-secrets/) is recommended for production deployments to avoid storing credentials in plain text.
@@ -80,7 +80,7 @@ MS_GRAPH_CLIENT_SECRET=
 ::: code-group
 
 ```BASH [Docker]
-docker compose up -d
+docker compose up -d --build
 docker compose ps
 
 Expected output:
@@ -97,7 +97,7 @@ docker compose logs -f
 ```
 
 ```BASH [Podman]
-sudo podman compose up -d
+sudo podman compose up -d --build
 sudo podman compose ps
 
 Expected output:

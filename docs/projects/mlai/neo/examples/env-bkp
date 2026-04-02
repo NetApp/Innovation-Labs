@@ -1,0 +1,51 @@
+## NetApp Neo v4 Settings
+## Copy this file to .env and modify as needed.
+
+## Database Settings (required)
+POSTGRES_USER=neo
+POSTGRES_PASSWORD=neo_password
+POSTGRES_DB=neo_connector
+
+## Constructed DATABASE_URL (used by all services)
+DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+
+## License (required - obtain from NetApp)
+# NETAPP_CONNECTOR_LICENSE=your-license-key
+
+## Authentication
+## JWT_SECRET_KEY is auto-generated and stored in the database if not set.
+## Only set this to override the database-stored key.
+# JWT_SECRET_KEY=
+# ACCESS_TOKEN_EXPIRE_MINUTES=1440
+
+## Encryption
+## ENCRYPTION_KEY is auto-generated and stored in the database if not set.
+# ENCRYPTION_KEY=
+
+## Microsoft Graph (optional - for M365 Copilot integration)
+# MS_GRAPH_TENANT_ID=
+# MS_GRAPH_CLIENT_ID=
+# MS_GRAPH_CLIENT_SECRET=
+# MS_GRAPH_CONNECTOR_ID=netappneo
+
+## MCP OAuth (optional - for securing MCP endpoints)
+# MCP_OAUTH_ENABLED=false
+# MCP_OAUTH_TENANT_ID=
+# MCP_OAUTH_CLIENT_ID=
+
+## MCP API Key (optional - alternative to OAuth for MCP)
+# MCP_API_KEY=
+
+## Worker Concurrency
+# NUM_UPLOAD_WORKERS=3
+# NUM_EXTRACTION_WORKERS=2
+# NUM_ACL_RESOLUTION_WORKERS=2
+# NUM_NER_WORKERS=1
+
+## NER Settings
+# NER_CONFIDENCE_THRESHOLD=0.7
+# NER_DEVICE=auto
+
+## Extractor Settings
+# EXTRACTOR_LOG_LEVEL=INFO
+# EXTRACTOR_DEFAULT_PIPELINE=markitdown
