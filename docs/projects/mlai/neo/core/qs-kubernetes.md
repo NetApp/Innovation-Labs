@@ -71,11 +71,12 @@ There are two primary methods for installing the chart: using command-line flags
 
 ```sh
 helm install netapp-neo innovation-labs/netapp-neo \
-  --namespace netapp-neo \
+  --namespace netapp-neo --create-namespace\
   --create-namespace \
   --set postgresql.enabled=true \
   --set postgresql.auth.password="your-secure-password" \
-  --set postgresql.auth.database="neo_connector"
+  --set postgresql.auth.username="neo-username" \ 
+  --set postgresql.auth.database="neo-database" \
 ```
 
 </details>
