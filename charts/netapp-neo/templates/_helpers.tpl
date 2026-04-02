@@ -90,9 +90,9 @@ Only useful when postgresql.enabled is true.
     - -c
     - |
       until pg_isready \
-        -h {{ include "netapp-neo.fullname" . }}-postgres 
-        -p {{ .Values.postgresql.service.port }} 
-        -U {{ .Values.postgresql.auth.username }}
+        -h {{ include "netapp-neo.fullname" . }}-postgres \
+        -p {{ .Values.postgresql.service.port }} \
+        -U {{ .Values.postgresql.auth.username }} \
         -d {{ .Values.postgresql.auth.database }}; do
         echo "Waiting for PostgreSQL…"
         sleep 2
