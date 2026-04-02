@@ -131,6 +131,18 @@ entries:
     urls:
     - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-connector-25.11.1/netapp-connector-25.11.1.tgz
     version: 25.11.1
+  netapp-neo:
+  - apiVersion: v2
+    appVersion: 4.0.3p7
+    created: "2026-04-02T10:13:40.189297Z"
+    description: NetApp Neo v4.x — context lake microservice architecture for AI services
+      via MCP service
+    digest: 8d24ad45def23d2156010df04f8ce283786b8e2c7f9abdf1e9a3ab188abcfb02
+    name: netapp-neo
+    type: application
+    urls:
+    - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-neo-26.3.1/netapp-neo-26.3.1.tgz
+    version: 26.3.1
   netapp-openshift-console-protect:
   - apiVersion: v2
     appVersion: 26.2.1
@@ -205,4 +217,4 @@ entries:
     urls:
     - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-openshift-console-trident-25.9.19/netapp-openshift-console-trident-25.9.19.tgz
     version: 25.9.19
-generated: "2026-03-12T11:30:32.589182833Z"
+generated: "2026-04-02T10:13:40.18937752Z"
