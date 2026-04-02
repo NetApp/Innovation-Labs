@@ -51,7 +51,7 @@ Otherwise uses postgresql.externalDatabaseUrl.
 */}}
 {{- define "netapp-neo.databaseUrl" -}}
 {{- if .Values.postgresql.enabled -}}
-postgresql://{{ .Values.postgresql.auth.username }}:{{ .Values.postgresql.auth.password }}@{{ include "netapp-neo.fullname" . }}-postgres:{{ .Values.postgresql.service.port }}/{{ .Values.postgresql.auth.database }}
+postgresql://{{ .Values.postgresql.auth.username | urlquery }}:{{ .Values.postgresql.auth.password | urlquery }}@{{ include "netapp-neo.fullname" . }}-postgres:{{ .Values.postgresql.service.port }}/{{ .Values.postgresql.auth.database | urlquery }}
 {{- else -}}
 {{ .Values.postgresql.externalDatabaseUrl }}
 {{- end -}}
