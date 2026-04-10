@@ -66,9 +66,9 @@ extractor:
   env:
     # Extraction
     EXTRACTOR_LOG_LEVEL: "INFO"
-    EXTRACTOR_DEFAULT_PIPELINE: ""
-    EXTRACTOR_MOUNT_TTL: ""
-    EXTRACTOR_FORCE_CPU: ""
+    EXTRACTOR_DEFAULT_PIPELINE: "markitdown"
+    # EXTRACTOR_MOUNT_TTL: ""
+    # EXTRACTOR_FORCE_CPU: ""
 
 # =============================================================================
 # NER Service
