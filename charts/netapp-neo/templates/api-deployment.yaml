@@ -24,6 +24,9 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       {{- if .Values.postgresql.enabled }}
       initContainers:
         {{- include "netapp-neo.waitForDb" . | nindent 8 }}
@@ -45,6 +48,14 @@ spec:
                 secretKeyRef:
                   name: {{ include "netapp-neo.fullname" . }}-db
                   key: DATABASE_URL
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+                - ALL
           {{- with .Values.api.resources }}
           resources:
             {{- toYaml . | nindent 12 }}

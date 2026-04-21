@@ -85,6 +85,14 @@ Only useful when postgresql.enabled is true.
 {{- define "netapp-neo.waitForDb" -}}
 - name: wait-for-db
   image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
   command:
     - sh
     - -c

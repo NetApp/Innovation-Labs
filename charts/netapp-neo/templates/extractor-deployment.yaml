@@ -20,6 +20,10 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       {{- if .Values.postgresql.enabled }}
       initContainers:
         {{- include "netapp-neo.waitForDb" . | nindent 8 }}
@@ -39,7 +43,13 @@ spec:
                   name: {{ include "netapp-neo.fullname" . }}-db
                   key: DATABASE_URL
           securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
             privileged: true
+            allowPrivilegeEscalation: true
+            runAsNonRoot: false
+            appArmorProfile:
+              type: Unconfined
           {{- with .Values.extractor.resources }}
           resources:
             {{- toYaml . | nindent 12 }}

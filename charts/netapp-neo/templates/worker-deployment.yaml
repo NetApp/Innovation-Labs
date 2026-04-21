@@ -6,8 +6,6 @@ metadata:
   labels:
     {{- include "netapp-neo.labels" . | nindent 4 }}
     app.kubernetes.io/component: worker
-  annotations:
-    container.apparmor.security.beta.kubernetes.io/worker: unconfined
 spec:
   replicas: {{ .Values.worker.replicaCount }}
   selector:
@@ -17,8 +15,6 @@ spec:
     metadata:
       labels:
         {{- include "netapp-neo.selectorLabels" (dict "context" . "component" "worker") | nindent 8 }}
-      annotations:
-        container.apparmor.security.beta.kubernetes.io/worker: unconfined
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -47,6 +43,10 @@ spec:
                   name: {{ include "netapp-neo.fullname" . }}-db
                   key: DATABASE_URL
           securityContext:
+            allowPrivilegeEscalation: true
+            runAsNonRoot: false
+            appArmorProfile:
+              type: Unconfined
             capabilities:
               add:
                 - SYS_ADMIN

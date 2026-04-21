@@ -84,7 +84,7 @@ ui:
   replicaCount: 1
   image:
     repository: ghcr.io/netapp/neo-ui-framework
-    tag: "4.0.0"
+    tag: "v4.0.0"
     pullPolicy: Always
   service:
     type: ClusterIP
@@ -98,6 +98,7 @@ ui:
     annotations: {}
     tls: []
   resources: {}
+  securityContext: {}
 
 # =============================================================================
 # PostgreSQL
@@ -123,5 +124,6 @@ postgresql:
     size: 8Gi
     annotations: {}
   resources: {}
+  securityContext: {}
   # When postgresql.enabled is false, set this to your external DB URL
   externalDatabaseUrl: ""
