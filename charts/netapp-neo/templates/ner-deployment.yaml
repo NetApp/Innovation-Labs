@@ -1,3 +1,4 @@
+{{- if .Values.ner.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -64,3 +65,4 @@ spec:
             timeoutSeconds: 10
             failureThreshold: 5
       restartPolicy: Always
+{{- end }}

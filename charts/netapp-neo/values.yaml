@@ -3,9 +3,8 @@
 nameOverride: ""
 # -- Image pull secrets (shared across all services)
 imagePullSecrets: []
-# =============================================================================
+
 # API Service
-# =============================================================================
 api:
   replicaCount: 1
   image:
@@ -24,14 +23,17 @@ api:
     className:
     annotations: {}
     tls: []
-  resources: {}
-
-
-# =============================================================================
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "2000m"
+      memory: "2Gi"
+      
 # Worker Service
-# =============================================================================
 worker:
-  replicaCount: 1
+  replicaCount: 2
   image:
     repository: ghcr.io/netapp/netapp-neo-worker
     tag: ""
@@ -39,20 +41,15 @@ worker:
   service:
     type: ClusterIP
     port: 8000
-  resources: {}
-  env:
-    # Concurrency
-    NUM_UPLOAD_WORKERS: "3"
-    NUM_EXTRACTION_WORKERS: "2"
-    NUM_ACL_RESOLUTION_WORKERS: "2"
-    NUM_NER_WORKERS: "1"
-    MAX_NER_CONCURRENT_WORK: "1"
-    # ACL
-    ACL_STRICT_MODE: "true"
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "2000m"
+      memory: "2Gi"
 
-# =============================================================================
 # Extractor Service
-# =============================================================================
 extractor:
   replicaCount: 1
   image:
@@ -63,17 +60,10 @@ extractor:
     type: ClusterIP
     port: 8000
   resources: {}
-  env:
-    # Extraction
-    EXTRACTOR_LOG_LEVEL: "INFO"
-    EXTRACTOR_DEFAULT_PIPELINE: "markitdown"
-    # EXTRACTOR_MOUNT_TTL: ""
-    # EXTRACTOR_FORCE_CPU: ""
 
-# =============================================================================
 # NER Service
-# =============================================================================
 ner:
+  enabled: false
   replicaCount: 1
   image:
     repository: ghcr.io/netapp/netapp-neo-ner
@@ -83,28 +73,18 @@ ner:
     type: ClusterIP
     port: 8000
   resources: {}
-  env:
-    NER_MODEL_NAME: "fastino/gliner2-base-v1"
-    NER_CONFIDENCE_THRESHOLD: "0.7"
-    NER_MAX_TEXT_LENGTH: "100000"
-    NER_DEVICE: "auto"
-    NER_CUDA_MAX_TEXT_LENGTH: "25000"
-    NER_CHUNK_OVERLAP: "500"
-    TOKENIZERS_PARALLELISM: "false"
   gpu:
     enabled: false
     count: 1
   nodeSelector: {}
   tolerations: []
 
-# =============================================================================
 # UI Service
-# =============================================================================
 ui:
   replicaCount: 1
   image:
-    repository: ghcr.io/beezy-dev/neo-ui-framework
-    tag: "3.2.2"
+    repository: ghcr.io/netapp/neo-ui-framework
+    tag: "4.0.0"
     pullPolicy: Always
   service:
     type: ClusterIP

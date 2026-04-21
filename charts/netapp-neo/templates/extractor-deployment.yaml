@@ -32,9 +32,6 @@ spec:
             - name: http
               containerPort: {{ .Values.extractor.service.port }}
               protocol: TCP
-          envFrom:
-            - configMapRef:
-                name: {{ include "netapp-neo.fullname" . }}-extractor
           env:
             - name: DATABASE_URL
               valueFrom:

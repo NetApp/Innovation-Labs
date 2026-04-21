@@ -2,5 +2,7 @@ apiVersion: v2
 name: netapp-neo
 description: NetApp Neo v4.x — context lake microservice architecture for AI services via MCP service
 type: application
-version: 26.4.1
-appVersion: "4.0.3p10"
+keywords: ["NetApp", "Neo", "MCP", "AI", "context lake"]
+home: "https://netapp.github.io/Innovation-Labs/"
+version: 26.4.2
+appVersion: "4.1.0"

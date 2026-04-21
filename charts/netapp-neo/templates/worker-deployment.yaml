@@ -40,9 +40,6 @@ spec:
             - name: http
               containerPort: {{ .Values.worker.service.port }}
               protocol: TCP
-          envFrom:
-            - configMapRef:
-                name: {{ include "netapp-neo.fullname" . }}-worker
           env:
             - name: DATABASE_URL
               valueFrom:
