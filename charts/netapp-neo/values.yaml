@@ -27,7 +27,17 @@ api:
     className:
     annotations: {}
     tls: []
-  resources: {}
+  # Defaults sized for medium deployments (≤ 100 M files / ≤ 100 shares).
+  # For multi-billion-file deployments, override limits.memory to 8Gi+ and
+  # see the PERFORMANCE_TUNING_GUIDE — cross-share endpoints can build large
+  # responses in memory.
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "2"
+      memory: "4Gi"
   env:
     # JWT
     JWT_SECRET_KEY: ""
