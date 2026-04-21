@@ -18,10 +18,26 @@ spec:
       labels:
         {{- include "netapp-neo.selectorLabels" (dict "context" . "component" "postgres") | nindent 8 }}
     spec:
+      {{- with .Values.postgresql.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.postgresql.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: postgres
           image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
           imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
+          {{- with .Values.postgresql.extraArgs }}
+          args:
+            - postgres
+            {{- range . }}
+            - "-c"
+            - {{ . | quote }}
+            {{- end }}
+          {{- end }}
           ports:
             - name: postgres
               containerPort: 5432

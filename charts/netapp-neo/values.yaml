@@ -198,5 +198,17 @@ postgresql:
     size: 8Gi
     annotations: {}
   resources: {}
+  # Pin postgres to a specific node when its PVC is on local-path / hostpath
+  # storage. Leave empty to let the scheduler decide.
+  nodeSelector: {}
+  tolerations: []
+  # Postgres command-line tuning passed via -c. Defaults set the safety net
+  # against share-creation-blocking-on-readers (see EVIDENCE F10):
+  #   idle_in_transaction_session_timeout=60s caps how long a transaction can
+  #   sit idle while still holding locks; auto-aborts and releases its locks
+  #   after the timeout. Without it a stuck client can block partition creates
+  #   for any new share indefinitely.
+  extraArgs:
+    - "idle_in_transaction_session_timeout=60s"
   # When postgresql.enabled is false, set this to your external DB URL
   externalDatabaseUrl: ""
