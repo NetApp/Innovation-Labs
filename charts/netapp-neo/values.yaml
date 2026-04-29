@@ -9,6 +9,16 @@ openshift:
   restrictedV2:
     # Mandatory for this chart in OpenShift.
     enabled: true
+  api:
+    serviceAccount:
+      create: true
+      name: ""
+      annotations: {}
+  ui:
+    serviceAccount:
+      create: true
+      name: ""
+      annotations: {}
   privilegedWorkloads:
     worker:
       # Mandatory: worker mounts filesystems and needs privileged exception mode.
@@ -157,9 +167,9 @@ postgresql:
     tag: "17-alpine"
     pullPolicy: IfNotPresent
   auth:
-    username: 
-    password: 
-    database: 
+    username: "neouser"
+    password: "neopassword"
+    database: "neodb"
   service:
     type: ClusterIP
     port: 5432

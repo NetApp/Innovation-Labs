@@ -9,6 +9,22 @@
 openshift:
   restrictedV2:
     enabled: true
+  api:
+    serviceAccount:
+      create: true
+      # If create=false, service account must already exist in the namespace.
+      # Leave empty to use generated name:
+      # <release>-netapp-neo-api
+      name: ""
+      annotations: {}
+  ui:
+    serviceAccount:
+      create: true
+      # If create=false, service account must already exist in the namespace.
+      # Leave empty to use generated name:
+      # <release>-netapp-neo-ui
+      name: ""
+      annotations: {}
   privilegedWorkloads:
     worker:
       enabled: true

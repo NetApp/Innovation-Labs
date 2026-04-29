@@ -57,8 +57,10 @@ Companion values file:
 
 ## 3. Bind SCC for Privileged Exception Service Accounts
 
-In this mode, the chart creates dedicated service accounts:
+In this mode, the chart creates service accounts:
 
+- `netapp-neo-netapp-neo-api`
+- `netapp-neo-netapp-neo-ui`
 - `netapp-neo-netapp-neo-worker-privileged`
 - `netapp-neo-netapp-neo-extractor-privileged`
 
@@ -76,6 +78,8 @@ oc adm policy add-scc-to-user privileged \
 
 If you set custom service account names in values:
 
+- `openshift.api.serviceAccount.name`
+- `openshift.ui.serviceAccount.name`
 - `openshift.privilegedWorkloads.worker.serviceAccount.name`
 - `openshift.privilegedWorkloads.extractor.serviceAccount.name`
 
@@ -97,9 +101,11 @@ Check pods:
 oc get pods -n neo-poc
 ```
 
-Check service account used by worker/extractor:
+Check service account used by api/ui/worker/extractor:
 
 ```bash
+oc get deploy netapp-neo-netapp-neo-api -n neo-poc -o jsonpath='{.spec.template.spec.serviceAccountName}{"\n"}'
+oc get deploy netapp-neo-netapp-neo-ui -n neo-poc -o jsonpath='{.spec.template.spec.serviceAccountName}{"\n"}'
 oc get deploy netapp-neo-netapp-neo-worker -n neo-poc -o jsonpath='{.spec.template.spec.serviceAccountName}{"\n"}'
 oc get deploy netapp-neo-netapp-neo-extractor -n neo-poc -o jsonpath='{.spec.template.spec.serviceAccountName}{"\n"}'
 ```
@@ -123,7 +129,8 @@ If pods are blocked by SCC:
 - Confirm privileged exception flags are enabled as required.
 - Confirm SCC binding exists for the exact service account names.
 - Confirm namespace in `oc adm policy` matches deployment namespace.
-- Confirm worker/extractor serviceAccountName values in the live deployment match the SAs bound to SCC.
+- Confirm api/ui/worker/extractor serviceAccountName values in the live deployment are the expected service accounts.
+- Confirm worker/extractor service accounts are the ones bound to SCC.
 - Re-run Helm with `--wait --rollback-on-failure` to catch rollout failures clearly.
 
 Example inspection:
@@ -135,5 +142,6 @@ oc describe rs -n neo-poc | grep -E "forbidden|security context constraint|SCC|r
 ## 6. Recommended Operational Practice
 
 - Keep this single enforced mode for OpenShift deployments.
+- Keep API and UI on dedicated non-privileged service accounts.
 - Grant elevated SCC only to `worker` and `extractor` service accounts.
 - Prefer a custom least-privilege SCC over broad `privileged` SCC when feasible.

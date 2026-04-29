@@ -20,6 +20,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ include "netapp-neo.apiServiceAccountName" . }}
       securityContext:
         runAsNonRoot: true
       {{- if .Values.postgresql.enabled }}

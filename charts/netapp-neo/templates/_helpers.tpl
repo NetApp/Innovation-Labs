@@ -121,8 +121,24 @@ Usage: include "netapp-neo.imageTag" (dict "imageTag" .Values.api.image.tag "app
 {{- end -}}
 
 {{/*
-Service account names used by privileged workloads in OpenShift mode.
+Service account names used by workloads in OpenShift mode.
 */}}
+{{- define "netapp-neo.apiServiceAccountName" -}}
+{{- if .Values.openshift.api.serviceAccount.name -}}
+{{- .Values.openshift.api.serviceAccount.name -}}
+{{- else -}}
+{{- printf "%s-api" (include "netapp-neo.fullname" .) -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "netapp-neo.uiServiceAccountName" -}}
+{{- if .Values.openshift.ui.serviceAccount.name -}}
+{{- .Values.openshift.ui.serviceAccount.name -}}
+{{- else -}}
+{{- printf "%s-ui" (include "netapp-neo.fullname" .) -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "netapp-neo.workerPrivilegedServiceAccountName" -}}
 {{- if .Values.openshift.privilegedWorkloads.worker.serviceAccount.name -}}
 {{- .Values.openshift.privilegedWorkloads.worker.serviceAccount.name -}}
