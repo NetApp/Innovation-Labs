@@ -7,12 +7,12 @@ imagePullSecrets: []
 # OpenShift security posture controls.
 openshift:
   restrictedV2:
-    # When true, chart renders restricted-v2-friendly security contexts by default.
+    # Mandatory for this chart in OpenShift.
     enabled: true
   privilegedWorkloads:
     worker:
-      # Enable only when worker must perform privileged mount operations.
-      enabled: false
+      # Mandatory: worker mounts filesystems and needs privileged exception mode.
+      enabled: true
       serviceAccount:
         create: true
         name: ""
@@ -31,8 +31,8 @@ openshift:
             - SYS_ADMIN
             - DAC_READ_SEARCH
     extractor:
-      # Enable only when extractor must perform privileged mount operations.
-      enabled: false
+      # Mandatory: extractor mounts filesystems and needs privileged exception mode.
+      enabled: true
       serviceAccount:
         create: true
         name: ""

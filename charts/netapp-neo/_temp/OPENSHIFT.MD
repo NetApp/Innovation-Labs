@@ -2,8 +2,8 @@
 
 This guide describes how to deploy this chart on OpenShift with the new security model:
 
-- Restricted mode by default (compatible with `restricted-v2` SCC)
-- Explicit privileged exceptions for `worker` and `extractor` only when needed for filesystem mount operations
+- Restricted-v2 baseline for the application
+- Mandatory privileged exceptions for `worker` and `extractor` because they mount filesystems in the pod
 
 ## 1. Prerequisites
 
@@ -16,33 +16,20 @@ This guide describes how to deploy this chart on OpenShift with the new security
 oc project neo-poc
 ```
 
-## 2. Security Modes
+## 2. Deployment Mode
 
-### Mode A: Restricted by default (recommended)
+### Restricted-v2 + privileged exceptions (worker/extractor)
 
-Use this when `worker` and `extractor` do not require elevated mount operations.
+This is the required deployment mode for this application because `worker` and `extractor`
+must mount filesystems inside the pod.
 
-Default chart behavior:
+Required chart behavior:
 
 - `openshift.restrictedV2.enabled=true`
-- `openshift.privilegedWorkloads.worker.enabled=false`
-- `openshift.privilegedWorkloads.extractor.enabled=false`
+- `openshift.privilegedWorkloads.worker.enabled=true`
+- `openshift.privilegedWorkloads.extractor.enabled=true`
 
 Deploy:
-
-```bash
-helm upgrade --install netapp-neo . \
-  -n neo-poc \
-  -f values.yaml \
-  -f _temp/values-openshift-restricted.yaml \
-  --wait --timeout 10m --rollback-on-failure
-```
-
-### Mode B: Restricted + privileged exceptions (worker/extractor)
-
-Use this when `worker` and `extractor` must mount filesystems inside the pod.
-
-Enable exceptions during deploy:
 
 ```bash
 helm upgrade --install netapp-neo . \
@@ -52,14 +39,13 @@ helm upgrade --install netapp-neo . \
   --wait --timeout 10m --rollback-on-failure
 ```
 
-Companion values files:
+Companion values file:
 
-- `_temp/values-openshift-restricted.yaml`
 - `_temp/values-openshift-privileged.yaml`
 
 ## 3. Bind SCC for Privileged Exception Service Accounts
 
-When Mode B is enabled, the chart creates dedicated service accounts:
+In this mode, the chart creates dedicated service accounts:
 
 - `netapp-neo-netapp-neo-worker-privileged`
 - `netapp-neo-netapp-neo-extractor-privileged`
@@ -108,7 +94,7 @@ oc get events -n neo-poc --sort-by=.lastTimestamp | tail -n 50
 
 If pods are blocked by SCC:
 
-- Confirm privileged exception flags were set as expected.
+- Confirm privileged exception flags are enabled as required.
 - Confirm SCC binding exists for the exact service account names.
 - Confirm namespace in `oc adm policy` matches deployment namespace.
 - Re-run Helm with `--wait --rollback-on-failure` to catch rollout failures clearly.

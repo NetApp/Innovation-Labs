@@ -1,0 +1,11 @@
+{{- if not .Values.openshift.restrictedV2.enabled -}}
+{{- fail "openshift.restrictedV2.enabled must be true. This chart supports only restricted-v2 baseline mode on OpenShift." -}}
+{{- end -}}
+
+{{- if not .Values.openshift.privilegedWorkloads.worker.enabled -}}
+{{- fail "openshift.privilegedWorkloads.worker.enabled must be true. Worker always requires privileged exception mode for filesystem mounts." -}}
+{{- end -}}
+
+{{- if not .Values.openshift.privilegedWorkloads.extractor.enabled -}}
+{{- fail "openshift.privilegedWorkloads.extractor.enabled must be true. Extractor always requires privileged exception mode for filesystem mounts." -}}
+{{- end -}}
