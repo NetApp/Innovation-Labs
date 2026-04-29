@@ -1,5 +1,6 @@
 # OpenShift profile with privileged exceptions for worker/extractor.
-# Use only when these workloads must mount filesystems in the pod.
+# This is the required mode for this chart on OpenShift because these workloads mount filesystems in the pod.
+# The three enabled flags below are chart-enforced by templates/validations.yaml.
 # Usage:
 # helm upgrade --install netapp-neo . -n neo-poc -f values.yaml -f _temp/values-openshift-privileged.yaml --wait --timeout 10m --rollback-on-failure
 
@@ -11,6 +12,7 @@ openshift:
       enabled: true
       serviceAccount:
         create: true
+        # If create=false, service account must already exist in the namespace.
         # Leave empty to use generated name:
         # <release>-netapp-neo-worker-privileged
         name: ""
@@ -19,6 +21,7 @@ openshift:
       enabled: true
       serviceAccount:
         create: true
+        # If create=false, service account must already exist in the namespace.
         # Leave empty to use generated name:
         # <release>-netapp-neo-extractor-privileged
         name: ""

@@ -4,6 +4,7 @@ This guide describes how to deploy this chart on OpenShift with the new security
 
 - Restricted-v2 baseline for the application
 - Mandatory privileged exceptions for `worker` and `extractor` because they mount filesystems in the pod
+- Helm validation enforces this mode during render/install
 
 ## 1. Prerequisites
 
@@ -28,6 +29,8 @@ Required chart behavior:
 - `openshift.restrictedV2.enabled=true`
 - `openshift.privilegedWorkloads.worker.enabled=true`
 - `openshift.privilegedWorkloads.extractor.enabled=true`
+
+These are enforced by chart validation. Helm will fail if any are set to `false`.
 
 Deploy:
 
@@ -69,6 +72,8 @@ If you set custom service account names in values:
 
 use those names in the `oc adm policy` commands.
 
+If you set `serviceAccount.create=false`, ensure those service accounts already exist in the namespace.
+
 ## 4. Verify Deployment
 
 Check pods:
@@ -90,6 +95,12 @@ Check events for SCC admission issues:
 oc get events -n neo-poc --sort-by=.lastTimestamp | tail -n 50
 ```
 
+Confirm API deployment does not render forbidden fixed IDs or explicit seccomp:
+
+```bash
+oc get deploy netapp-neo-netapp-neo-api -n neo-poc -o yaml | grep -E "runAsUser|runAsGroup|fsGroup|seccompProfile" -n
+```
+
 ## 5. Troubleshooting
 
 If pods are blocked by SCC:
@@ -97,6 +108,7 @@ If pods are blocked by SCC:
 - Confirm privileged exception flags are enabled as required.
 - Confirm SCC binding exists for the exact service account names.
 - Confirm namespace in `oc adm policy` matches deployment namespace.
+- Confirm worker/extractor serviceAccountName values in the live deployment match the SAs bound to SCC.
 - Re-run Helm with `--wait --rollback-on-failure` to catch rollout failures clearly.
 
 Example inspection:
@@ -107,6 +119,6 @@ oc describe rs -n neo-poc | grep -E "forbidden|security context constraint|SCC|r
 
 ## 6. Recommended Operational Practice
 
-- Keep restricted mode as default.
+- Keep this single enforced mode for OpenShift deployments.
 - Grant elevated SCC only to `worker` and `extractor` service accounts.
 - Prefer a custom least-privilege SCC over broad `privileged` SCC when feasible.

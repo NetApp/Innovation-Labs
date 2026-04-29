@@ -88,8 +88,6 @@ Only useful when postgresql.enabled is true.
   securityContext:
     allowPrivilegeEscalation: false
     runAsNonRoot: true
-    seccompProfile:
-      type: RuntimeDefault
     capabilities:
       drop:
         - ALL
