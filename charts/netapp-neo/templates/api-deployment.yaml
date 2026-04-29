@@ -20,6 +20,12 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.openshift.restrictedV2.enabled }}
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      {{- else }}
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
@@ -27,6 +33,7 @@ spec:
         runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
+      {{- end }}
       {{- if .Values.postgresql.enabled }}
       initContainers:
         {{- include "netapp-neo.waitForDb" . | nindent 8 }}

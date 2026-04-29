@@ -1,0 +1,12 @@
+# OpenShift restricted-v2 profile (recommended default)
+# Usage:
+# helm upgrade --install netapp-neo . -n neo-poc -f values.yaml -f _temp/values-openshift-restricted.yaml --wait --timeout 10m --rollback-on-failure
+
+openshift:
+  restrictedV2:
+    enabled: true
+  privilegedWorkloads:
+    worker:
+      enabled: false
+    extractor:
+      enabled: false

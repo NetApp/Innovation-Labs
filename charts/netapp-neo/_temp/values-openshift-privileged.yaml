@@ -1,0 +1,25 @@
+# OpenShift profile with privileged exceptions for worker/extractor.
+# Use only when these workloads must mount filesystems in the pod.
+# Usage:
+# helm upgrade --install netapp-neo . -n neo-poc -f values.yaml -f _temp/values-openshift-privileged.yaml --wait --timeout 10m --rollback-on-failure
+
+openshift:
+  restrictedV2:
+    enabled: true
+  privilegedWorkloads:
+    worker:
+      enabled: true
+      serviceAccount:
+        create: true
+        # Leave empty to use generated name:
+        # <release>-netapp-neo-worker-privileged
+        name: ""
+        annotations: {}
+    extractor:
+      enabled: true
+      serviceAccount:
+        create: true
+        # Leave empty to use generated name:
+        # <release>-netapp-neo-extractor-privileged
+        name: ""
+        annotations: {}
