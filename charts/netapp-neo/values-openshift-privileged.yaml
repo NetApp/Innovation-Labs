@@ -2,11 +2,10 @@
 # This is the required mode for this chart on OpenShift because these workloads mount filesystems in the pod.
 # The three enabled flags below are chart-enforced by templates/validations.yaml.
 # Usage:
-# git clone --branch fix-scc https://github.com/NetApp/Innovation-Labs.git
-# cd Innovation-Labs/charts/netapp-neo
 # helm upgrade --install netapp-neo . -n neo-poc -f values.yaml -f _temp/values-openshift-privileged.yaml --wait --timeout 10m --rollback-on-failure
 
 openshift:
+  enabled: true
   restrictedV2:
     enabled: true
   api:

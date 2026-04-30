@@ -6,6 +6,8 @@ imagePullSecrets: []
 
 # OpenShift security posture controls.
 openshift:
+  # Enable OpenShift-specific validation and deployment mode enforcement.
+  enabled: false
   restrictedV2:
     # Mandatory for this chart in OpenShift.
     enabled: true
@@ -167,9 +169,9 @@ postgresql:
     tag: "17-alpine"
     pullPolicy: IfNotPresent
   auth:
-    username: "neouser"
-    password: "neopassword"
-    database: "neodb"
+    username: 
+    password: 
+    database: 
   service:
     type: ClusterIP
     port: 5432

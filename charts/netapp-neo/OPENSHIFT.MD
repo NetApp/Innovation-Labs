@@ -11,12 +11,17 @@ This guide describes how to deploy this chart on OpenShift with the new security
 - OpenShift cluster access (`oc`)
 - Helm 3
 - Cluster admin support for SCC binding (required for privileged worker/extractor mode)
-- Target namespace exists, example: `neo-poc`
+- Target namespace exists
+
+Examples used in this guide:
+
+- `<release>` example: `netapp-neo`
+- `<namespace>` example: `neo-poc`
 
 Select your target namespace:
 
 ```bash
-oc project neo-poc
+oc project <namespace>
 ```
 
 Prepare OpenShift values override file:
@@ -24,6 +29,7 @@ Prepare OpenShift values override file:
 ```bash
 cat > values-openshift.yaml <<'EOF'
 openshift:
+  enabled: true
   restrictedV2:
     enabled: true
   api:
@@ -61,6 +67,7 @@ must mount filesystems inside the pod.
 
 Required chart behavior:
 
+- `openshift.enabled=true`
 - `openshift.restrictedV2.enabled=true`
 - `openshift.privilegedWorkloads.worker.enabled=true`
 - `openshift.privilegedWorkloads.extractor.enabled=true`
@@ -70,9 +77,9 @@ These are enforced by chart validation. Helm will fail if any are set to `false`
 Deploy:
 
 ```bash
-helm upgrade --install netapp-neo innovation-labs/netapp-neo \
-  -n neo-poc \
-  -f ./netapp-neo/values.yaml \
+helm upgrade --install <release> innovation-labs/netapp-neo \
+  -n <namespace> \
+  -f ./values.yaml \
   -f ./values-openshift.yaml \
   --wait --timeout 10m --rollback-on-failure
 ```
@@ -81,23 +88,26 @@ If you maintain a platform-specific values file, keep this OpenShift block there
 
 ## 3. Bind SCC for Privileged Exception Service Accounts
 
-In this mode, the chart creates service accounts:
+Service account names are derived from the Helm release name and can also be affected by `fullnameOverride`.
 
-- `netapp-neo-netapp-neo-api`
-- `netapp-neo-netapp-neo-ui`
-- `netapp-neo-netapp-neo-worker-privileged`
-- `netapp-neo-netapp-neo-extractor-privileged`
+In this mode, the chart creates service accounts like:
+
+- `<release>-netapp-neo-api`
+- `<release>-netapp-neo-ui`
+- `<release>-netapp-neo-worker-privileged`
+- `<release>-netapp-neo-extractor-privileged`
 
 Bind an SCC that permits required behavior (example shown with `privileged`; use a narrower custom SCC if possible):
 
 ```bash
+# Replace <release> and namespace with your values.
 oc adm policy add-scc-to-user privileged \
-  -z netapp-neo-netapp-neo-worker-privileged \
-  -n neo-poc
+  -z <release>-netapp-neo-worker-privileged \
+  -n <namespace>
 
 oc adm policy add-scc-to-user privileged \
-  -z netapp-neo-netapp-neo-extractor-privileged \
-  -n neo-poc
+  -z <release>-netapp-neo-extractor-privileged \
+  -n <namespace>
 ```
 
 If you set custom service account names in values:
@@ -116,28 +126,30 @@ If you set `serviceAccount.create=false`, ensure those service accounts already 
 Check pods:
 
 ```bash
-oc get pods -n neo-poc
+oc get pods -n <namespace>
 ```
 
 Check service account used by api/ui/worker/extractor:
 
 ```bash
-oc get deploy netapp-neo-netapp-neo-api -n neo-poc -o jsonpath='{.spec.template.spec.serviceAccountName}{"\n"}'
-oc get deploy netapp-neo-netapp-neo-ui -n neo-poc -o jsonpath='{.spec.template.spec.serviceAccountName}{"\n"}'
-oc get deploy netapp-neo-netapp-neo-worker -n neo-poc -o jsonpath='{.spec.template.spec.serviceAccountName}{"\n"}'
-oc get deploy netapp-neo-netapp-neo-extractor -n neo-poc -o jsonpath='{.spec.template.spec.serviceAccountName}{"\n"}'
+# Replace <release> and namespace with your values.
+oc get deploy <release>-netapp-neo-api -n <namespace> -o jsonpath='{.spec.template.spec.serviceAccountName}{"\n"}'
+oc get deploy <release>-netapp-neo-ui -n <namespace> -o jsonpath='{.spec.template.spec.serviceAccountName}{"\n"}'
+oc get deploy <release>-netapp-neo-worker -n <namespace> -o jsonpath='{.spec.template.spec.serviceAccountName}{"\n"}'
+oc get deploy <release>-netapp-neo-extractor -n <namespace> -o jsonpath='{.spec.template.spec.serviceAccountName}{"\n"}'
 ```
 
 Check events for SCC admission issues:
 
 ```bash
-oc get events -n neo-poc --sort-by=.lastTimestamp | tail -n 50
+oc get events -n <namespace> --sort-by=.lastTimestamp | tail -n 50
 ```
 
 Confirm API deployment does not render forbidden fixed IDs or explicit seccomp:
 
 ```bash
-oc get deploy netapp-neo-netapp-neo-api -n neo-poc -o yaml | grep -E "runAsUser|runAsGroup|fsGroup|seccompProfile" -n
+# Replace <release> and namespace with your values.
+oc get deploy <release>-netapp-neo-api -n <namespace> -o yaml | grep -E "runAsUser|runAsGroup|fsGroup|seccompProfile" -n
 ```
 
 ## 5. Troubleshooting
@@ -154,7 +166,7 @@ If pods are blocked by SCC:
 Example inspection:
 
 ```bash
-oc describe rs -n neo-poc | grep -E "forbidden|security context constraint|SCC|restricted-v2" -i
+oc describe rs -n <namespace> | grep -E "forbidden|security context constraint|SCC|restricted-v2" -i
 ```
 
 ## 6. Recommended Operational Practice
