@@ -1,11 +1,29 @@
+{{- if .Values.openshift.enabled -}}
 {{- if not .Values.openshift.restrictedV2.enabled -}}
-{{- fail "openshift.restrictedV2.enabled must be true. This chart supports only restricted-v2 baseline mode on OpenShift." -}}
+{{- fail "openshift.restrictedV2.enabled must be true when openshift.enabled=true. This chart supports only restricted-v2 baseline mode on OpenShift." -}}
 {{- end -}}
 
 {{- if not .Values.openshift.privilegedWorkloads.worker.enabled -}}
-{{- fail "openshift.privilegedWorkloads.worker.enabled must be true. Worker always requires privileged exception mode for filesystem mounts." -}}
+{{- fail "openshift.privilegedWorkloads.worker.enabled must be true when openshift.enabled=true. Worker always requires privileged exception mode for filesystem mounts." -}}
 {{- end -}}
 
 {{- if not .Values.openshift.privilegedWorkloads.extractor.enabled -}}
-{{- fail "openshift.privilegedWorkloads.extractor.enabled must be true. Extractor always requires privileged exception mode for filesystem mounts." -}}
+{{- fail "openshift.privilegedWorkloads.extractor.enabled must be true when openshift.enabled=true. Extractor always requires privileged exception mode for filesystem mounts." -}}
+{{- end -}}
+{{- end -}}
+
+{{- if and (not .Values.openshift.api.serviceAccount.create) (empty .Values.openshift.api.serviceAccount.name) -}}
+{{- fail "openshift.api.serviceAccount.name must be set when openshift.api.serviceAccount.create=false." -}}
+{{- end -}}
+
+{{- if and (not .Values.openshift.ui.serviceAccount.create) (empty .Values.openshift.ui.serviceAccount.name) -}}
+{{- fail "openshift.ui.serviceAccount.name must be set when openshift.ui.serviceAccount.create=false." -}}
+{{- end -}}
+
+{{- if and .Values.openshift.privilegedWorkloads.worker.enabled (not .Values.openshift.privilegedWorkloads.worker.serviceAccount.create) (empty .Values.openshift.privilegedWorkloads.worker.serviceAccount.name) -}}
+{{- fail "openshift.privilegedWorkloads.worker.serviceAccount.name must be set when openshift.privilegedWorkloads.worker.serviceAccount.create=false." -}}
+{{- end -}}
+
+{{- if and .Values.openshift.privilegedWorkloads.extractor.enabled (not .Values.openshift.privilegedWorkloads.extractor.serviceAccount.create) (empty .Values.openshift.privilegedWorkloads.extractor.serviceAccount.name) -}}
+{{- fail "openshift.privilegedWorkloads.extractor.serviceAccount.name must be set when openshift.privilegedWorkloads.extractor.serviceAccount.create=false." -}}
 {{- end -}}
