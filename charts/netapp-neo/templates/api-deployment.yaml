@@ -20,13 +20,9 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ include "netapp-neo.apiServiceAccountName" . }}
       securityContext:
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
         runAsNonRoot: true
-        seccompProfile:
-          type: RuntimeDefault
       {{- if .Values.postgresql.enabled }}
       initContainers:
         {{- include "netapp-neo.waitForDb" . | nindent 8 }}
@@ -51,8 +47,6 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
-            seccompProfile:
-              type: RuntimeDefault
             capabilities:
               drop:
                 - ALL

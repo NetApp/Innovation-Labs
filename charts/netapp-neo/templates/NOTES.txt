@@ -37,3 +37,17 @@ To access the API locally:
 
 To access the UI locally:
   kubectl -n {{ .Release.Namespace}} port-forward svc/{{ include "netapp-neo.fullname" . }}-ui 8080:{{ .Values.ui.service.port }}
+
+{{- if .Values.openshift.privilegedWorkloads.worker.enabled }}
+
+OpenShift setup required for worker privileged mode:
+  - Bind an SCC that allows the required mount behavior to service account:
+    {{ include "netapp-neo.workerPrivilegedServiceAccountName" . }}
+{{- end }}
+
+{{- if .Values.openshift.privilegedWorkloads.extractor.enabled }}
+
+OpenShift setup required for extractor privileged mode:
+  - Bind an SCC that allows the required mount behavior to service account:
+    {{ include "netapp-neo.extractorPrivilegedServiceAccountName" . }}
+{{- end }}

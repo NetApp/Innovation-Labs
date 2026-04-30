@@ -20,10 +20,23 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.openshift.privilegedWorkloads.extractor.enabled }}
+      serviceAccountName: {{ include "netapp-neo.extractorPrivilegedServiceAccountName" . }}
+      {{- end }}
+      {{- if .Values.openshift.privilegedWorkloads.extractor.enabled }}
+      securityContext:
+        {{- toYaml .Values.openshift.privilegedWorkloads.extractor.podSecurityContext | nindent 8 }}
+      {{- else if .Values.openshift.restrictedV2.enabled }}
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      {{- else }}
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
+      {{- end }}
       {{- if .Values.postgresql.enabled }}
       initContainers:
         {{- include "netapp-neo.waitForDb" . | nindent 8 }}
@@ -42,6 +55,19 @@ spec:
                 secretKeyRef:
                   name: {{ include "netapp-neo.fullname" . }}-db
                   key: DATABASE_URL
+          {{- if .Values.openshift.privilegedWorkloads.extractor.enabled }}
+          securityContext:
+            {{- toYaml .Values.openshift.privilegedWorkloads.extractor.containerSecurityContext | nindent 12 }}
+          {{- else if .Values.openshift.restrictedV2.enabled }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+                - ALL
+          {{- else }}
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
@@ -50,6 +76,7 @@ spec:
             runAsNonRoot: false
             appArmorProfile:
               type: Unconfined
+          {{- end }}
           {{- with .Values.extractor.resources }}
           resources:
             {{- toYaml . | nindent 12 }}

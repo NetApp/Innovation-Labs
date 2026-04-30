@@ -4,6 +4,62 @@ nameOverride: ""
 # -- Image pull secrets (shared across all services)
 imagePullSecrets: []
 
+# OpenShift security posture controls.
+openshift:
+  restrictedV2:
+    # Mandatory for this chart in OpenShift.
+    enabled: true
+  api:
+    serviceAccount:
+      create: true
+      name: ""
+      annotations: {}
+  ui:
+    serviceAccount:
+      create: true
+      name: ""
+      annotations: {}
+  privilegedWorkloads:
+    worker:
+      # Mandatory: worker mounts filesystems and needs privileged exception mode.
+      enabled: true
+      serviceAccount:
+        create: true
+        name: ""
+        annotations: {}
+      podSecurityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containerSecurityContext:
+        allowPrivilegeEscalation: true
+        runAsNonRoot: false
+        appArmorProfile:
+          type: Unconfined
+        capabilities:
+          add:
+            - SYS_ADMIN
+            - DAC_READ_SEARCH
+    extractor:
+      # Mandatory: extractor mounts filesystems and needs privileged exception mode.
+      enabled: true
+      serviceAccount:
+        create: true
+        name: ""
+        annotations: {}
+      podSecurityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containerSecurityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        privileged: true
+        allowPrivilegeEscalation: true
+        runAsNonRoot: false
+        appArmorProfile:
+          type: Unconfined
+
 # API Service
 api:
   replicaCount: 1
@@ -111,9 +167,9 @@ postgresql:
     tag: "17-alpine"
     pullPolicy: IfNotPresent
   auth:
-    username: 
-    password: 
-    database: 
+    username: "neouser"
+    password: "neopassword"
+    database: "neodb"
   service:
     type: ClusterIP
     port: 5432
