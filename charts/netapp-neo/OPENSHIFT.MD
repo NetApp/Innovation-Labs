@@ -3,26 +3,53 @@
 This guide describes how to deploy this chart on OpenShift with the new security model:
 
 - Restricted-v2 baseline for the application
-- Mandatory privileged exceptions for `worker` and `extractor` because they mount filesystems in the pod
+- Mandatory privileged exceptions for `worker` and `extractor` to access remote file systems
 - Helm validation enforces this mode during render/install
 
 ## 1. Prerequisites
 
 - OpenShift cluster access (`oc`)
 - Helm 3
-- Git
-- Cluster admin support for SCC binding (required only for privileged worker/extractor mode)
+- Cluster admin support for SCC binding (required for privileged worker/extractor mode)
 - Target namespace exists, example: `neo-poc`
 
-Pull the chart from the `fix-scc` branch:
-
-```bash
-git clone --branch fix-scc https://github.com/NetApp/Innovation-Labs.git
-cd Innovation-Labs/charts/netapp-neo
-```
+Select your target namespace:
 
 ```bash
 oc project neo-poc
+```
+
+Prepare OpenShift values override file:
+
+```bash
+cat > values-openshift.yaml <<'EOF'
+openshift:
+  restrictedV2:
+    enabled: true
+  api:
+    serviceAccount:
+      create: true
+      name: ""
+      annotations: {}
+  ui:
+    serviceAccount:
+      create: true
+      name: ""
+      annotations: {}
+  privilegedWorkloads:
+    worker:
+      enabled: true
+      serviceAccount:
+        create: true
+        name: ""
+        annotations: {}
+    extractor:
+      enabled: true
+      serviceAccount:
+        create: true
+        name: ""
+        annotations: {}
+EOF
 ```
 
 ## 2. Deployment Mode
@@ -43,17 +70,14 @@ These are enforced by chart validation. Helm will fail if any are set to `false`
 Deploy:
 
 ```bash
-# Run from Innovation-Labs/charts/netapp-neo on branch fix-scc
-helm upgrade --install netapp-neo . \
+helm upgrade --install netapp-neo innovation-labs/netapp-neo \
   -n neo-poc \
-  -f values.yaml \
-  -f _temp/values-openshift-privileged.yaml \
+  -f ./netapp-neo/values.yaml \
+  -f ./values-openshift.yaml \
   --wait --timeout 10m --rollback-on-failure
 ```
 
-Companion values file:
-
-- `_temp/values-openshift-privileged.yaml`
+If you maintain a platform-specific values file, keep this OpenShift block there.
 
 ## 3. Bind SCC for Privileged Exception Service Accounts
 
@@ -88,12 +112,6 @@ use those names in the `oc adm policy` commands.
 If you set `serviceAccount.create=false`, ensure those service accounts already exist in the namespace.
 
 ## 4. Verify Deployment
-
-Optional: confirm the checked-out branch before deploying.
-
-```bash
-git branch --show-current
-```
 
 Check pods:
 
