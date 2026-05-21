@@ -82,6 +82,7 @@ export default defineConfig({
                 { text: 'Users', link: '/projects/mlai/neo/core/m-users' },
                 { text: 'Shares', link: '/projects/mlai/neo/core/m-shares' },
                 { text: 'Files', link: '/projects/mlai/neo/core/m-files' },
+                { text: 'Virtual Datasets', link: '/projects/mlai/neo/core/m-datasets' },
                 { text: 'Protocols', link: '/projects/mlai/neo/core/m-protocols' },
                 { text: 'Extraction', link: '/projects/mlai/neo/core/m-extraction' },
                 { text: 'Search', link: '/projects/mlai/neo/core/m-search' },
