@@ -19,7 +19,7 @@ The UI runs as a separate container (`neoui`) and is included in the standard Do
 
 ```yaml
 neoui:
-  image: ghcr.io/beezy-dev/neo-ui-framework:3.2.2
+  image: ghcr.io/netapp/neo-ui-framework:4.1.0-20250513
   ports:
     - "8081:80"
   environment:
@@ -32,4 +32,4 @@ Access the console at `http://your-server:8081` after deployment.
 
 For console usage details, see the [Console Guide](../core/m-console.md).
 
-The UI Framework is maintained separately at [beezy-dev/neo-ui-framework](https://github.com/beezy-dev/neo-ui-framework).
+The UI Framework is maintained separately at [netapp/neo-ui-framework](https://github.com/netapp/neo-ui-framework).

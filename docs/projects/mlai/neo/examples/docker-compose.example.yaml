@@ -176,7 +176,7 @@ services:
   # crawls, and managing the connector. Connects to the API service.
   neoui:
     hostname: neoui
-    image: ghcr.io/beezy-dev/neo-ui-framework:${NUI_VERSION}
+    image: ghcr.io/netapp/neo-ui-framework:${NUI_VERSION}
     container_name: neoui
     ports:
       - "8080:80"

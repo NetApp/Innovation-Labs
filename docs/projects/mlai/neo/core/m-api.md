@@ -182,7 +182,7 @@ Response:
 {
   "status": "healthy",
   "service": "api",
-  "version": "4.0.2",
+  "version": "4.1.4",
   "timestamp": "2026-03-10T12:00:00+00:00"
 }
 ```
@@ -197,7 +197,7 @@ Response:
 {
   "status": "healthy",
   "service": "api",
-  "version": "4.0.2",
+  "version": "4.1.4",
   "components": {
     "database": "ok",
     "oauth": "configured"
@@ -380,6 +380,29 @@ Background task management.
 | DELETE | `/api/v1/tasks/{task_id}` | Cancel a running task |
 | GET | `/api/v1/tasks/statistics/summary` | Task statistics summary |
 | GET | `/api/v1/tasks/statistics/acl-cache` | ACL cache statistics |
+
+### Virtual Datasets
+
+Curated, shareable file collections with independent access controls. See the [Virtual Datasets Guide](./m-datasets.md) for full details.
+
+| Method | Endpoint | Description |
+| ------ | -------- | ----------- |
+| POST | `/api/v1/datasets` | Create a dataset |
+| GET | `/api/v1/datasets` | List accessible datasets |
+| GET | `/api/v1/datasets/expiring` | List expiring datasets (admin) |
+| GET | `/api/v1/datasets/{id}` | Get dataset details |
+| PATCH | `/api/v1/datasets/{id}` | Update dataset metadata |
+| DELETE | `/api/v1/datasets/{id}` | Delete dataset |
+| POST | `/api/v1/datasets/{id}/items` | Add files to dataset |
+| GET | `/api/v1/datasets/{id}/items` | List files in dataset |
+| DELETE | `/api/v1/datasets/{id}/items` | Remove files from dataset |
+| POST | `/api/v1/datasets/{id}/search` | Full-text search within dataset |
+| POST | `/api/v1/datasets/{id}/ner-search` | Named entity search within dataset |
+| POST | `/api/v1/datasets/{id}/subset` | Create a subset dataset |
+| POST | `/api/v1/datasets/{id}/shares` | Share dataset |
+| GET | `/api/v1/datasets/{id}/shares` | List shares |
+| PATCH | `/api/v1/datasets/{id}/shares/{share_id}` | Update share |
+| DELETE | `/api/v1/datasets/{id}/shares/{share_id}` | Revoke share |
 
 ### Health
 

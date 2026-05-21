@@ -16,7 +16,7 @@ All protocols share a common workflow: create a share, test the connection, craw
 
 ## SMB File Shares
 
-SMB (Server Message Block), also known as CIFS, is the standard protocol for Windows file shares. Neo mounts SMB shares read-only inside the Extractor container using `mount.cifs` and enumerates files via the local mount point. ACLs are read using `smbcacls`.
+SMB (Server Message Block), also known as CIFS, is the standard protocol for Windows file shares. Neo connects to SMB shares read-only and enumerates files for indexing. ACLs are extracted and resolved to support access control.
 
 ### Supported Storage Systems
 

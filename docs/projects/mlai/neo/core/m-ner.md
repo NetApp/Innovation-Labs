@@ -1,17 +1,16 @@
 # Named Entity Recognition (NER)
 
-Project Neo uses [GLiNER2](https://github.com/urchade/GLiNER) (Generalist and Lightweight model for Named Entity Recognition) to identify and extract structured entities from document text. NER runs as a dedicated microservice (`ner_service`) and processes files asynchronously via the worker queue after text extraction completes.
+Project Neo uses Named Entity Recognition (NER) to identify and extract structured entities from document text. NER runs as a dedicated microservice and processes files asynchronously after text extraction completes.
 
 ## How It Works
 
 1. A file is uploaded to a share that has `enable_ner_analysis` turned on.
-2. The worker service extracts text from the file (PDF, DOCX, etc.).
-3. The worker sends the extracted text to the NER service over an internal HTTP call.
-4. The NER service runs the GLiNER2 model against the text using the share's configured schema.
-5. Detected entities, classifications, and structured extractions are stored in PostgreSQL.
-6. Results are available immediately through the API.
+2. Neo extracts text from the file (PDF, DOCX, etc.).
+3. The NER service analyses the extracted text using the share's configured schema.
+4. Detected entities, classifications, and structured extractions are stored in the database.
+5. Results are available immediately through the API.
 
-The underlying model is **DeBERTa-v3-base** fine-tuned for zero-shot NER. It accepts a list of target entity labels and returns spans with confidence scores -- no task-specific training is needed.
+The NER engine uses zero-shot recognition -- it accepts a list of target entity labels and returns spans with confidence scores, so no task-specific training is needed.
 
 ## NER Schemas
 
@@ -132,17 +131,8 @@ The NER service is configured through environment variables set on the `ner` con
 | `NER_MODEL_NAME` | `fastino/gliner2-base-v1` | Hugging Face model identifier. The model is downloaded on first startup. |
 | `NER_CONFIDENCE_THRESHOLD` | `0.7` | Global minimum confidence score (0.0--1.0). Per-share thresholds override this. |
 | `NER_DEVICE` | `auto` | Compute device: `auto`, `cuda`, or `cpu`. `auto` selects CUDA when a GPU is detected. |
-| `NER_MAX_TEXT_LENGTH` | `8000` | Maximum characters per chunk sent to the model. GLiNER2 has a 2048-token context window (~4 chars/token = ~8000 chars). |
-| `NER_CUDA_MAX_TEXT_LENGTH` | `8000` | Hard cap on chunk size when running on CUDA to prevent out-of-memory errors. |
-| `NER_CHUNK_OVERLAP` | `500` | Character overlap between adjacent chunks so entities at boundaries are not missed. |
-| `NER_TOKEN_BUDGET` | `2048` | Token budget per chunk for the tokenizer-aware chunking path. |
-| `NER_MAX_BATCH_SIZE` | `32` | Upper limit for adaptive batch sizing on GPU. |
-| `NER_ESTIMATED_MB_PER_CHUNK` | `1500` | Estimated VRAM (MB) per chunk, used for initial batch size calculation before probing. |
+| `NER_MAX_BATCH_SIZE` | `32` | Upper limit for batch sizing on GPU. Reduce if you encounter out-of-memory errors. |
 | `NER_CPU_BATCH_SIZE` | `16` | Fixed batch size when running on CPU. |
-| `NER_BATCH_RECOVERY_INTERVAL` | `50` | Number of successful inferences before attempting to increase batch size after an OOM. |
-| `NER_MAX_CONSECUTIVE_OOMS` | `3` | After this many consecutive OOM errors, the engine falls back to CPU. |
-| `NER_CUDA_RETRY_COOLDOWN` | `200` | Number of successful CPU inferences before retrying CUDA after an OOM fallback. |
-| `NER_MAX_CUDA_RETRIES` | `3` | Maximum number of times to retry moving back to CUDA after OOM fallback. |
 
 ## Per-Share NER Settings
 
@@ -344,20 +334,15 @@ Set `NER_DEVICE=auto` (the default) to let the engine detect available hardware.
 
 ### Text Chunking
 
-GLiNER2 is based on DeBERTa-v3-base with a 2048-token context window. For documents longer than the context window, the engine splits text into chunks of up to `NER_MAX_TEXT_LENGTH` characters with `NER_CHUNK_OVERLAP` characters of overlap between adjacent chunks. Entity spans detected across chunk boundaries are deduplicated in post-processing.
+For documents longer than the model's context window, the engine automatically splits text into manageable chunks with overlap between adjacent chunks. Entity spans detected across chunk boundaries are deduplicated in post-processing.
 
 ### Adaptive Batch Sizing
 
-On GPU, the engine probes available VRAM at startup and computes an initial batch size. During inference:
-
-- Successful batches gradually increase the batch size up to `NER_MAX_BATCH_SIZE`.
-- An OOM error halves the batch size and retries.
-- After `NER_MAX_CONSECUTIVE_OOMS` consecutive OOM errors, the engine falls back to CPU automatically.
-- After `NER_CUDA_RETRY_COOLDOWN` successful CPU inferences, the engine attempts to move back to CUDA (up to `NER_MAX_CUDA_RETRIES` times).
+On GPU, the engine automatically adapts batch sizes to the available VRAM. If out-of-memory errors occur, the batch size is reduced and processing continues. If GPU memory issues persist, the engine falls back to CPU automatically and will attempt to return to GPU after a cooldown period.
 
 ### VRAM Requirements
 
-The GLiNER2 base model requires approximately 500 MB of VRAM. Each inference chunk uses an estimated `NER_ESTIMATED_MB_PER_CHUNK` MB (default 1500 MB) for activations and gradients. A GPU with 4 GB of VRAM can comfortably run batch size 1--2; 8 GB or more is recommended for larger batch sizes.
+A GPU with 4 GB of VRAM is sufficient for small batch sizes. 8 GB or more is recommended for production workloads with larger batch sizes.
 
 ## Troubleshooting
 
@@ -387,12 +372,6 @@ Actions:
 - If the GPU has limited VRAM (less than 4 GB), set `NER_DEVICE=cpu` to avoid OOM entirely.
 
 The engine automatically falls back to CPU after repeated OOMs and will attempt to return to CUDA after a cooldown period.
-
-### Tokenizer Deadlock
-
-The Hugging Face `tokenizers` library uses Rust-based parallelism that can deadlock when called from multiple Python threads inside a forked process. Symptoms: the NER service hangs during inference with no log output.
-
-Workaround: Set the environment variable `TOKENIZERS_PARALLELISM=false` on the NER container. This disables tokenizer-level parallelism and prevents the deadlock. The Neo container images set this by default.
 
 ### NER Results Are Empty
 

@@ -55,8 +55,8 @@ Aside from the versioning and database paramters, Neo services can be configured
 
 ```bash
 # Neo container image versioning
-NEO_VERSION=4.0.3p7
-NUI_VERSION=3.2.2
+NEO_VERSION=4.1.4
+NUI_VERSION=4.1.0-20250513
 
 ## Database Settings (required)
 # Modify accordingly to your preferences
@@ -90,7 +90,7 @@ api-1           neo-api                                     Up 25 seconds (healt
 extractor-1     neo-extractor                               Up 28 seconds (healthy)
 ner-1           neo-ner                                     Up 28 seconds (healthy)
 worker-1        neo-worker                                  Up 20 seconds (healthy)
-neoui           ghcr.io/beezy-dev/neo-ui-framework:3.2.2   Up 18 seconds             0.0.0.0:8081->80/tcp
+neoui           ghcr.io/netapp/neo-ui-framework:4.1.0-20250513   Up 18 seconds             0.0.0.0:8081->80/tcp
 
 View logs:
 docker compose logs -f
@@ -107,7 +107,7 @@ api-1           neo-api                                     Up 25 seconds (healt
 extractor-1     neo-extractor                               Up 28 seconds (healthy)
 ner-1           neo-ner                                     Up 28 seconds (healthy)
 worker-1        neo-worker                                  Up 20 seconds (healthy)
-neoui           ghcr.io/beezy-dev/neo-ui-framework:3.2.2   Up 18 seconds             0.0.0.0:8081->80/tcp
+neoui           ghcr.io/netapp/neo-ui-framework:4.1.0-20250513   Up 18 seconds             0.0.0.0:8081->80/tcp
 
 View logs:
 sudo podman compose logs -f

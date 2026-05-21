@@ -1,6 +1,6 @@
 # Troubleshooting
 
-This guide covers common issues and solutions for NetApp Project Neo v4.0.2 and its multi-service architecture.
+This guide covers common issues and solutions for NetApp Project Neo and its multi-service architecture.
 
 ## How to log a support case / idea
 
@@ -40,9 +40,9 @@ Neo v4 uses a multi-service architecture with independently scalable components.
    ```bash
    docker compose ps
    ```
-2. Confirm services are on the same Docker network (`neo-network`):
+2. Confirm services are on the same Docker network:
    ```bash
-   docker network inspect neo-network
+   docker network ls
    ```
 3. Check that `WORKER_SERVICE_URL`, `EXTRACTOR_SERVICE_URL`, and `NER_SERVICE_URL` are set correctly. Default values in `docker-compose.yml`:
    - API -> Worker: `http://worker:8000`
@@ -114,19 +114,19 @@ Database schema migrations run automatically on service startup. If a migration 
    ```
 3. For locking issues during migration (multiple services migrating simultaneously), Neo uses advisory locks. If a migration lock is stuck, restart all services — the lock is session-based and will be released.
 
-### system_config table missing
+### Configuration table missing
 
-The `system_config` table stores encryption keys, JWT secrets, and other shared configuration. It is created automatically on first startup by whichever service starts first.
+The system configuration table stores encryption keys, JWT secrets, and other shared configuration. It is created automatically on first startup by whichever service starts first.
 
-If you see errors about `system_config` not existing:
+If you see errors about missing configuration tables:
 1. Ensure at least one service (API or worker) has started successfully against the database at least once.
 2. Check that the database user has `CREATE TABLE` privileges.
 
 ### Encryption key errors
 
-**Error:** `InvalidToken` or `Fernet key error` when accessing shares
+**Error:** `InvalidToken` or encryption key errors when accessing shares
 
-The `ENCRYPTION_KEY` is a Fernet key used to encrypt sensitive data (e.g., SMB passwords). It is auto-generated and stored in the `system_config` table on first startup.
+The `ENCRYPTION_KEY` is used to encrypt sensitive data (e.g., SMB passwords). It is auto-generated and stored in the database on first startup.
 
 - **All services must use the same encryption key.** If services share the same `DATABASE_URL`, they retrieve the key from the database automatically.
 - If you set `ENCRYPTION_KEY` as an environment variable, it overrides the database-stored key. Ensure all services use the same value.
@@ -326,20 +326,16 @@ Files with unsupported extensions are skipped during crawling. Check the work qu
 
 ### Search is slow
 
-Neo v4 uses PostgreSQL GIN-indexed `search_vector` columns for full-text search, providing 20-42x speedup over unindexed queries.
+Neo v4 uses optimized full-text search indexes for high-performance content search.
 
 If search is slow:
 
-1. Verify the GIN index exists:
-   ```sql
-   SELECT indexname FROM pg_indexes WHERE tablename = 'file_metadata' AND indexname = 'idx_file_metadata_search_vector';
-   ```
-2. If the index is missing, it is created automatically during migration. Restart the API service to trigger migration.
-3. For large databases, `VACUUM ANALYZE file_metadata` can help the query planner:
+1. Verify the search indexes exist — they are created automatically during database migration. Restart the API service to trigger migration if needed.
+2. For large databases, running PostgreSQL `VACUUM ANALYZE` can help the query planner:
    ```bash
-   docker exec neo-postgres psql -U neo -d neo_connector -c "VACUUM ANALYZE file_metadata;"
+   docker exec neo-postgres psql -U neo -d neo_connector -c "VACUUM ANALYZE;"
    ```
-4. Check that queries are using `websearch_to_tsquery` (the indexed path) rather than `LIKE` or `ILIKE` patterns.
+3. Check the [Performance & Benchmarking](m-performance) guide for tuning recommendations.
 
 ### ACL resolution slow
 
@@ -377,9 +373,9 @@ If the overall system throughput is lower than expected:
 
 | Error Message | Cause | Solution |
 |---|---|---|
-| `InvalidToken` or `Fernet key error` | Encryption key mismatch between services | Ensure all services share the same `DATABASE_URL` or set the same `ENCRYPTION_KEY` |
+| `InvalidToken` or encryption key error | Encryption key mismatch between services | Ensure all services share the same `DATABASE_URL` or set the same `ENCRYPTION_KEY` |
 | `connection refused` on port 5432 | PostgreSQL not running or unreachable | Check `docker logs neo-postgres` and verify `DATABASE_URL` |
-| `system_config table does not exist` | Database not initialized | Restart the API service to trigger auto-migration |
+| Configuration table not found | Database not initialized | Restart the API service to trigger auto-migration |
 | `429 Too Many Requests` | Microsoft Graph rate limit exceeded | Reduce `NUM_UPLOAD_WORKERS` or lower `GRAPH_RATE_LIMIT` |
 | `401 Unauthorized` on MCP endpoints | Invalid OAuth token or API key | Verify `MCP_OAUTH_*` settings or `MCP_API_KEY` value |
 | `502 Bad Gateway` from API | Worker service unreachable | Check `docker compose ps` and `WORKER_SERVICE_URL` |

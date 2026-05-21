@@ -18,20 +18,20 @@ NetApp Project Neo is a secure enterprise application that indexes content from 
                               │ HTTPS
                               ▼
 ┌─────────────┐  ┌──────────────────────────────────────────────────────────┐
-│ MCP Clients │  │  neo-network (Docker bridge)                             │
+│ MCP Clients │  │  Internal Network                                        │
 │ (AI tools)  │  │                                                          │
 └──────┬──────┘  │  ┌──────────┐  ┌────────┐  ┌────────┐  ┌────────────┐    │
        │         │  │   API    │  │ Worker │  │  NER   │  │ Extractor  │    │
-       │ HTTPS   │  │  :8000   │─►│(intern)│─►│(intern)│  │  (intern)  │    │
-       └────────►│  └────┬─────┘  │        │  │GLiNER2 │  │GPU-accel.  │    │
+       │ HTTPS   │  │ Service  │─►│Service │─►│Service │  │  Service   │    │
+       └────────►│  └────┬─────┘  │        │  │        │  │ GPU-accel. │    │
                  │       │        └────────┘  └────────┘  └──────┬─────┘    │
 ┌─────────────┐  │       │                           ▲           │          │
 │  Neo UI     │  │       │                           └───────────┘          │
-│  :8081      │──►       │                       Worker orchestrates        │
+│             │──►       │                       Worker orchestrates        │
 └─────────────┘  │       ▼                                       │          │
                  │  ┌──────────┐                                 │          │
                  │  │PostgreSQL│                                 │          │
-                 │  │  :5432   │                                 │          │
+                 │  │          │                                 │          │
                  │  └──────────┘                                 │          │
                  └───────────────────────────────────────────────┼──────────┘
                                                                  │
@@ -49,15 +49,15 @@ NetApp Project Neo is a secure enterprise application that indexes content from 
 
 ### Microservices
 
-Neo v4 is composed of four microservices communicating over an internal Docker network (`neo-network`):
+Neo v4 is composed of microservices communicating over an isolated internal network:
 
-1. **API Service** (port 8000): FastAPI application handling REST API, MCP server, authentication, and share management. Exposed externally.
-1. **Neo UI** (port 8081): Web-based management console (separate container: `ghcr.io/beezy-dev/neo-ui-framework`). Connects to the API service internally. Exposed externally.
-1. **Worker Service** (internal only): Background service that crawls file shares, enumerates directories, processes work queue items, and uploads content to Microsoft Graph.
-1. **Extractor Service** (internal only): GPU-accelerated document content extraction using Docling. Converts files (PDF, DOCX, PPTX, etc.) to markdown for indexing.
-1. **NER Service** (internal only): Named Entity Recognition using GLiNER2 for entity extraction, document classification, and structured data extraction from indexed content.
-1. **Database Layer**: PostgreSQL (primary) or MySQL for metadata, user accounts, work queues, and operational logs.
-1. **Security Manager**: Shared library (`netapp_shared/security/`) providing authentication, encryption, OAuth validation, and access control across all services.
+1. **API Service**: Handles REST API, MCP server, authentication, and share management. Exposed externally.
+1. **Neo UI**: Web-based management console. Connects to the API service internally. Exposed externally.
+1. **Worker Service** (internal only): Background service that crawls file shares, enumerates directories, and uploads content to Microsoft Graph.
+1. **Extractor Service** (internal only): GPU-accelerated document content extraction. Converts files (PDF, DOCX, PPTX, etc.) to searchable text for indexing.
+1. **NER Service** (internal only): Named Entity Recognition for entity extraction, document classification, and structured data extraction from indexed content.
+1. **Database Layer**: PostgreSQL (recommended) or MySQL for metadata, user accounts, and operational data.
+1. **Security Manager**: Shared component providing authentication, encryption, OAuth validation, and access control across all services.
 
 ### Firewall Rules
 
@@ -78,14 +78,8 @@ Neo supports multiple authentication mechanisms depending on the access path.
 
 #### JWT-Based Authentication (Admin UI / REST API)
 
-- **Algorithm**: HS256 (HMAC with SHA-256)
 - **Token Expiration**: Configurable via `ACCESS_TOKEN_EXPIRE_MINUTES` (default: 24 hours / 1440 minutes)
-- **Secret Key Management** (priority order):
-  1. `JWT_SECRET_KEY` environment variable (highest priority)
-  2. Database-stored key in `system_config` table (recommended for multi-node)
-  3. Legacy file-based storage (`data/jwt_secret.key`, auto-migrated to database)
-  4. Auto-generated 256-bit key stored in database if none exists
-- **Internal Service Token**: Deterministic token derived from JWT secret for MCP-to-API internal calls (localhost only)
+- **Secret Key Management**: Keys can be provided via environment variable (`JWT_SECRET_KEY`) or are automatically generated and stored securely. Multi-node deployments should set the key via environment variable to ensure consistency across replicas.
 
 #### OAuth 2.0 / Microsoft Entra ID (MCP Server)
 
@@ -136,21 +130,16 @@ For CLI tools, automation, and environments where OAuth is not practical, Neo su
 #### At-Rest Encryption
 
 - **Database**: PostgreSQL with filesystem-level encryption support
-- **Credential Storage**: SMB/NFS passwords and OAuth secrets encrypted using Fernet (AES-128 in CBC mode with HMAC authentication)
-- **Key Management** (priority order):
-  1. `ENCRYPTION_KEY` environment variable (highest priority, recommended for multi-node)
-  2. Database-stored key in `system_config` table (auto-generated if not present)
-  3. Legacy file-based storage (`data/key.key`, auto-migrated to database on first use)
-  4. Auto-generated Fernet key stored in database if none exists
-- **Key Format**: 256-bit URL-safe base64-encoded Fernet keys
-- **Sensitive Config**: The `system_config` table supports `is_sensitive` flag and `config_type='secret'` for encryption keys, JWT secrets, and other sensitive values
+- **Credential Storage**: SMB/NFS passwords and OAuth secrets are encrypted at rest using industry-standard authenticated encryption
+- **Key Management**: Encryption keys can be provided via the `ENCRYPTION_KEY` environment variable (recommended for multi-node deployments) or are automatically generated and stored securely
+- **Sensitive Data**: Sensitive configuration values including encryption keys and secrets are stored with additional protection
 
 #### In-Transit Encryption
 
 - **HTTPS**: Application designed to run behind HTTPS proxy/load balancer
 - **Microsoft Graph API**: All communications over HTTPS
 - **SMB Connections**: Supports SMB encryption when available on target shares
-- **Internal Services**: Services communicate over Docker bridge network (`neo-network`); TLS termination at the ingress layer
+- **Internal Services**: Services communicate over an isolated Docker bridge network; TLS termination at the ingress layer
 
 ### Access Control & Permissions
 
@@ -177,33 +166,26 @@ Microsoft Graph integration is optional. It is only required when using Neo with
 
 ### Network Security
 
-#### Service Architecture & Ports
+#### Service Architecture
 
-| Service    | Port | Exposure      | Purpose                               |
-| ---------- | ---- | ------------- | ------------------------------------- |
-| API        | 8000 | External      | REST API and MCP server               |
-| UI         | 8081 | External      | Web administration interface          |
-| Worker     | --   | Internal only | File crawling, Graph sync, work queue |
-| Extractor  | 8000 | Internal only | Document content extraction (GPU)     |
-| NER        | 8000 | Internal only | Named entity recognition (GPU)        |
-| PostgreSQL | 5432 | Internal only | Database                              |
+| Service    | Exposure      | Purpose                               |
+| ---------- | ------------- | ------------------------------------- |
+| API        | External      | REST API and MCP server               |
+| UI         | External      | Web administration interface          |
+| Worker     | Internal only | File crawling, Graph sync             |
+| Extractor  | Internal only | Document content extraction (GPU)     |
+| NER        | Internal only | Named entity recognition (GPU)        |
+| PostgreSQL | Internal only | Database                              |
 
-#### Container Security (Per-Service)
+#### Container Security
 
-Each microservice runs with the minimum privileges required for its function:
-
-| Service   | User          | Capabilities                             | Privileged | Notes                                 |
-| --------- | ------------- | ---------------------------------------- | ---------- | ------------------------------------- |
-| API       | netapp (1000) | None required                            | No         | Minimal privileges                    |
-| Worker    | netapp (1000) | SYS_ADMIN, DAC_READ_SEARCH, DAC_OVERRIDE | No         | Required for SMB/NFS mounting         |
-| Extractor | netapp (1000) | (varies)                                 | Yes        | Privileged mode for GPU device access |
-| NER       | netapp (1000) | None required                            | No         | Minimal privileges                    |
+Each microservice runs with the minimum privileges required for its function. The API and NER services run with no additional capabilities. The Worker service requires elevated capabilities for mounting SMB/NFS shares. The Extractor service requires GPU device access.
 
 #### Network Isolation
 
-- **Internal Network**: All services communicate over the `neo-network` Docker bridge network
-- **External Access**: Only the API service (port 8000) and Neo UI (port 8081) are exposed outside the Docker network — these are separate containers
-- **Worker, Extractor, NER**: Not directly accessible from outside `neo-network`
+- **Internal Network**: All services communicate over an isolated Docker bridge network
+- **External Access**: Only the API service and Neo UI are exposed externally
+- **Worker, Extractor, NER**: Not directly accessible from outside the internal network
 - **External Dependencies**: SMB/NFS/S3 file shares; optionally Microsoft Graph API (HTTPS) and Entra ID JWKS endpoints (only when Graph or MCP OAuth is enabled)
 
 ## Security Controls Implementation
@@ -214,7 +196,7 @@ Each microservice runs with the minimum privileges required for its function:
 
 - **Pydantic Models**: Strict data validation for all API inputs
 - **Path Traversal Protection**: Validates file paths to prevent directory traversal
-- **SQL Injection Prevention**: Parameterized queries throughout database layer (56+ shared Database methods)
+- **SQL Injection Prevention**: Parameterized queries throughout the database layer
 - **XSS Protection**: Input sanitization for user-provided content
 - **MCP Content Windowing**: Configurable content window sizes (`MCP_DEFAULT_WINDOW_SIZE`, `MCP_MAX_WINDOW_SIZE`) to prevent excessive data transfer
 
@@ -285,14 +267,14 @@ The following operation types are tracked in the audit log:
 - **NER Processing**: Optional entity extraction identifies people, organizations, locations, and custom entity types
 - **Metadata Only Mode**: Option to index only metadata without content
 - **Data Retention**: Configurable retention policies for indexed content
-- **Full-Text Search**: GIN-indexed search vectors for efficient content search without scanning raw data
+- **Full-Text Search**: Optimized search indexes for efficient content search without scanning raw data
 
 #### Personal Data Protection
 
 - **ACL Preservation**: Maintains original file permissions in Microsoft Graph and MCP responses
 - **User Attribution**: Tracks user actions for compliance reporting
 - **Data Minimization**: Only processes necessary file metadata and content
-- **Right to Deletion**: Support for removing indexed content (shared `delete_share()` cleans up files, NER results, Graph items, and work queue entries)
+- **Right to Deletion**: Support for removing indexed content — deleting a share cleans up all associated files, NER results, Graph items, and work queue entries
 
 ### Compliance Features
 
@@ -346,7 +328,7 @@ securityContext:
   runAsGroup: 1000
   allowPrivilegeEscalation: true # Required for SMB/NFS mounting
   capabilities:
-    add: ["SYS_ADMIN", "DAC_READ_SEARCH", "DAC_OVERRIDE"]
+    add: [...]  # See deployment guide for required capabilities
 ```
 
 **Extractor Service** (requires GPU device access):
@@ -360,8 +342,8 @@ securityContext:
 
 #### Network Policies
 
-- **Ingress Control**: Only the API service (port 8000) and Neo UI (port 8081) should receive external traffic
-- **Internal Traffic**: Worker, Extractor, and NER services accept traffic only from within `neo-network`
+- **Ingress Control**: Only the API service and Neo UI should receive external traffic
+- **Internal Traffic**: Worker, Extractor, and NER services accept traffic only from within the internal network
 - **Egress Control**: Allow outbound traffic to SMB/NFS/S3 file shares and HuggingFace (model downloads); optionally Microsoft Graph and Entra ID JWKS when those integrations are enabled
 - **Service Mesh**: Compatible with service mesh security policies
 
@@ -403,13 +385,13 @@ ACCESS_TOKEN_EXPIRE_MINUTES=1440           # Default: 24 hours
 - **Secret Objects**: Store sensitive configuration in Kubernetes secrets
 - **Volume Mounts**: Mount secrets as files rather than environment variables
 - **RBAC**: Restrict access to secret objects
-- **Database-Backed Keys**: Encryption and JWT keys stored in the `system_config` table are automatically generated if not provided via environment variables, ensuring keys persist across container restarts without requiring external secret management
+- **Database-Backed Keys**: Encryption and JWT keys are automatically generated if not provided via environment variables, ensuring keys persist across container restarts without requiring external secret management
 
 ## Security Best Practices
 
 ### Deployment Recommendations
 
-1. **Network Segmentation**: Deploy in isolated network segments; only expose API (port 8000) and Neo UI (port 8081)
+1. **Network Segmentation**: Deploy in isolated network segments; only expose the API service and Neo UI externally
 2. **HTTPS Termination**: Use reverse proxy/load balancer for HTTPS in front of the API service
 3. **Regular Updates**: Keep base images and dependencies updated
 4. **Monitoring**: Implement comprehensive monitoring and alerting across all four services
@@ -437,11 +419,11 @@ ACCESS_TOKEN_EXPIRE_MINUTES=1440           # Default: 24 hours
 
 ### Known Limitations
 
-1. **SMB Authentication**: Share passwords stored encrypted (Fernet) but accessible to the Worker service at runtime
-2. **Privileged Capabilities**: Worker requires SYS_ADMIN/DAC_READ_SEARCH for SMB/NFS mounting; Extractor requires privileged mode for GPU access
+1. **SMB Authentication**: Share passwords are stored encrypted but accessible to the Worker service at runtime
+2. **Privileged Capabilities**: Worker requires elevated capabilities for SMB/NFS mounting; Extractor requires GPU device access
 3. **Content Processing**: Processes file content which may contain sensitive data (mitigated by ACL filtering)
 4. **Network Access**: Requires network access to file shares; Microsoft Graph and Entra ID access only required when those integrations are enabled
-5. **Internal Network Trust**: Services on `neo-network` communicate without mutual TLS (suitable for single-host Docker deployments; consider service mesh for multi-node)
+5. **Internal Network Trust**: Internal services communicate without mutual TLS (suitable for single-host Docker deployments; consider service mesh for multi-node)
 
 ### Risk Mitigation
 
@@ -471,8 +453,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES=1440           # Default: 24 hours
 ## Version Information
 
 - **Document Version**: 2.0
-- **Last Updated**: 2026-03-10
-- **Neo Version**: 4.0.2
+- **Last Updated**: 2026-05-21
+- **Neo Version**: 4.1.4
 - **Review Date**: Annual review required
 
 ---

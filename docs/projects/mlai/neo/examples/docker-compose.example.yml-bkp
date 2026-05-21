@@ -60,7 +60,7 @@ services:
   # Lightweight FastAPI service handling HTTP endpoints, MCP transport, and
   # OAuth. No background processing — delegates to the worker service.
   api:
-    image: ghcr.io/netapp/netapp-neo-api:4.0.2
+    image: ghcr.io/netapp/netapp-neo-api:4.1.4
     ports:
       - "8000:8000"
     environment:
@@ -223,7 +223,7 @@ services:
   # backends: MarkItDown (Office/PDF), Docling (OCR/tables), Docling VLM
   # (vision language models). Mounts shares independently via CIFS.
   extractor:
-    image: ghcr.io/netapp/netapp-neo-extractor:4.0.2
+    image: ghcr.io/netapp/netapp-neo-extractor:4.1.4
     # privileged needed for NFS/CIFS mounting inside the container
     privileged: true
     environment:
@@ -302,7 +302,7 @@ services:
   # classifications (document type), and structured data. Stateless — no file
   # or database access needed.
   ner:
-    image: ghcr.io/netapp/netapp-neo-ner:4.0.2
+    image: ghcr.io/netapp/netapp-neo-ner:4.1.4
     environment:
       # NER_MODEL_NAME: Hugging Face model ID for GLiNER2. The model is
       # downloaded on first startup and cached in the container.
@@ -379,7 +379,7 @@ services:
   # Microsoft Graph upload, ACL resolution, and NER orchestration. Delegates
   # extraction to the extractor service and NER to the NER service.
   worker:
-    image: ghcr.io/netapp/netapp-neo-worker:4.0.2
+    image: ghcr.io/netapp/netapp-neo-worker:4.1.4
     cap_add:
       - SYS_ADMIN
       - DAC_READ_SEARCH
@@ -509,7 +509,7 @@ services:
   # Browser-based management console for configuring shares, monitoring
   # crawls, and managing the connector. Connects to the API service.
   neoui:
-    image: ghcr.io/beezy-dev/neo-ui-framework:3.2.2
+    image: ghcr.io/netapp/neo-ui-framework:4.1.0-20250513
     container_name: neoui
     ports:
       - "8081:80"

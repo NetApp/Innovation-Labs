@@ -944,11 +944,11 @@ helm repo update
 helm upgrade netapp-neo innovation-labs/netapp-neo \
   --namespace netapp-neo \
   --reuse-values \
-  --set api.image.tag="4.0.2" \
-  --set worker.image.tag="4.0.2" \
-  --set extractor.image.tag="4.0.2" \
-  --set ner.image.tag="4.0.2" \
-  --set ui.image.tag="3.2.2"
+  --set api.image.tag="4.1.4" \
+  --set worker.image.tag="4.1.4" \
+  --set extractor.image.tag="4.1.4" \
+  --set ner.image.tag="4.1.4" \
+  --set ui.image.tag="4.1.0-20250513"
 ```
 
 **Upgrading with a values file:**
@@ -1076,8 +1076,8 @@ helm uninstall netapp-neo --namespace netapp-neo
 |-----------|-------------|---------|
 | `ui.name` | The base name for UI resources. | `neo-ui` |
 | `ui.replicaCount` | Number of UI pods to run. | `1` |
-| `ui.image.repository` | The UI container image repository. | `ghcr.io/beezy-dev/neo-ui-framework` |
-| `ui.image.tag` | UI image tag. | `3.2.2` |
+| `ui.image.repository` | The UI container image repository. | `ghcr.io/netapp/neo-ui-framework` |
+| `ui.image.tag` | UI image tag. | `4.1.0-20250513` |
 | `ui.image.pullPolicy` | The image pull policy. | `Always` |
 | `ui.service.type` | The type of Kubernetes service to create for UI. | `ClusterIP` |
 | `ui.service.port` | The port exposed by the UI service. | `80` |

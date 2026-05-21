@@ -8,8 +8,8 @@
 ## MUST BE CONFIGURED PARAMETERS
 # =============================================================================
 # Neo container image versioning
-NEO_VERSION=4.0.3p7
-NUI_VERSION=3.2.2
+NEO_VERSION=4.1.4
+NUI_VERSION=4.1.0-20250513
 
 ## Database Settings (required)
 # Modify accordingly to your preferences
@@ -37,11 +37,10 @@ POSTGRES_PORT=5432
 # ACCESS_TOKEN_EXPIRE_MINUTES=1440
 
 ## Encryption
-# ENCRYPTION_KEY: Fernet key for encrypting sensitive data (SMB
-# passwords). Auto-generated and stored in the database on first
-# startup if not set. All services sharing the same database will
-# retrieve the same key automatically. Only set this to override
-# the database-stored key.
+# ENCRYPTION_KEY: Key for encrypting sensitive data (SMB passwords).
+# Auto-generated and stored in the database on first startup if not
+# set. All services sharing the same database will retrieve the same
+# key automatically. Only set this to override the database-stored key.
 # ENCRYPTION_KEY=
 
 ## Microsoft Graph (optional - for M365 Copilot integration)
