@@ -117,13 +117,11 @@ The MCP integration allows AI assistants to securely search and retrieve content
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
                                │
-                               │ Internal HTTP
+                               │ Internal
                                ▼
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │                        NETAPP CONNECTOR API                                  │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│  │ GET /files  │  │ POST /search│  │ GET /shares │  │ GET /ner/entities   │  │
-│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+│           Files, Search, Shares, NER, and Virtual Datasets                   │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -383,7 +381,7 @@ The MCP server exposes five tools for AI agents:
 
 ### 1\. `search_files`
 
-Search for files by name, type, date, or size across all accessible shares. Uses GIN-indexed `search_vector` for 20-42x faster full-text search (PostgreSQL).
+Search for files by name, type, date, or size across all accessible shares. Leverages optimized full-text search indexes for high-performance queries (PostgreSQL).
 
 **Parameters:**
 

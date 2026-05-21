@@ -100,20 +100,18 @@ curl -X POST http://localhost:8000/api/v1/search \
 
 #### PostgreSQL (Recommended)
 
-Neo uses PostgreSQL's GIN-indexed `search_vector` column on the `file_metadata` table for full-text search. This provides:
+Neo uses PostgreSQL's full-text search capabilities with optimized indexing for high-performance content search. This provides:
 
-- **GIN Index**: A pre-built Generalized Inverted Index over tsvector data, enabling sub-millisecond lookups even on millions of rows.
 - **Phrase Matching**: Use double-quoted phrases to match exact word sequences.
-- **Prefix Wildcards**: Partial word matching via `websearch_to_tsquery`.
+- **Prefix Matching**: Partial word matching for broader searches.
 - **Boolean Operators**: `AND`, `OR`, `NOT` logic supported in natural language queries.
-- **Relevance Ranking**: Results are scored using `ts_rank_cd` (cover density ranking) which considers proximity of matching terms.
-- **Content Snippets**: `ts_headline` generates contextual snippets around matching terms with HTML `<b>` highlighting, returning approximately 25-50 words of context per match.
-- **Chunk Deduplication**: Large files are split into chunks for extraction. The search automatically deduplicates chunks by `parent_file_id`, returning only the highest-scoring snippet per original file.
-- **Performance**: 20-42x speedup over basic `LIKE` queries, measured on real-world datasets.
+- **Relevance Ranking**: Results are scored by relevance, considering proximity of matching terms.
+- **Content Snippets**: Contextual snippets around matching terms with highlighted keywords.
+- **Deduplication**: Large files split into chunks are automatically deduplicated, returning only the best-matching snippet per original file.
 
 #### MySQL
 
-For MySQL deployments, Neo uses `FULLTEXT` indexes with two search modes:
+For MySQL deployments, Neo uses full-text indexes with two search modes:
 
 - **Natural Language Mode** (`search_mode: "natural"`): OR-based matching ranked by relevance. Best for general queries.
 - **Boolean Mode** (`search_mode: "boolean"`): AND-based matching with operators (`+`, `-`, `*`, `""`). Best for precise queries.

@@ -23,10 +23,10 @@ Neo includes a 5-stage benchmark pipeline that measures throughput, latency, and
 
 | Stage | What It Measures |
 |---|---|
-| **Database** | Read query throughput and latency against `file_inventory` |
+| **Database** | Read query throughput and latency |
 | **Enumeration** | File discovery and directory scanning performance |
-| **Extraction** | Content extraction throughput from historical completed work items |
-| **ACL Extraction** | ACL/permission resolution throughput from completed ACL work items |
+| **Extraction** | Content extraction throughput |
+| **ACL Extraction** | ACL/permission resolution throughput |
 | **Graph Upload** | Microsoft Graph API upload throughput, including rate-limit detection |
 
 ### Metrics Per Stage
@@ -41,13 +41,7 @@ Each stage reports:
 
 ### Bottleneck Detection
 
-After all stages complete, the system identifies the stage with the lowest throughput as the pipeline bottleneck. Recommendations are then generated targeting the bottleneck:
-
-- **Extraction bottleneck**: Increase `NUM_EXTRACTION_WORKERS` or `CONTENT_EXTRACTION_PARALLEL_WORKERS`
-- **Graph upload bottleneck**: Adjust `NUM_UPLOAD_WORKERS` or `GRAPH_RATE_LIMIT` (reduce rate if 429 throttling is active)
-- **Database bottleneck**: Increase `DATABASE_BATCH_INSERT_SIZE` or `DATABASE_CONNECTION_POOL_SIZE`
-- **ACL extraction bottleneck**: Increase `MAX_CONCURRENT_WORK`
-- **Enumeration bottleneck**: Increase `MAX_ENUMERATION_WORKERS`
+After all stages complete, the system identifies the stage with the lowest throughput as the pipeline bottleneck and generates tuning recommendations. The auto-tuner suggests parameter adjustments targeting the specific bottleneck stage, such as increasing worker counts, adjusting batch sizes, or modifying rate limits.
 
 ---
 
@@ -163,12 +157,12 @@ curl http://localhost:8000/api/v1/monitoring/benchmark/history \
 
 Neo ships with four sizing profiles based on file estate size. The system auto-detects the appropriate profile by examining available CPU and RAM.
 
-| Profile | File Estate | CPU | RAM | Extraction Workers | Upload Workers | Graph Rate Limit |
-|---|---|---|---|---|---|---|
-| **Small** | < 10K files | 2 cores | 4 GB | 1 | 2 | 20 req/s |
-| **Medium** | 10K - 100K files | 4 cores | 8 GB | 2 | 3 | 25 req/s |
-| **Large** | 100K - 1M files | 8 cores | 16 GB | 4 | 6 | 40 req/s |
-| **Enterprise** | > 1M files | 16 cores | 32 GB | 8 | 10 | 50 req/s |
+| Profile | File Estate | Recommended CPU | Recommended RAM |
+|---|---|---|---|
+| **Small** | < 10K files | 2 cores | 4 GB |
+| **Medium** | 10K - 100K files | 4 cores | 8 GB |
+| **Large** | 100K - 1M files | 8 cores | 16 GB |
+| **Enterprise** | > 1M files | 16+ cores | 32+ GB |
 
 ### Get All Profiles
 
@@ -302,69 +296,19 @@ curl http://localhost:8000/api/v1/monitoring/tuning/status \
 
 ## Manual Tuning
 
-The following environment variables control Neo's performance characteristics. Set them in your Docker Compose file, Kubernetes deployment, or container runtime environment.
+Neo exposes a comprehensive set of environment variables for manual tuning. Set them in your Docker Compose file, Kubernetes deployment, or container runtime environment.
 
-### Worker Concurrency
+Key tuning categories include:
 
-| Variable | Default | Description |
-|---|---|---|
-| `NUM_EXTRACTION_WORKERS` | 1 | Number of extraction worker processes. Scale with available CPU cores (max 16). Requires restart. |
-| `NUM_UPLOAD_WORKERS` | 3 | Number of Graph upload worker tasks. Scale with network bandwidth (max 16). Requires restart. |
-| `EXTRACTION_THREAD_POOL_SIZE` | 0 (auto) | Thread pool size per extraction worker. 0 = auto-detect from CPU count (max 32). Requires restart. |
-| `MAX_CONCURRENT_WORK` | 10 | Maximum concurrent work items per worker. Higher = more parallelism but more memory pressure (max 50). Safe to adjust at runtime. |
-| `CONTENT_EXTRACTION_PARALLEL_WORKERS` | 4 | Parallel threads within a single extraction work item for multi-page documents (max 16). Safe to adjust at runtime. |
+- **Worker concurrency** -- control the number of extraction workers, upload workers, and parallel threads
+- **Enumeration** -- adjust directory scanning parallelism and strategies for large file estates
+- **Batch sizes** -- optimize database insert and work queue batch sizes for throughput
+- **Microsoft Graph rate limiting** -- balance upload speed against API throttling
+- **Timeouts** -- configure processing, extraction, and upload timeouts
+- **Database** -- adjust connection pool sizes and query timeouts
+- **Content extraction** -- set maximum file sizes and content chunking thresholds
 
-### Enumeration
-
-| Variable | Default | Description |
-|---|---|---|
-| `MAX_ENUMERATION_WORKERS` | 4 | Parallel directory scanning workers (max 16). Safe to adjust at runtime. |
-| `ENUMERATION_STRATEGY` | `auto` | Scanning strategy: `auto`, `directory_parallel`, `depth_parallel`, `hybrid`, `single_worker`. |
-| `ENUMERATION_TIMEOUT` | 3600 | Maximum seconds for a full share enumeration. Increase for very large shares. |
-| `MAX_DEPTH_PER_WORKER` | 3 | Maximum directory depth each enumeration worker processes. |
-
-### Batch Sizes
-
-| Variable | Default | Description |
-|---|---|---|
-| `DIRECTORY_BATCH_SIZE` | 100 | Directories processed per batch during enumeration (max 1000). |
-| `FILE_BATCH_SIZE` | 1000 | Files inserted per database batch (max 10000). |
-| `WORK_QUEUE_BATCH_SIZE` | 50 | Work items created per batch (max 500). |
-| `DATABASE_BATCH_INSERT_SIZE` | 500 | General database batch insert size (max 5000). |
-
-### Microsoft Graph Rate Limiting
-
-| Variable | Default | Description |
-|---|---|---|
-| `GRAPH_RATE_LIMIT` | 25.0 | Requests per second to the Graph API. Higher = faster uploads but risk of 429 throttling. |
-| `GRAPH_DAILY_QUOTA` | 100000 | Maximum Graph API requests per day. |
-| `GRAPH_BACKOFF_BASE_DELAY` | 1.0 | Initial backoff delay (seconds) after a 429 response. |
-| `GRAPH_BACKOFF_MAX_DELAY` | 300.0 | Maximum backoff delay (seconds) after repeated 429s. |
-| `GRAPH_BACKOFF_MULTIPLIER` | 2.0 | Exponential backoff multiplier. |
-
-### Timeouts
-
-| Variable | Default | Description |
-|---|---|---|
-| `WORK_PROCESSING_TIMEOUT` | 7200 | Maximum seconds to process a single work item. |
-| `FILE_EXTRACTION_TIMEOUT` | 300 | Maximum seconds to extract content from a single file. |
-| `GRAPH_UPLOAD_TIMEOUT` | 120 | Maximum seconds for a single Graph API upload. |
-| `FS_SCAN_TIMEOUT_PER_DIRECTORY` | 60 | Maximum seconds to scan a single directory. |
-
-### Database
-
-| Variable | Default | Description |
-|---|---|---|
-| `DATABASE_CONNECTION_POOL_SIZE` | 10 | Connection pool size. More connections = higher DB parallelism (max 50). Requires restart. |
-| `DATABASE_QUERY_TIMEOUT` | 30 | Query timeout in seconds (max 300). Requires restart. |
-
-### Content Extraction
-
-| Variable | Default | Description |
-|---|---|---|
-| `CONTENT_EXTRACTION_MAX_SIZE` | 10 MB | Maximum file size for content extraction. Files larger than this are skipped. |
-| `CONTENT_CHUNK_SIZE` | 900 KB | Content chunk size for database storage. Content larger than this is split into multiple rows. |
-| `GRAPH_CONTENT_CHUNK_SIZE` | 3.8 MB | Maximum content size per Microsoft Graph external item. |
+Use the sizing API endpoints (`GET /api/v1/monitoring/sizing/parameters`) to retrieve the full list of tunable parameters with descriptions, defaults, and recommended values for your hardware.
 
 ---
 

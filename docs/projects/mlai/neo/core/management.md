@@ -6,6 +6,7 @@ This section covers the various ways to manage and interact with NetApp Project 
 
 - [Shares](./m-shares.md) -- Configure and manage SMB file shares
 - [Files](./m-files.md) -- Browse and manage indexed files
+- [Virtual Datasets](./m-datasets.md) -- Create, share, and search curated file collections
 - [Users](./m-users.md) -- User account management and roles
 - [ACLs](./m-acls.md) -- Access control list management
 
@@ -24,6 +25,6 @@ This section covers the various ways to manage and interact with NetApp Project 
 
 ## Interfaces
 
-- [Console](./m-console.md) -- Web-based management console (port 8081)
+- [Console](./m-console.md) -- Web-based management console
 - [API Reference](./m-api.md) -- REST API documentation and usage
 - [Performance](./m-performance.md) -- Performance monitoring and benchmarking

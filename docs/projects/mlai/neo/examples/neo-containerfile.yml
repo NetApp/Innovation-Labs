@@ -21,7 +21,7 @@ services:
 
   # API Service (HTTP endpoints, MCP transport, OAuth)
   api:
-    image: ghcr.io/netapp/netapp-neo-api:4.0.2
+    image: ghcr.io/netapp/netapp-neo-api:4.1.4
     ports:
       - "8000:8000"
     environment:
@@ -58,7 +58,7 @@ services:
 
   # Extractor Service (content extraction: MarkItDown, Docling, VLM)
   extractor:
-    image: ghcr.io/netapp/netapp-neo-extractor:4.0.2
+    image: ghcr.io/netapp/netapp-neo-extractor:4.1.4
     privileged: true
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-neo}:${POSTGRES_PASSWORD:-neo_password}@postgres:5432/${POSTGRES_DB:-neo_connector}
@@ -84,7 +84,7 @@ services:
 
   # NER Service (Named Entity Recognition using GLiNER2)
   ner:
-    image: ghcr.io/netapp/netapp-neo-ner:4.0.2
+    image: ghcr.io/netapp/netapp-neo-ner:4.1.4
     environment:
       NER_CONFIDENCE_THRESHOLD: ${NER_CONFIDENCE_THRESHOLD:-0.7}
       NER_DEVICE: ${NER_DEVICE:-auto}
@@ -109,7 +109,7 @@ services:
 
   # Worker Service (background processing: crawling, upload, NER orchestration)
   worker:
-    image: ghcr.io/netapp/netapp-neo-worker:4.0.2
+    image: ghcr.io/netapp/netapp-neo-worker:4.1.4
     cap_add:
       - SYS_ADMIN
       - DAC_READ_SEARCH
@@ -149,7 +149,7 @@ services:
 
   # Neo UI (Web Management Console)
   neoui:
-    image: ghcr.io/beezy-dev/neo-ui-framework:3.2.2
+    image: ghcr.io/netapp/neo-ui-framework:4.1.0-20250513
     container_name: neoui
     ports:
       - "8081:80"

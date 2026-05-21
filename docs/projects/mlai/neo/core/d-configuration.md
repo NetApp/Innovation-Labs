@@ -114,7 +114,7 @@ You have successfully switched the connector to PRODUCTION mode. You can now beg
 | `JWT_SECRET_KEY` | *(auto-generated)* | Secret key for signing JWT tokens |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | `1440` | JWT token expiry time in minutes |
 | **Encryption** | | |
-| `ENCRYPTION_KEY` | *(auto-generated)* | Fernet key for encrypting stored credentials |
+| `ENCRYPTION_KEY` | *(auto-generated)* | Key for encrypting stored credentials |
 | **License** | | |
 | `NETAPP_CONNECTOR_LICENSE` | *(none)* | Pre-configure license key via environment |
 | `CONNECTOR_ID` | *(auto-generated)* | Unique identifier for this connector instance |

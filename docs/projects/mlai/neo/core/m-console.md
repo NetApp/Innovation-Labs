@@ -19,7 +19,7 @@ curl --location 'http://<server-ip>:8000/api/v1/setup/initial-credentials'
 
 The console provides a full-text search interface for querying indexed content across all configured shares. Search features include:
 
-- **Full-text search**: Search across all extracted document content using natural language queries. Results are ranked by relevance using PostgreSQL GIN-indexed search vectors.
+- **Full-text search**: Search across all extracted document content using natural language queries. Results are ranked by relevance.
 - **Filters**: Narrow results by share, file type, date range, or NER entity tags.
 - **File preview**: View extracted content and metadata for any search result.
 - **Export**: Download search results for further analysis.

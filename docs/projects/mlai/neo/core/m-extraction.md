@@ -23,7 +23,7 @@ The **extractor service** is the component responsible for reading files from mo
 - **Full-text search** -- users can search across all indexed file content via the API or MCP tools.
 - **Named Entity Recognition (NER)** -- the NER service processes extracted text to identify entities such as people, organizations, addresses, financial data, and personally identifiable information (PII).
 
-The extractor service runs as an independent microservice that pulls work items from a shared queue. It supports CPU-only and GPU-accelerated modes, with optional Vision Language Model (VLM) pipelines for scanned and image-heavy documents.
+The extractor service runs as an independent microservice. It supports CPU-only and GPU-accelerated modes, with optional Vision Language Model (VLM) pipelines for scanned and image-heavy documents.
 
 ---
 
@@ -81,33 +81,15 @@ Operates in two modes:
 
 ## Intelligent Routing & Fallback Chain
 
-The extractor service uses a **strategy router** (`ExtractionStrategy`) that selects the best backend based on file extension and file size. If the primary extractor fails, the service automatically falls back to the next extractor in the chain.
-
-### Routing Rules
-
-| File Type | Small Files | Large Files | Threshold |
-|-----------|------------|-------------|-----------|
-| **Plain text / source code** | TextExtractor | TextExtractor | -- |
-| **PDF** | MarkItDown, then Docling | Docling, then MarkItDown | 1 MB |
-| **Office** (`.docx`, `.xlsx`, `.pptx`, etc.) | MarkItDown, then Docling | Docling, then MarkItDown | 2 MB |
-| **Images** (`.jpg`, `.png`, `.tiff`, etc.) | MarkItDown, then Docling | Docling, then MarkItDown | 512 KB |
-| **Markup** (`.html`, `.xml`, etc.) | TextExtractor, then Docling | Docling, then TextExtractor | 5 MB |
-| **Unknown extensions** | MarkItDown, then Docling | MarkItDown, then Docling | -- |
+The extractor service automatically selects the best extraction backend based on file type and characteristics. If the primary extractor fails or returns empty content, the service falls back to the next available backend in the chain.
 
 **How it works:**
 
 1. The strategy router examines the file extension and size.
-2. It returns an ordered list of extractors to try.
-3. The service attempts the first extractor. If it fails or returns empty content, it tries the next one.
-4. For small PDFs and Office files, MarkItDown is tried first because it is faster. For large files, Docling is preferred because it handles complex layouts and large documents more reliably.
+2. It selects the most appropriate backend and identifies fallback alternatives.
+3. If the primary extractor fails, it automatically retries with the next backend in the chain.
 
-### Example
-
-A 3 MB PDF file:
-1. File size (3 MB) exceeds the PDF threshold (1 MB).
-2. Strategy returns: `["docling", "markitdown"]`.
-3. Docling attempts extraction with OCR and table recognition.
-4. If Docling fails (e.g., not installed), MarkItDown handles it as a fallback.
+Plain text files are always handled by the TextExtractor. For binary formats (PDFs, Office documents, images), the router selects between MarkItDown and Docling based on file characteristics, ensuring the fastest and most reliable extraction for each document.
 
 ---
 
@@ -117,33 +99,22 @@ The Docling VLM pipeline supports multiple Vision Language Models. Based on [ben
 
 ### Working Models
 
-| Model Spec | HuggingFace Repo | Output Format | VRAM Required | Notes |
-|------------|------------------|---------------|---------------|-------|
-| `GRANITEDOCLING_TRANSFORMERS` | `ibm-granite/granite-docling-258M` | DOCTAGS | ~5 GB peak | **Recommended.** Best extraction quality on scanned documents. 3.4x more content than OCR baseline on image-heavy PDFs with zero OCR artifacts. |
-| `SMOLDOCLING_TRANSFORMERS` | `docling-project/SmolDocling-256M-preview` | DOCTAGS | ~3 GB peak | Smaller and faster, but produces hallucinated output on multi-page structured forms. Not recommended for complex documents. |
-
-### Models Requiring Specific Hardware or Software
-
-| Model Spec | HuggingFace Repo | VRAM Required | Status |
-|------------|------------------|---------------|--------|
-| `GOT2_TRANSFORMERS` | `stepfun-ai/GOT-OCR-2.0-hf` | ~1.5 GB | Blocked by SDPA attention incompatibility in transformers 4.57+. |
-| `DOLPHIN_TRANSFORMERS` | `ByteDance/Dolphin` | ~2 GB | Same SDPA issue as GOT2. |
-| `GRANITE_VISION_TRANSFORMERS` | `ibm-granite/granite-vision-3.2-2b` | ~4 GB | Requires isolated GPU process; OOMs when sharing VRAM with other models. |
-| `PHI4_TRANSFORMERS` | `microsoft/Phi-4-multimodal-instruct` | ~8 GB | Requires `transformers<4.52.0`. |
-| `PIXTRAL_12B_TRANSFORMERS` | `mistral-community/pixtral-12b` | ~24 GB | Requires high-end GPU (A100, H100, or multi-GPU). |
+| Model Spec | VRAM Required | Notes |
+|------------|---------------|-------|
+| `GRANITEDOCLING_TRANSFORMERS` | ~5 GB peak | **Recommended.** Best extraction quality on scanned documents with minimal OCR artifacts. |
+| `SMOLDOCLING_TRANSFORMERS` | ~3 GB peak | Smaller and faster, but may produce lower quality output on multi-page structured forms. |
 
 ### When to Use VLM vs Standard OCR
 
 | Document Type | Recommended Pipeline | Reason |
 |---------------|---------------------|--------|
-| Scanned/image-heavy PDFs | Docling VLM (Granite-Docling) | 3.4x better content extraction than OCR on scanned pages |
-| Text-native PDFs and forms | Standard Docling OCR | 5x more content on structured forms, 25x faster |
+| Scanned/image-heavy PDFs | Docling VLM (Granite-Docling) | Superior content extraction on scanned pages |
+| Text-native PDFs and forms | Standard Docling OCR | Faster processing with good results on structured forms |
 | Office documents | MarkItDown | Native format conversion, no GPU needed |
 | Plain text / source code | TextExtractor | Direct read, fastest |
 
-::: warning Performance Trade-off
-VLM extraction is approximately 25x slower than the standard OCR pipeline. Granite-Docling averaged 5 minutes 49 seconds per document vs 14 seconds for OCR baseline in benchmarks. Use VLM only when standard extraction produces poor results.
-:::
+> [!NOTE]
+> VLM extraction produces significantly better results on scanned documents but is considerably slower than the standard OCR pipeline. Use VLM only when standard extraction produces poor results.
 
 ---
 
@@ -221,24 +192,9 @@ docker cp $(docker compose ps -q extractor):/tmp/vlm_benchmark_results.json .
 
 ### What It Measures
 
-For each VLM model and each test document, the benchmark records:
+For each VLM model and each test document, the benchmark records extraction completeness, content quality metrics, processing time, and GPU memory usage. The standard Docling OCR pipeline is included as a baseline for comparison.
 
-- **Word count** and **character count** -- measures extraction completeness.
-- **Long words** (>30 characters) -- detects OCR artifacts where spaces between words are missed.
-- **Repeated lines** -- detects hallucination patterns where models emit repeated sequences.
-- **Image placeholder count** -- counts image tags in output.
-- **Extraction time** -- wall-clock duration.
-- **Peak VRAM usage** -- GPU memory consumption.
-- **Content sample** -- first 500 characters for manual quality inspection.
-
-The standard Docling OCR pipeline is included as a baseline for comparison.
-
-### Interpreting Results
-
-- High word count with low long-word count indicates clean, complete extraction.
-- Low word count relative to baseline suggests the model missed content.
-- High repeated-line count indicates hallucination (the model generates plausible-looking but fabricated text).
-- Results are saved as JSON for programmatic analysis.
+Results are saved as JSON for programmatic analysis.
 
 ---
 
@@ -254,28 +210,11 @@ POST /shares/{share_id}/recrawl-missing-content
 
 **Authentication:** Requires a valid user token.
 
-### What It Does
-
-The endpoint identifies files with missing content in two categories:
-
-1. **NULL content** -- files that have metadata records but the content field is NULL (extraction started but failed).
-2. **Unextracted files** -- files in the inventory that are stuck in `discovered` status with no metadata at all (extraction was never attempted).
-
-For each identified file, the endpoint:
-
-1. Deletes any stale metadata records (for NULL content files).
-2. Resets the file inventory status so extraction can be reattempted.
-3. Queues new extraction work items at priority 3.
-4. Sets the share status back to `PROCESSING`.
+The endpoint identifies files with incomplete or missing extracted content and re-queues them for processing.
 
 ### Example
 
 ```bash
-# Get an auth token
-TOKEN=$(curl -s -X POST http://localhost:8000/token \
-  -d "username=admin&password=yourpassword" | jq -r .access_token)
-
-# Recrawl missing content for a specific share
 curl -X POST http://localhost:8000/shares/{share_id}/recrawl-missing-content \
   -H "Authorization: Bearer $TOKEN"
 ```

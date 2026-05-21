@@ -187,7 +187,7 @@ curl -s "http://localhost:8000/api/v1/files?file_type=pdf&page_size=50&field_set
 POST /api/v1/search
 ```
 
-Searches across extracted file content using database-native full-text search. On PostgreSQL, this uses a GIN-indexed `search_vector` column that provides 20--42x faster queries compared to pattern-based search. Results include relevance scoring and content snippets.
+Searches across extracted file content using database-native full-text search. On PostgreSQL, this uses optimized full-text indexes for high-performance queries. Results include relevance scoring and content snippets.
 
 ### Request Body
 
@@ -254,9 +254,8 @@ curl -s -X POST "http://localhost:8000/api/v1/search" \
 }
 ```
 
-::: tip Performance
-The GIN-indexed `search_vector` column on PostgreSQL delivers 20--42x faster full-text search compared to `LIKE`/`ILIKE` pattern matching. No additional configuration is required -- the index is created automatically during database initialization.
-:::
+> [!TIP]
+> PostgreSQL deployments benefit from optimized full-text search indexes that are created automatically during database initialization. No additional configuration is required.
 
 ## Field Selection
 
@@ -341,7 +340,7 @@ pending --> processing --> completed
 
 1. **Pending** -- The file has been discovered during a share crawl and queued for content extraction.
 2. **Processing** -- A worker has claimed the file and the extractor service is converting it to text.
-3. **Completed** -- Content extraction succeeded. The file's `content` field is populated and the `search_vector` index is updated.
+3. **Completed** -- Content extraction succeeded. The file's content is stored and the search index is updated.
 4. **Error** -- Extraction failed. The work queue retries the file automatically (default: up to 3 retries). Persistent failures are logged with an error message.
 
 Once a file reaches the **completed** state, it is available for full-text search and its metadata is visible in all listing endpoints.
