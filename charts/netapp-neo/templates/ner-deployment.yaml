@@ -31,7 +31,7 @@ spec:
       {{- end }}
       containers:
         - name: ner
-          image: "{{ .Values.ner.image.repository }}:{{ include "netapp-neo.imageTag" (dict "imageTag" .Values.ner.image.tag "appVersion" .Chart.AppVersion) }}"
+          image: "{{ .Values.extractor.image.repository }}:{{ .Values.extractor.image.tag | default (printf "%s-full" .Chart.AppVersion) }}"
           imagePullPolicy: {{ .Values.ner.image.pullPolicy }}
           ports:
             - name: http
