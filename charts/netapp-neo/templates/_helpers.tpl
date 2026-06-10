@@ -88,6 +88,10 @@ Only useful when postgresql.enabled is true.
   securityContext:
     allowPrivilegeEscalation: false
     runAsNonRoot: true
+    {{- if not (and .Values.openshift.deploy .Values.openshift.restrictedV2.enabled) }}
+    runAsUser: 1000
+    runAsGroup: 1000
+    {{- end }}
     capabilities:
       drop:
         - ALL
@@ -152,5 +156,13 @@ Service account names used by workloads in OpenShift mode.
 {{- .Values.openshift.privilegedWorkloads.extractor.serviceAccount.name -}}
 {{- else -}}
 {{- printf "%s-extractor-privileged" (include "netapp-neo.fullname" .) -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "netapp-neo.postgresServiceAccountName" -}}
+{{- if .Values.openshift.postgres.serviceAccount.name -}}
+{{- .Values.openshift.postgres.serviceAccount.name -}}
+{{- else -}}
+{{- printf "%s-postgres" (include "netapp-neo.fullname" .) -}}
 {{- end -}}
 {{- end -}}

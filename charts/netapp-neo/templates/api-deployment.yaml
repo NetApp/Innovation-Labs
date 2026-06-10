@@ -35,9 +35,9 @@ spec:
             - name: http
               containerPort: {{ .Values.api.service.port }}
               protocol: TCP
-          # envFrom:
-          #   - configMapRef:
-          #       name: {{ include "netapp-neo.fullname" . }}-api
+          envFrom:
+            - configMapRef:
+                name: {{ include "netapp-neo.fullname" . }}-api
           env:
             - name: DATABASE_URL
               valueFrom:

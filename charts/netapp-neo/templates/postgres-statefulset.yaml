@@ -18,6 +18,13 @@ spec:
       labels:
         {{- include "netapp-neo.selectorLabels" (dict "context" . "component" "postgres") | nindent 8 }}
     spec:
+      {{- if and .Values.openshift.deploy .Values.openshift.postgres.bindAnyuid }}
+      serviceAccountName: {{ include "netapp-neo.postgresServiceAccountName" . }}
+      {{- end }}
+      {{- with .Values.postgresql.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: postgres
           image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"

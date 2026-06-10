@@ -20,13 +20,13 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.openshift.privilegedWorkloads.worker.enabled }}
+      {{- if and .Values.openshift.deploy .Values.openshift.privilegedWorkloads.worker.enabled }}
       serviceAccountName: {{ include "netapp-neo.workerPrivilegedServiceAccountName" . }}
       {{- end }}
-      {{- if .Values.openshift.privilegedWorkloads.worker.enabled }}
+      {{- if and .Values.openshift.deploy .Values.openshift.privilegedWorkloads.worker.enabled }}
       securityContext:
         {{- toYaml .Values.openshift.privilegedWorkloads.worker.podSecurityContext | nindent 8 }}
-      {{- else if .Values.openshift.restrictedV2.enabled }}
+      {{- else if and .Values.openshift.deploy .Values.openshift.restrictedV2.enabled }}
       securityContext:
         runAsNonRoot: true
         seccompProfile:
@@ -49,16 +49,19 @@ spec:
             - name: http
               containerPort: {{ .Values.worker.service.port }}
               protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "netapp-neo.fullname" . }}-worker
           env:
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   name: {{ include "netapp-neo.fullname" . }}-db
                   key: DATABASE_URL
-          {{- if .Values.openshift.privilegedWorkloads.worker.enabled }}
+          {{- if and .Values.openshift.deploy .Values.openshift.privilegedWorkloads.worker.enabled }}
           securityContext:
             {{- toYaml .Values.openshift.privilegedWorkloads.worker.containerSecurityContext | nindent 12 }}
-          {{- else if .Values.openshift.restrictedV2.enabled }}
+          {{- else if and .Values.openshift.deploy .Values.openshift.restrictedV2.enabled }}
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true

@@ -1,3 +1,4 @@
+{{- if .Values.openshift.deploy -}}
 {{- if not .Values.openshift.restrictedV2.enabled -}}
 {{- fail "openshift.restrictedV2.enabled must be true. This chart supports only restricted-v2 baseline mode on OpenShift." -}}
 {{- end -}}
@@ -8,4 +9,5 @@
 
 {{- if not .Values.openshift.privilegedWorkloads.extractor.enabled -}}
 {{- fail "openshift.privilegedWorkloads.extractor.enabled must be true. Extractor always requires privileged exception mode for filesystem mounts." -}}
+{{- end -}}
 {{- end -}}

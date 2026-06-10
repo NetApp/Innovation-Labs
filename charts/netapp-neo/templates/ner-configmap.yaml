@@ -1,0 +1,14 @@
+{{- if and .Values.ner.enabled .Values.ner.environments }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "netapp-neo.fullname" . }}-ner
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "netapp-neo.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ner
+data:
+  {{- range $key, $val := .Values.ner.environments }}
+  {{ $key }}: {{ $val | quote }}
+  {{- end }}
+{{- end }}

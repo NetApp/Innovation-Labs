@@ -1,0 +1,58 @@
+{{- if .Values.openshift.deploy }}
+{{- if and .Values.openshift.privilegedWorkloads.bindSCC .Values.openshift.privilegedWorkloads.worker.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "netapp-neo.fullname" . }}-worker-scc
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "netapp-neo.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:openshift:scc:{{ .Values.openshift.privilegedWorkloads.sccName }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "netapp-neo.workerPrivilegedServiceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+---
+{{- end }}
+{{- if and .Values.openshift.privilegedWorkloads.bindSCC .Values.openshift.privilegedWorkloads.extractor.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "netapp-neo.fullname" . }}-extractor-scc
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "netapp-neo.labels" . | nindent 4 }}
+    app.kubernetes.io/component: extractor
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:openshift:scc:{{ .Values.openshift.privilegedWorkloads.sccName }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "netapp-neo.extractorPrivilegedServiceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+---
+{{- end }}
+{{- if and .Values.openshift.postgres.bindAnyuid .Values.postgresql.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "netapp-neo.fullname" . }}-postgres-scc
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "netapp-neo.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgres
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:openshift:scc:{{ .Values.openshift.postgres.sccName }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "netapp-neo.postgresServiceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}
+{{- end }}

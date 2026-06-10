@@ -8,4 +8,6 @@ metadata:
     app.kubernetes.io/component: api
 data:
   WORKER_SERVICE_URL: {{ include "netapp-neo.workerUrl" . | quote }}
+  {{- if .Values.ner.enabled }}
   NER_SERVICE_URL: {{ include "netapp-neo.nerUrl" . | quote }}
+  {{- end }}

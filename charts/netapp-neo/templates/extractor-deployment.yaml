@@ -20,13 +20,13 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.openshift.privilegedWorkloads.extractor.enabled }}
+      {{- if and .Values.openshift.deploy .Values.openshift.privilegedWorkloads.extractor.enabled }}
       serviceAccountName: {{ include "netapp-neo.extractorPrivilegedServiceAccountName" . }}
       {{- end }}
-      {{- if .Values.openshift.privilegedWorkloads.extractor.enabled }}
+      {{- if and .Values.openshift.deploy .Values.openshift.privilegedWorkloads.extractor.enabled }}
       securityContext:
         {{- toYaml .Values.openshift.privilegedWorkloads.extractor.podSecurityContext | nindent 8 }}
-      {{- else if .Values.openshift.restrictedV2.enabled }}
+      {{- else if and .Values.openshift.deploy .Values.openshift.restrictedV2.enabled }}
       securityContext:
         runAsNonRoot: true
         seccompProfile:
@@ -49,16 +49,20 @@ spec:
             - name: http
               containerPort: {{ .Values.extractor.service.port }}
               protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "netapp-neo.fullname" . }}-extractor
+                optional: true
           env:
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   name: {{ include "netapp-neo.fullname" . }}-db
                   key: DATABASE_URL
-          {{- if .Values.openshift.privilegedWorkloads.extractor.enabled }}
+          {{- if and .Values.openshift.deploy .Values.openshift.privilegedWorkloads.extractor.enabled }}
           securityContext:
             {{- toYaml .Values.openshift.privilegedWorkloads.extractor.containerSecurityContext | nindent 12 }}
-          {{- else if .Values.openshift.restrictedV2.enabled }}
+          {{- else if and .Values.openshift.deploy .Values.openshift.restrictedV2.enabled }}
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true

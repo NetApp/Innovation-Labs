@@ -6,6 +6,11 @@ imagePullSecrets: []
 
 # OpenShift security posture controls.
 openshift:
+  # Master switch: set true when deploying on OpenShift, false for vanilla
+  # Kubernetes. When false, OpenShift-only validations and ServiceAccounts are
+  # skipped and workloads use explicit runAsUser security contexts instead of
+  # relying on the restricted-v2 SCC to inject a UID.
+  deploy: true
   restrictedV2:
     # Mandatory for this chart in OpenShift.
     enabled: true
@@ -20,6 +25,12 @@ openshift:
       name: ""
       annotations: {}
   privilegedWorkloads:
+    # Create namespaced RoleBindings granting the worker/extractor service
+    # accounts use of the named SCC. This automates the otherwise-manual
+    # `oc adm policy add-scc-to-user` step. The installer must be able to create
+    # RoleBindings in the target namespace.
+    bindSCC: true
+    sccName: privileged
     worker:
       # Mandatory: worker mounts filesystems and needs privileged exception mode.
       enabled: true
@@ -59,6 +70,16 @@ openshift:
         runAsNonRoot: false
         appArmorProfile:
           type: Unconfined
+  # Postgres runs as its built-in image UID (70 in the alpine image). On
+  # OpenShift, restricted-v2 would force a random UID and break data-directory
+  # ownership, so the postgres SA is bound to the anyuid SCC instead.
+  postgres:
+    bindAnyuid: true
+    sccName: anyuid
+    serviceAccount:
+      create: true
+      name: ""
+      annotations: {}
 
 # API Service
 api:
@@ -180,6 +201,11 @@ postgresql:
     size: 8Gi
     annotations: {}
   resources: {}
+  # Pod-level security context. fsGroup makes the PVC writable by the postgres
+  # group (gid 70 in the alpine image). Works on vanilla Kubernetes and on
+  # OpenShift when the postgres SA is bound to the anyuid SCC.
+  podSecurityContext:
+    fsGroup: 70
   securityContext: {}
   # When postgresql.enabled is false, set this to your external DB URL
   externalDatabaseUrl: ""

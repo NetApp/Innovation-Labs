@@ -1,0 +1,14 @@
+{{- if .Values.extractor.environments }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "netapp-neo.fullname" . }}-extractor
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "netapp-neo.labels" . | nindent 4 }}
+    app.kubernetes.io/component: extractor
+data:
+  {{- range $key, $val := .Values.extractor.environments }}
+  {{ $key }}: {{ $val | quote }}
+  {{- end }}
+{{- end }}

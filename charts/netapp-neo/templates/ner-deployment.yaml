@@ -29,9 +29,20 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if and .Values.openshift.deploy .Values.openshift.restrictedV2.enabled }}
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      {{- else }}
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      {{- end }}
       containers:
         - name: ner
-          image: "{{ .Values.extractor.image.repository }}:{{ .Values.extractor.image.tag | default (printf "%s-full" .Chart.AppVersion) }}"
+          image: "{{ .Values.ner.image.repository }}:{{ .Values.ner.image.tag | default (printf "%s-full" .Chart.AppVersion) }}"
           imagePullPolicy: {{ .Values.ner.image.pullPolicy }}
           ports:
             - name: http
@@ -40,6 +51,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "netapp-neo.fullname" . }}-ner
+                optional: true
           {{- if .Values.ner.gpu.enabled }}
           resources:
             limits:
@@ -65,6 +77,7 @@ spec:
             timeoutSeconds: 10
             failureThreshold: 5
           securityContext:
+          {{- if and .Values.openshift.deploy .Values.openshift.restrictedV2.enabled }}
             allowPrivilegeEscalation: false
             runAsNonRoot: true
             seccompProfile:
@@ -72,5 +85,14 @@ spec:
             capabilities:
               drop:
                 - ALL
+          {{- else }}
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            capabilities:
+              drop:
+                - ALL
+          {{- end }}
       restartPolicy: Always
 {{- end }}
