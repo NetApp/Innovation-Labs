@@ -20,7 +20,9 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.openshift.deploy }}
       serviceAccountName: {{ include "netapp-neo.apiServiceAccountName" . }}
+      {{- end }}
       securityContext:
         runAsNonRoot: true
       {{- if .Values.postgresql.enabled }}

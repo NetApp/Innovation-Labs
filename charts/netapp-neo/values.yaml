@@ -10,7 +10,7 @@ openshift:
   # Kubernetes. When false, OpenShift-only validations and ServiceAccounts are
   # skipped and workloads use explicit runAsUser security contexts instead of
   # relying on the restricted-v2 SCC to inject a UID.
-  deploy: true
+  deploy: false
   restrictedV2:
     # Mandatory for this chart in OpenShift.
     enabled: true
