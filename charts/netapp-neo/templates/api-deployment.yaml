@@ -24,6 +24,11 @@ spec:
       serviceAccountName: {{ include "netapp-neo.apiServiceAccountName" . }}
       {{- end }}
       securityContext:
+        {{- if not (and .Values.openshift.deploy .Values.openshift.restrictedV2.enabled) }}
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        {{- end }}
         runAsNonRoot: true
       {{- if .Values.postgresql.enabled }}
       initContainers:
