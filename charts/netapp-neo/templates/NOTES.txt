@@ -38,16 +38,59 @@ To access the API locally:
 To access the UI locally:
   kubectl -n {{ .Release.Namespace}} port-forward svc/{{ include "netapp-neo.fullname" . }}-ui 8080:{{ .Values.ui.service.port }}
 
-{{- if .Values.openshift.privilegedWorkloads.worker.enabled }}
+{{- if .Values.openshift.deploy }}
 
-OpenShift setup required for worker privileged mode:
-  - Bind an SCC that allows the required mount behavior to service account:
-    {{ include "netapp-neo.workerPrivilegedServiceAccountName" . }}
+OpenShift mode is enabled (openshift.deploy=true).
+
+Service accounts created:
+  - api:       {{ include "netapp-neo.apiServiceAccountName" . }}
+  - ui:        {{ include "netapp-neo.uiServiceAccountName" . }}
+{{- if .Values.openshift.privilegedWorkloads.worker.enabled }}
+  - worker:    {{ include "netapp-neo.workerPrivilegedServiceAccountName" . }}
+{{- end }}
+{{- if .Values.openshift.privilegedWorkloads.extractor.enabled }}
+  - extractor: {{ include "netapp-neo.extractorPrivilegedServiceAccountName" . }}
+{{- end }}
+{{- if and .Values.openshift.postgres.bindAnyuid .Values.postgresql.enabled }}
+  - postgres:  {{ include "netapp-neo.postgresServiceAccountName" . }}
 {{- end }}
 
-{{- if .Values.openshift.privilegedWorkloads.extractor.enabled }}
+{{- if .Values.openshift.privilegedWorkloads.bindSCC }}
 
-OpenShift setup required for extractor privileged mode:
-  - Bind an SCC that allows the required mount behavior to service account:
-    {{ include "netapp-neo.extractorPrivilegedServiceAccountName" . }}
+SCC access for the privileged workloads was bound automatically via RoleBindings:
+{{- if .Values.openshift.privilegedWorkloads.worker.enabled }}
+  - {{ include "netapp-neo.workerPrivilegedServiceAccountName" . }} -> system:openshift:scc:{{ .Values.openshift.privilegedWorkloads.sccName }}
+{{- end }}
+{{- if .Values.openshift.privilegedWorkloads.extractor.enabled }}
+  - {{ include "netapp-neo.extractorPrivilegedServiceAccountName" . }} -> system:openshift:scc:{{ .Values.openshift.privilegedWorkloads.sccName }}
+{{- end }}
+  No manual `oc adm policy` step is required.
+{{- else }}
+
+SCC auto-binding is disabled (openshift.privilegedWorkloads.bindSCC=false).
+Bind an SCC that allows the required mount behavior manually:
+{{- if .Values.openshift.privilegedWorkloads.worker.enabled }}
+  oc adm policy add-scc-to-user {{ .Values.openshift.privilegedWorkloads.sccName }} -z {{ include "netapp-neo.workerPrivilegedServiceAccountName" . }} -n {{ .Release.Namespace }}
+{{- end }}
+{{- if .Values.openshift.privilegedWorkloads.extractor.enabled }}
+  oc adm policy add-scc-to-user {{ .Values.openshift.privilegedWorkloads.sccName }} -z {{ include "netapp-neo.extractorPrivilegedServiceAccountName" . }} -n {{ .Release.Namespace }}
+{{- end }}
+{{- end }}
+
+{{- if and .Values.openshift.postgres.bindAnyuid .Values.postgresql.enabled }}
+
+PostgreSQL runs under the {{ .Values.openshift.postgres.sccName }} SCC
+{{- if not .Values.openshift.privilegedWorkloads.bindSCC }} (bind manually):
+  oc adm policy add-scc-to-user {{ .Values.openshift.postgres.sccName }} -z {{ include "netapp-neo.postgresServiceAccountName" . }} -n {{ .Release.Namespace }}
+{{- else }} (bound automatically).
+{{- end }}
+{{- end }}
+
+Verify the SCC RoleBindings:
+  oc get rolebinding -n {{ .Release.Namespace }} | grep scc
+{{- else }}
+
+Running in vanilla Kubernetes mode (openshift.deploy=false).
+Workloads use explicit runAsUser security contexts and the default service account.
+Set openshift.deploy=true to enable the OpenShift security model (restricted-v2 + SCC binding).
 {{- end }}
