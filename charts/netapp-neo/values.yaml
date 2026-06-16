@@ -209,3 +209,98 @@ postgresql:
   securityContext: {}
   # When postgresql.enabled is false, set this to your external DB URL
   externalDatabaseUrl: ""
+
+# =============================================================================
+# Data-plane backend (Elasticsearch overlay)
+# =============================================================================
+# Selects where file metadata, content chunks and search live. The relational
+# control plane (work queue, coordination, config, auth) is ALWAYS PostgreSQL —
+# this only swaps the data plane.
+#
+#   backend: "pg" (default) keeps everything relational; nothing else is needed.
+#   backend: "es"           enables the Elasticsearch data plane. Elasticsearch
+#                           is expected to already be running (e.g. in its own
+#                           namespace) and reachable at esUrl. DATABASE_URL is
+#                           still required and still points at PostgreSQL.
+#
+# Injected (only when backend == "es") into the api, worker and extractor
+# containers as AIDE_BACKEND / AIDE_DP_URL / AIDE_ES_INDEX_PREFIX.
+dataPlane:
+  backend: "pg"
+  # Elasticsearch URL for the data plane. Use the in-cluster service FQDN.
+  # Example (ES in a dedicated namespace):
+  #   es://elasticsearch.neo-414-es.svc.cluster.local:9200
+  # Use https:// once x-pack security/TLS is enabled.
+  #
+  # Leave empty to use the bundled Elasticsearch below (elasticsearch.deploy:
+  # true) — the URL is then derived automatically from its service.
+  esUrl: ""
+  # Optional index name prefix (default "neo_" in the app) so multiple
+  # deployments can share one ES cluster, e.g. "neo_414_".
+  indexPrefix: ""
+
+# =============================================================================
+# Bundled Elasticsearch (optional, single-node)
+# =============================================================================
+# When deploy is true, the chart stands up a single-node Elasticsearch
+# StatefulSet (and optional Kibana) to back the data plane, and dataPlane.esUrl
+# is derived automatically from its service. Leave deploy false to point at an
+# externally managed Elasticsearch via dataPlane.esUrl instead.
+#
+# This is a PoC/benchmark topology: single node, no replicas. x-pack security is
+# disabled by default (plain HTTP, no auth) — only acceptable on a trusted /
+# air-gapped network.
+elasticsearch:
+  deploy: false
+  image:
+    repository: docker.elastic.co/elasticsearch/elasticsearch
+    tag: "9.4.2"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 9200
+  # JVM heap. Keep Xms == Xmx and well below the memory limit.
+  javaOpts: "-Xms2g -Xmx2g"
+  # x-pack security. false => plain HTTP, no auth (PoC). When enabling this you
+  # must also set dataPlane.esUrl explicitly (https:// with credentials).
+  security:
+    enabled: false
+  # Run an init container that raises vm.max_map_count to 262144 (required by
+  # ES). Needs a privileged container; disable on clusters that block privileged
+  # init containers (e.g. OpenShift restricted-v2) and set the sysctl on the node
+  # instead.
+  setVmMaxMapCount: true
+  persistence:
+    enabled: true
+    storageClass: ""
+    accessMode: ReadWriteOnce
+    size: 10Gi
+    annotations: {}
+  resources:
+    requests:
+      cpu: "1"
+      memory: "2Gi"
+    limits:
+      cpu: "4"
+      memory: "8Gi"
+  podSecurityContext:
+    fsGroup: 1000
+  nodeSelector: {}
+  tolerations: []
+  # Optional Kibana for index inspection.
+  kibana:
+    enabled: false
+    image:
+      repository: docker.elastic.co/kibana/kibana
+      tag: "9.4.2"
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 5601
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+      limits:
+        cpu: "1"
+        memory: "2Gi"

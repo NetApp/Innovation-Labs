@@ -78,6 +78,45 @@ http://{{ include "netapp-neo.fullname" . }}-ner:{{ .Values.ner.service.port }}
 {{- end -}}
 
 {{/*
+Bundled Elasticsearch service host:port (cluster-internal).
+*/}}
+{{- define "netapp-neo.elasticsearchUrl" -}}
+es://{{ include "netapp-neo.fullname" . }}-elasticsearch:{{ .Values.elasticsearch.service.port }}
+{{- end -}}
+
+{{/*
+Resolve the data-plane (Elasticsearch) URL.
+Precedence: explicit dataPlane.esUrl, else the bundled ES service when
+elasticsearch.deploy is true. Empty when neither is set.
+*/}}
+{{- define "netapp-neo.dataPlaneUrl" -}}
+{{- if .Values.dataPlane.esUrl -}}
+{{- .Values.dataPlane.esUrl -}}
+{{- else if .Values.elasticsearch.deploy -}}
+{{- include "netapp-neo.elasticsearchUrl" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Data-plane backend env vars (Elasticsearch overlay).
+Emits AIDE_BACKEND / AIDE_DP_URL / AIDE_ES_INDEX_PREFIX only when
+dataPlane.backend is "es". Include inside a container's `env:` list:
+  {{- include "netapp-neo.dataPlaneEnv" . | nindent 12 }}
+*/}}
+{{- define "netapp-neo.dataPlaneEnv" -}}
+{{- if eq .Values.dataPlane.backend "es" -}}
+- name: AIDE_BACKEND
+  value: {{ .Values.dataPlane.backend | quote }}
+- name: AIDE_DP_URL
+  value: {{ required "dataPlane.backend is \"es\" but no Elasticsearch URL is set — set dataPlane.esUrl or enable elasticsearch.deploy" (include "netapp-neo.dataPlaneUrl" .) | quote }}
+{{- with .Values.dataPlane.indexPrefix }}
+- name: AIDE_ES_INDEX_PREFIX
+  value: {{ . | quote }}
+{{- end }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Wait-for-db init container (reusable).
 Usage: include "netapp-neo.waitForDb" .
 Only useful when postgresql.enabled is true.

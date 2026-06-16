@@ -51,6 +51,7 @@ spec:
                 secretKeyRef:
                   name: {{ include "netapp-neo.fullname" . }}-db
                   key: DATABASE_URL
+            {{- include "netapp-neo.dataPlaneEnv" . | nindent 12 }}
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true

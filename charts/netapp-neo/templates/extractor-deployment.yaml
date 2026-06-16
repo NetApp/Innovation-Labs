@@ -59,6 +59,7 @@ spec:
                 secretKeyRef:
                   name: {{ include "netapp-neo.fullname" . }}-db
                   key: DATABASE_URL
+            {{- include "netapp-neo.dataPlaneEnv" . | nindent 12 }}
           {{- if and .Values.openshift.deploy .Values.openshift.privilegedWorkloads.extractor.enabled }}
           securityContext:
             {{- toYaml .Values.openshift.privilegedWorkloads.extractor.containerSecurityContext | nindent 12 }}
