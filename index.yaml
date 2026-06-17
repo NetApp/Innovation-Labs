@@ -133,6 +133,24 @@ entries:
     version: 25.11.1
   netapp-neo:
   - apiVersion: v2
+    appVersion: 4.1.4-p5-2026061703
+    created: "2026-06-17T21:37:53.970338676Z"
+    description: NetApp Neo v4.x — context lake microservice architecture for AI services
+      via MCP service
+    digest: 1352b90d0b8b45211bd6810083c98850474e06342e975b0e47b3285358251d5a
+    home: https://netapp.github.io/Innovation-Labs/
+    keywords:
+    - NetApp
+    - Neo
+    - MCP
+    - AI
+    - context lake
+    name: netapp-neo
+    type: application
+    urls:
+    - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-neo-26.6.4/netapp-neo-26.6.4.tgz
+    version: 26.6.4
+  - apiVersion: v2
     appVersion: 4.1.4-p5-2026061701
     created: "2026-06-17T09:50:32.124561794Z"
     description: NetApp Neo v4.x — context lake microservice architecture for AI services
@@ -455,4 +473,4 @@ entries:
     urls:
     - https://github.com/NetApp/Innovation-Labs/releases/download/netapp-openshift-console-trident-25.9.19/netapp-openshift-console-trident-25.9.19.tgz
     version: 25.9.19
-generated: "2026-06-17T09:50:32.124639401Z"
+generated: "2026-06-17T21:37:53.970501842Z"
