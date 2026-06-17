@@ -11,3 +11,6 @@ data:
   {{- if .Values.ner.enabled }}
   NER_SERVICE_URL: {{ include "netapp-neo.nerUrl" . | quote }}
   {{- end }}
+  {{- range $key, $val := .Values.api.environments }}
+  {{ $key }}: {{ $val | quote }}
+  {{- end }}
