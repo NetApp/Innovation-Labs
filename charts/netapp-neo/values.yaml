@@ -88,6 +88,8 @@ api:
     repository: ghcr.io/netapp/netapp-neo-api
     tag: ""
     pullPolicy: Always
+  environments:
+    API_LOG_LEVEL: "INFO"
   service:
     type: ClusterIP
     port: 8000
@@ -115,6 +117,8 @@ worker:
     repository: ghcr.io/netapp/netapp-neo-worker
     tag: ""
     pullPolicy: Always
+  environments:
+    WORKER_LOG_LEVEL: "INFO"
   service:
     type: ClusterIP
     port: 8000
@@ -133,6 +137,8 @@ extractor:
     repository: ghcr.io/netapp/netapp-neo-extractor
     tag: ""
     pullPolicy: Always
+  environments:
+    EXTRACTOR_LOG_LEVEL: "INFO"
   service:
     type: ClusterIP
     port: 8000
@@ -146,6 +152,8 @@ ner:
     repository: ghcr.io/netapp/netapp-neo-ner
     tag: ""
     pullPolicy: Always
+  environments:
+    NER_LOG_LEVEL: "INFO"
   service:
     type: ClusterIP
     port: 8000

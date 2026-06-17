@@ -4,5 +4,5 @@ description: NetApp Neo v4.x — context lake microservice architecture for AI s
 type: application
 keywords: ["NetApp", "Neo", "MCP", "AI", "context lake"]
 home: "https://netapp.github.io/Innovation-Labs/"
-version: 26.6.2
-appVersion: "4.1.4-p5-2026061601"
+version: 26.6.3
+appVersion: "4.1.4-p5-2026061701"
